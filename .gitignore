@@ -1,0 +1,26 @@
+node_modules
+dist
+build
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.vercel
+
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+
+# Editor / system
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# Original mobile asset drop (already copied into client/public/m)
+/mobile
+
+# Test artifacts
+/tmp
+.ghpush
