@@ -31,8 +31,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { redemptionsData, type Redemption, type RedemptionStatus } from "@/lib/hr-data";
-import { Search, Check, X, Package, Star } from "lucide-react";
+import { Search, Check, X, Package, Star, Ban } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { getAccount } from "@/lib/account";
+import { isMonetaryActive } from "@/lib/appreciation-policy";
+
+// TODO: Connects to wallet redemptions in Phase 4.1. Until then the table
+// is backed by the mocked redemptionsData from hr-data.
 
 const statusColors: Record<RedemptionStatus, string> = {
   Pending: "bg-yellow-100 text-yellow-700",
@@ -49,6 +55,29 @@ export default function Redemptions() {
   const [items, setItems] = useState<Redemption[]>(redemptionsData);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const account = getAccount();
+  if (!isMonetaryActive(account)) {
+    return (
+      <div className="p-6">
+        <Card className="border border-stone-200">
+          <CardContent className="flex flex-col items-center text-center gap-3 py-14 px-6">
+            <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
+              <Ban className="w-5 h-5 text-stone-500" />
+            </div>
+            <p className="text-base font-semibold text-stone-900">Redemptions are disabled</p>
+            <p className="text-sm text-stone-600 max-w-md">
+              Monetary recognition is currently off at the org level. Re-enable it in{" "}
+              <Link to="/settings" className="text-stone-900 underline underline-offset-2 font-medium">
+                Settings → Appreciation Policy
+              </Link>{" "}
+              to start accepting employee redemptions.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const filtered = items.filter((r) => {
     const matchSearch =

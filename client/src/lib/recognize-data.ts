@@ -97,6 +97,16 @@ export function findEmployee(id: string | undefined): Employee | undefined {
   return EMPLOYEES.find((e) => e.id === id);
 }
 
+/**
+ * Resolve the signed-in user to a seeded Employee record. Demo flows that
+ * don't have a real authenticated employee yet fall back to the first row.
+ */
+export function currentEmployee(adminEmail?: string | null): Employee | undefined {
+  if (!adminEmail) return EMPLOYEES[0];
+  const match = EMPLOYEES.find((e) => e.email.toLowerCase() === adminEmail.toLowerCase());
+  return match ?? EMPLOYEES[0];
+}
+
 export function badgeImage(badge: RecognizeBadge | undefined): string | undefined {
   if (!badge) return undefined;
   return BADGE_IMAGE[badge.badgeKind];

@@ -8,6 +8,7 @@ import { ProfileTabs, type ProfileTab } from "@/components/profile/profile-tabs"
 import { BadgesGrid } from "@/components/profile/badges-grid";
 import { RecognitionCard } from "@/components/mobile/recognition-card";
 import { ProfileRightRail } from "@/components/profile/profile-right-rail";
+import { WalletCard } from "@/components/profile/wallet-card";
 import { getAccount, setAuthenticated } from "@/lib/account";
 import { FEED, MY_BADGES, MY_RANK, ME, isMe, type RecognitionFeedItem } from "@/lib/mobile-data";
 import { loadMyRecognitions } from "@/lib/recognize-data";
@@ -59,6 +60,8 @@ export default function MobileProfile() {
     <EmployeeLayout rightRail={<ProfileRightRail />}>
       <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6 space-y-4">
         <ProfileHeader account={account} />
+
+        <WalletCard />
 
         <StatsGrid stats={stats} />
 
