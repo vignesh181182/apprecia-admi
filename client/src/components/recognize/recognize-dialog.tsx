@@ -18,17 +18,37 @@ import {
   type Employee,
   type RecognizeBadge,
 } from "@/lib/recognize-data";
-import { getAccount } from "@/lib/account";
+import { getAccount, type RecognitionCategory, type RecognitionCategoryColor } from "@/lib/account";
 import {
   isSendingWindowOpen,
   nextWindowReopenAt,
   resolveApprover,
 } from "@/lib/appreciation-policy";
-import { saveBadge } from "@/lib/badges";
+import { saveBadge, type BadgeTier } from "@/lib/badges";
+import { deductGive, creditReceive, getWallet } from "@/lib/wallet";
 import { useToast } from "@/hooks/use-toast";
 
 type Kind = "appreciation" | "rnr";
 type Step = "person" | "badge" | "reason";
+
+const CATEGORY_COLOR_CLASSES: Record<RecognitionCategoryColor, { bg: string; bgSelected: string; ring: string; text: string }> = {
+  blue:   { bg: "bg-blue-50",   bgSelected: "bg-blue-100",   ring: "ring-blue-300",   text: "text-blue-900" },
+  amber:  { bg: "bg-amber-50",  bgSelected: "bg-amber-100",  ring: "ring-amber-300",  text: "text-amber-900" },
+  stone:  { bg: "bg-stone-100", bgSelected: "bg-stone-200",  ring: "ring-stone-400",  text: "text-stone-900" },
+  purple: { bg: "bg-purple-50", bgSelected: "bg-purple-100", ring: "ring-purple-300", text: "text-purple-900" },
+  rose:   { bg: "bg-rose-50",   bgSelected: "bg-rose-100",   ring: "ring-rose-300",   text: "text-rose-900" },
+  green:  { bg: "bg-green-50",  bgSelected: "bg-green-100",  ring: "ring-green-300",  text: "text-green-900" },
+  sky:    { bg: "bg-sky-50",    bgSelected: "bg-sky-100",    ring: "ring-sky-300",    text: "text-sky-900" },
+  teal:   { bg: "bg-teal-50",   bgSelected: "bg-teal-100",   ring: "ring-teal-300",   text: "text-teal-900" },
+};
+
+const FALLBACK_CATEGORY: RecognitionCategory = {
+  id: "general-appreciation",
+  name: "General Appreciation",
+  description: "Recognition without a specific value tag.",
+  emoji: "🤝",
+  color: "stone",
+};
 
 export function RecognizeDialog({
   kind = "appreciation",
@@ -77,13 +97,29 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
   const [step, setStep] = useState<Step>("person");
   const [employee, setEmployee] = useState<Employee | undefined>();
   const [badge, setBadge] = useState<RecognizeBadge | undefined>();
+  const [category, setCategory] = useState<RecognitionCategory | undefined>();
+  const [tier, setTier] = useState<BadgeTier>("thanks");
   const [reason, setReason] = useState("");
   const [points, setPoints] = useState(POINTS_PRESETS[1]);
   const [sent, setSent] = useState(false);
 
+  // Available categories with a safety fallback so the picker can never end up empty.
+  const availableCategories = useMemo<RecognitionCategory[]>(
+    () => (account?.recognitionCategories?.length ? account.recognitionCategories : [FALLBACK_CATEGORY]),
+    [account],
+  );
+
+  const tierValues = account?.pointsPolicy?.tierValues ?? { thanks: 0, goodJob: 25, exceptional: 100 };
+  const wallet = monetaryActive && currentUser
+    ? getWallet(currentUser.id, "employee", account)
+    : null;
+
   const personDone = !!employee;
-  const badgeDone = !!badge;
-  const canSend = personDone && badgeDone && windowOpen;
+  // For appreciation the second step is the category picker; for rnr it stays
+  // the existing badge picker. Keep both states alive so switching kind mid-
+  // session (rare) doesn't lose progress.
+  const secondStepDone = kind === "appreciation" ? !!category : !!badge;
+  const canSend = personDone && secondStepDone && windowOpen;
 
   if (!windowOpen) {
     return (
@@ -116,18 +152,37 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
     );
   }
 
-  if (sent && employee && badge) {
-    return (
-      <div className="flex-1 overflow-hidden">
-        <SentConfirmation
-          employee={employee}
-          badge={badge}
-          reason={reason}
-          points={kind === "rnr" ? points : undefined}
-          onDone={onClose}
-        />
-      </div>
-    );
+  if (sent && employee) {
+    const confirmationBadge: RecognizeBadge | undefined = kind === "rnr"
+      ? badge
+      : category
+        ? {
+            id: category.id,
+            label: category.name,
+            description: category.description,
+            emoji: category.emoji,
+            badgeKind: "custom-badge-name",
+          }
+        : undefined;
+    const confirmationPoints =
+      kind === "rnr"
+        ? points
+        : monetaryActive && tierValues[tier] > 0
+          ? tierValues[tier]
+          : undefined;
+    if (confirmationBadge) {
+      return (
+        <div className="flex-1 overflow-hidden">
+          <SentConfirmation
+            employee={employee}
+            badge={confirmationBadge}
+            reason={reason}
+            points={confirmationPoints}
+            onDone={onClose}
+          />
+        </div>
+      );
+    }
   }
 
   return (
@@ -174,50 +229,85 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
 
         <Section
           number={2}
-          title="Pick a badge"
+          title={kind === "appreciation" ? "Pick a value" : "Pick a badge"}
           state={
             !personDone
               ? "future"
               : step === "badge"
                 ? "active"
-                : badgeDone
+                : secondStepDone
                   ? "done"
                   : "future"
           }
-          summary={badge ? `${badge.emoji}  ${badge.label}` : undefined}
+          summary={
+            kind === "appreciation"
+              ? category ? `${category.emoji}  ${category.name}` : undefined
+              : badge ? `${badge.emoji}  ${badge.label}` : undefined
+          }
           onEdit={() => personDone && setStep("badge")}
-          allowEdit={badgeDone}
+          allowEdit={secondStepDone}
           disabled={!personDone}
         >
-          <BadgePicker
-            selectedId={badge?.id}
-            onSelect={(b) => {
-              setBadge(b);
-              setStep("reason");
-            }}
-            layout="grid"
-          />
+          {kind === "appreciation" ? (
+            <CategoryPicker
+              categories={availableCategories}
+              selectedId={category?.id}
+              onSelect={(c) => {
+                setCategory(c);
+                setStep("reason");
+              }}
+            />
+          ) : (
+            <BadgePicker
+              selectedId={badge?.id}
+              onSelect={(b) => {
+                setBadge(b);
+                setStep("reason");
+              }}
+              layout="grid"
+            />
+          )}
         </Section>
 
         <Section
           number={3}
           title={kind === "rnr" ? "Add a note & points" : "Add a note"}
-          state={!badgeDone ? "future" : step === "reason" ? "active" : "future"}
-          onEdit={() => badgeDone && setStep("reason")}
+          state={!secondStepDone ? "future" : step === "reason" ? "active" : "future"}
+          onEdit={() => secondStepDone && setStep("reason")}
           allowEdit={false}
-          disabled={!badgeDone}
+          disabled={!secondStepDone}
         >
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Enter reason... (optional)"
-            disabled={!badgeDone}
+            disabled={!secondStepDone}
             className="w-full min-h-[100px] p-3 rounded-2xl bg-white border border-stone-200 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-300 disabled:bg-stone-50"
           />
           {kind === "rnr" && (
             <div className="mt-4">
               <PointsPicker value={points} onChange={setPoints} />
             </div>
+          )}
+          {kind === "appreciation" && monetaryActive && (
+            <div className="mt-4">
+              <TierSelector
+                value={tier}
+                onChange={setTier}
+                tierValues={tierValues}
+                giveBalance={wallet?.giveBalance ?? 0}
+              />
+              {wallet && (
+                <p className="text-xs text-stone-500 mt-2">
+                  {wallet.giveBalance.toLocaleString()} of {wallet.giveAllowance.toLocaleString()} give-points left this month
+                </p>
+              )}
+            </div>
+          )}
+          {kind === "appreciation" && !monetaryActive && (
+            <p className="text-xs text-stone-500 mt-3">
+              Recognition without points — a meaningful thank-you.
+            </p>
           )}
         </Section>
       </div>
@@ -233,7 +323,9 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
           type="button"
           disabled={!canSend}
           onClick={() => {
-            if (!canSend || !employee || !badge) return;
+            if (!canSend || !employee) return;
+            if (kind === "appreciation" && !category) return;
+            if (kind === "rnr" && !badge) return;
 
             const id = Math.random().toString(36).slice(2, 10);
             const createdAt = new Date().toISOString();
@@ -246,7 +338,11 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
               ? "pending-approval"
               : "approved";
             const effectivePoints =
-              kind === "rnr" ? points : monetaryActive ? 0 : 0;
+              kind === "rnr"
+                ? points
+                : monetaryActive
+                  ? tierValues[tier]
+                  : 0;
 
             // Keep the legacy outgoing list so the existing "my recognitions"
             // surfaces don't go blank. Source of truth for the feed shifts
@@ -256,11 +352,11 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
               recipientId: employee.id,
               recipientName: employee.name,
               recipientAvatar: employee.avatar,
-              badgeId: badge.id,
-              badgeLabel: badge.label,
-              badgeKind: badge.badgeKind,
+              badgeId: kind === "rnr" ? badge!.id : category!.id,
+              badgeLabel: kind === "rnr" ? badge!.label : category!.name,
+              badgeKind: kind === "rnr" ? badge!.badgeKind : "custom-badge-name",
               reason: reason.trim(),
-              points: kind === "rnr" ? points : undefined,
+              points: kind === "rnr" ? points : effectivePoints || undefined,
               kind,
               status: useApproval ? "pending" : "approved",
               createdAt,
@@ -274,8 +370,12 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
               toUserId: employee.id,
               toName: employee.name,
               toAvatar: employee.avatar,
-              badgeId: badge.id,
-              badgeLabel: badge.label,
+              categoryId: kind === "appreciation" ? category!.id : undefined,
+              categoryName: kind === "appreciation" ? category!.name : undefined,
+              categoryEmoji: kind === "appreciation" ? category!.emoji : undefined,
+              tier: kind === "appreciation" ? tier : undefined,
+              badgeId: kind === "rnr" ? badge!.id : undefined,
+              badgeLabel: kind === "rnr" ? badge!.label : undefined,
               message: reason.trim(),
               points: effectivePoints,
               kind,
@@ -283,7 +383,17 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
               status,
               pendingApproverId: useApproval ? approver!.id : undefined,
               pendingApproverName: useApproval ? approver!.name : undefined,
+              reactions: {},
+              comments: [],
+              boosts: [],
             });
+
+            // Immediate wallet movement when no approval is required.
+            // approveBadge() handles the deferred case at approval time.
+            if (!useApproval && kind === "appreciation" && effectivePoints > 0) {
+              deductGive(sender?.id ?? "me", "employee", effectivePoints, account);
+              creditReceive(employee.id, effectivePoints, account);
+            }
 
             if (useApproval) {
               toast({
@@ -302,6 +412,105 @@ function RecognizeFlow({ kind, onClose }: { kind: Kind; onClose: () => void }) {
         </button>
       </footer>
     </>
+  );
+}
+
+function CategoryPicker({
+  categories,
+  selectedId,
+  onSelect,
+}: {
+  categories: RecognitionCategory[];
+  selectedId?: string;
+  onSelect: (c: RecognitionCategory) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {categories.map((cat) => {
+        const isSelected = cat.id === selectedId;
+        const cls = CATEGORY_COLOR_CLASSES[cat.color] ?? CATEGORY_COLOR_CLASSES.stone;
+        return (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() => onSelect(cat)}
+            className={cn(
+              "rounded-2xl p-3 border text-left transition-all",
+              isSelected
+                ? `${cls.bgSelected} ${cls.text} border-transparent ring-2 ${cls.ring}`
+                : `${cls.bg} border-stone-200 hover:border-stone-300`,
+            )}
+          >
+            <div className="flex items-start gap-2">
+              <span className="text-xl shrink-0">{cat.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className={cn("text-sm font-mobile font-semibold", isSelected ? "" : "text-stone-900")}>
+                  {cat.name}
+                </p>
+                {cat.description && (
+                  <p
+                    className={cn(
+                      "text-[11px] mt-0.5 line-clamp-2",
+                      isSelected ? "" : "text-stone-500",
+                    )}
+                  >
+                    {cat.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TierSelector({
+  value,
+  onChange,
+  tierValues,
+  giveBalance,
+}: {
+  value: BadgeTier;
+  onChange: (t: BadgeTier) => void;
+  tierValues: { thanks: number; goodJob: number; exceptional: number };
+  giveBalance: number;
+}) {
+  const tiers: { id: BadgeTier; label: string; points: number }[] = [
+    { id: "thanks",      label: "Thanks",     points: tierValues.thanks },
+    { id: "goodJob",     label: "Good Job",   points: tierValues.goodJob },
+    { id: "exceptional", label: "Exceptional", points: tierValues.exceptional },
+  ];
+  return (
+    <div className="flex gap-2">
+      {tiers.map((t) => {
+        const disabled = t.points > giveBalance;
+        const isSelected = value === t.id;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(t.id)}
+            className={cn(
+              "flex-1 h-12 rounded-full text-sm font-mobile font-semibold transition-all border",
+              isSelected
+                ? "bg-[#465853] text-white border-[#465853]"
+                : "bg-white text-stone-700 border-stone-200 hover:border-stone-300",
+              disabled && "opacity-40 cursor-not-allowed",
+            )}
+          >
+            <div className="leading-tight">
+              <div>{t.label}</div>
+              <div className={cn("text-[10px] font-medium", isSelected ? "text-white/80" : "text-stone-500")}>
+                {t.points > 0 ? `${t.points} pts` : "free"}
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
