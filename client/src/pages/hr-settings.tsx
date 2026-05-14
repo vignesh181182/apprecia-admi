@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,11 +14,22 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Star, Bell, Plug, Shield, Check } from "lucide-react";
+import { Building2, Star, Bell, Plug, Shield, Check, Tags, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getAccount, updateAccount, DEFAULT_CATEGORIES, DEFAULT_APPRECIATION_POLICY } from "@/lib/account";
+import type { RecognitionCategory, AppreciationPolicy } from "@/lib/account";
+import { CategoryEditor } from "@/components/recognition/category-editor";
+import { AppreciationPolicyEditor } from "@/components/recognition/appreciation-policy-editor";
 
 export default function HRSettings() {
   const { toast } = useToast();
+  const account = getAccount();
+  const [categories, setCategories] = useState<RecognitionCategory[]>(
+    account?.recognitionCategories?.length ? account.recognitionCategories : DEFAULT_CATEGORIES,
+  );
+  const [policy, setPolicy] = useState<AppreciationPolicy>(
+    account?.appreciationPolicy ?? DEFAULT_APPRECIATION_POLICY,
+  );
 
   function save() {
     toast({ title: "Settings saved", description: "Your changes have been applied." });
@@ -38,6 +50,12 @@ export default function HRSettings() {
           </TabsTrigger>
           <TabsTrigger value="integrations" className="text-xs gap-1.5 h-8">
             <Plug className="w-3.5 h-3.5" /> Integrations
+          </TabsTrigger>
+          <TabsTrigger value="appreciation" className="text-xs gap-1.5 h-8">
+            <Sparkles className="w-3.5 h-3.5" /> Appreciation Policy
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="text-xs gap-1.5 h-8">
+            <Tags className="w-3.5 h-3.5" /> Categories
           </TabsTrigger>
           <TabsTrigger value="roles" className="text-xs gap-1.5 h-8">
             <Shield className="w-3.5 h-3.5" /> Roles
@@ -258,6 +276,46 @@ export default function HRSettings() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        {/* ── Appreciation Policy ── */}
+        <TabsContent value="appreciation" className="space-y-4 mt-0">
+          <AppreciationPolicyEditor
+            policy={policy}
+            onChange={setPolicy}
+            onSave={() => {
+              updateAccount({ appreciationPolicy: policy });
+              toast({ title: "Appreciation policy saved", description: "Your changes will apply on the next badge sent." });
+            }}
+            accountTimezone={account?.timezone}
+            accountCurrency={account?.currency}
+          />
+        </TabsContent>
+
+        {/* ── Recognition Categories ── */}
+        <TabsContent value="categories" className="space-y-4 mt-0">
+          <Card className="border border-stone-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-semibold text-stone-900">Recognition Categories</CardTitle>
+              <p className="text-xs text-stone-500">Manage the values employees can tag when sending recognitions.</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <CategoryEditor categories={categories} onChange={setCategories} />
+              <div className="flex justify-end pt-2">
+                <Button
+                  size="sm"
+                  className="bg-stone-900 hover:bg-stone-700 text-white"
+                  disabled={categories.length < 3 || !categories.every((c) => c.name.trim())}
+                  onClick={() => {
+                    updateAccount({ recognitionCategories: categories });
+                    toast({ title: "Categories saved", description: "Recognition categories have been updated." });
+                  }}
+                >
+                  Save Categories
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* ── Roles ── */}

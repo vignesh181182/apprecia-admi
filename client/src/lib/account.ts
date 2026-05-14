@@ -25,6 +25,51 @@ export type Integrations = {
   ssoProvider: "none" | "saml" | "oidc";
 };
 
+export type RecognitionCategoryColor =
+  | "blue"
+  | "amber"
+  | "stone"
+  | "purple"
+  | "rose"
+  | "green"
+  | "sky"
+  | "teal";
+
+export type RecognitionCategory = {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  color: RecognitionCategoryColor;
+};
+
+export type ApprovalLevel =
+  | "direct-manager"
+  | "bu-head"
+  | "function-lead"
+  | "hr-admin";
+
+export type AppreciationPolicy = {
+  monetaryEnabled: boolean;
+  /** Conversion rate between recognition points and account currency.
+   *  Example: { points: 100, amount: 50 } means 100 pts = ₹50. */
+  pointValue: {
+    points: number;
+    amount: number;
+  };
+  window: {
+    mode: "always" | "scheduled";
+    startDate?: string;
+    endDate?: string;
+    timezone?: string;
+  };
+  approval: {
+    required: boolean;
+    approverLevel: ApprovalLevel;
+    autoApproveAfterHours?: number;
+  };
+};
+
 export type Role = "admin" | "employee";
 
 export type Account = {
@@ -46,7 +91,8 @@ export type Account = {
   fiscalYearStart: string;
   hrAdmins: HRAdmin[];
   integrations: Integrations;
-  recognitionCategories: string[];
+  recognitionCategories: RecognitionCategory[];
+  appreciationPolicy: AppreciationPolicy;
   pointsPolicy: {
     startingBudget: number;
     expiryMonths: number;
@@ -89,20 +135,71 @@ export const DEFAULT_INTEGRATIONS: Integrations = {
   ssoProvider: "none",
 };
 
-export const DEFAULT_CATEGORIES = [
-  "Innovation",
-  "Leadership",
-  "Teamwork",
-  "Creativity",
-  "Culture",
-  "Customer Focus",
+export const DEFAULT_CATEGORIES: RecognitionCategory[] = [
+  { id: "cat-innovation", name: "Innovation", description: "Bold ideas and creative problem-solving", emoji: "💡", color: "amber" },
+  { id: "cat-leadership", name: "Leadership", description: "Setting direction and inspiring others", emoji: "🧭", color: "blue" },
+  { id: "cat-teamwork", name: "Teamwork", description: "Collaboration that lifts the team", emoji: "🤜", color: "purple" },
+  { id: "cat-creativity", name: "Creativity", description: "Original thinking applied to real work", emoji: "🎨", color: "rose" },
+  { id: "cat-culture", name: "Culture", description: "Embodying who we are as a company", emoji: "✨", color: "teal" },
+  { id: "cat-customer-focus", name: "Customer Focus", description: "Going above for the customer", emoji: "🤝", color: "green" },
 ];
+
+export const DEFAULT_APPRECIATION_POLICY: AppreciationPolicy = {
+  monetaryEnabled: true,
+  pointValue: { points: 100, amount: 100 },
+  window: { mode: "always" },
+  approval: { required: false, approverLevel: "direct-manager" },
+};
+
+const MIGRATION_COLORS: RecognitionCategoryColor[] = [
+  "blue", "amber", "stone", "purple", "rose", "green", "sky", "teal",
+];
+
+function migrateCategories(raw: unknown[]): RecognitionCategory[] {
+  if (raw.length === 0) return [];
+  if (typeof raw[0] === "string") {
+    return (raw as string[]).map((name, i) => ({
+      id: "cat-" + Math.random().toString(36).slice(2, 8),
+      name,
+      description: "",
+      emoji: "⭐",
+      color: MIGRATION_COLORS[i % MIGRATION_COLORS.length],
+    }));
+  }
+  return raw as RecognitionCategory[];
+}
 
 export function getAccount(): Account | null {
   const raw = localStorage.getItem(ACCOUNT_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as Account;
+    const parsed = JSON.parse(raw) as Account;
+    let mutated = false;
+
+    if (
+      Array.isArray(parsed.recognitionCategories) &&
+      parsed.recognitionCategories.length > 0 &&
+      typeof parsed.recognitionCategories[0] === "string"
+    ) {
+      parsed.recognitionCategories = migrateCategories(
+        parsed.recognitionCategories as unknown as unknown[],
+      );
+      mutated = true;
+    }
+
+    if (!parsed.appreciationPolicy) {
+      parsed.appreciationPolicy = { ...DEFAULT_APPRECIATION_POLICY };
+      mutated = true;
+    } else if (!parsed.appreciationPolicy.pointValue) {
+      parsed.appreciationPolicy = {
+        ...parsed.appreciationPolicy,
+        pointValue: { ...DEFAULT_APPRECIATION_POLICY.pointValue },
+      };
+      mutated = true;
+    }
+
+    if (mutated) saveAccount(parsed);
+    return parsed;
   } catch {
     return null;
   }
@@ -263,6 +360,8 @@ export function createAccountFromInvite(invite: InviteRecord): Account {
     hrAdmins: [],
     integrations: DEFAULT_INTEGRATIONS,
     recognitionCategories: DEFAULT_CATEGORIES,
+    appreciationPolicy:
+      getSeedPolicyOverride(invite.accountId) ?? { ...DEFAULT_APPRECIATION_POLICY },
     pointsPolicy: {
       startingBudget: 50000,
       expiryMonths: 12,
@@ -305,7 +404,27 @@ type SeedSpec = {
   state: "active" | "in-setup" | "pending";
   /** How many days ago the invite was created (for spread-out timestamps). */
   daysAgo: number;
+  /** Optional override applied when the seed account is first materialized. */
+  appreciationPolicy?: AppreciationPolicy;
 };
+
+/** Side-channel map of accountId → policy override, written by seedDummyCompanies. */
+const SEED_POLICY_OVERRIDE_KEY = "engagex_seed_policy_overrides";
+
+function getSeedPolicyOverride(accountId: string): AppreciationPolicy | null {
+  const raw = localStorage.getItem(SEED_POLICY_OVERRIDE_KEY);
+  if (!raw) return null;
+  try {
+    const map = JSON.parse(raw) as Record<string, AppreciationPolicy>;
+    return map[accountId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function setSeedPolicyOverrides(map: Record<string, AppreciationPolicy>): void {
+  localStorage.setItem(SEED_POLICY_OVERRIDE_KEY, JSON.stringify(map));
+}
 
 /**
  * Five dummy companies covering the full status spectrum:
@@ -313,6 +432,12 @@ type SeedSpec = {
  *  • 2 In setup (admin redeemed but didn't finish onboarding) — Globex, Soylent Corp
  *  • 1 Pending invite (just provisioned) — Initech
  */
+function inDaysIso(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+}
+
 const SEED_COMPANIES: SeedSpec[] = [
   {
     companyName: "Acme Corp",
@@ -325,6 +450,12 @@ const SEED_COMPANIES: SeedSpec[] = [
     products: { appreciation: true, rnr: true },
     state: "active",
     daysAgo: 21,
+    appreciationPolicy: {
+      monetaryEnabled: true,
+      pointValue: { points: 100, amount: 100 },
+      window: { mode: "always" },
+      approval: { required: false, approverLevel: "direct-manager" },
+    },
   },
   {
     companyName: "Northwind Logistics",
@@ -337,6 +468,16 @@ const SEED_COMPANIES: SeedSpec[] = [
     products: { appreciation: true, rnr: false },
     state: "active",
     daysAgo: 14,
+    appreciationPolicy: {
+      monetaryEnabled: true,
+      pointValue: { points: 100, amount: 50 },
+      window: { mode: "always" },
+      approval: {
+        required: true,
+        approverLevel: "direct-manager",
+        autoApproveAfterHours: 48,
+      },
+    },
   },
   {
     companyName: "Globex Industries",
@@ -349,6 +490,17 @@ const SEED_COMPANIES: SeedSpec[] = [
     products: { appreciation: true, rnr: true },
     state: "in-setup",
     daysAgo: 5,
+    appreciationPolicy: {
+      monetaryEnabled: false,
+      pointValue: { points: 100, amount: 100 },
+      window: {
+        mode: "scheduled",
+        startDate: inDaysIso(-3),
+        endDate: inDaysIso(27),
+        timezone: "ist",
+      },
+      approval: { required: false, approverLevel: "direct-manager" },
+    },
   },
   {
     companyName: "Soylent Corp",
@@ -361,6 +513,21 @@ const SEED_COMPANIES: SeedSpec[] = [
     products: { appreciation: true, rnr: false },
     state: "in-setup",
     daysAgo: 3,
+    appreciationPolicy: {
+      monetaryEnabled: true,
+      pointValue: { points: 250, amount: 100 },
+      window: {
+        mode: "scheduled",
+        startDate: inDaysIso(0),
+        endDate: inDaysIso(30),
+        timezone: "pt",
+      },
+      approval: {
+        required: true,
+        approverLevel: "hr-admin",
+        autoApproveAfterHours: 72,
+      },
+    },
   },
   {
     companyName: "Initech Software",
@@ -396,16 +563,23 @@ export function seedDummyCompanies(): void {
     return;
   }
 
+  const policyOverrides: Record<string, AppreciationPolicy> = {};
+
   const invites: InviteRecord[] = SEED_COMPANIES.map((spec) => {
     const createdAt = daysAgoIso(spec.daysAgo);
     const redeemedAt =
       spec.state !== "pending" ? daysAgoIso(Math.max(spec.daysAgo - 1, 0)) : undefined;
     const setupCompletedAt =
       spec.state === "active" ? daysAgoIso(Math.max(spec.daysAgo - 2, 0)) : undefined;
+    const accountId = generateAccountId();
+
+    if (spec.appreciationPolicy) {
+      policyOverrides[accountId] = spec.appreciationPolicy;
+    }
 
     return {
       token: generateInviteToken(),
-      accountId: generateAccountId(),
+      accountId,
       adminEmail: spec.adminEmail,
       adminName: spec.adminName,
       adminDesignation: spec.adminDesignation,
@@ -423,6 +597,7 @@ export function seedDummyCompanies(): void {
   });
 
   localStorage.setItem(INVITES_KEY, JSON.stringify(invites));
+  setSeedPolicyOverrides(policyOverrides);
   localStorage.setItem(SEED_FLAG_KEY, "true");
 }
 
@@ -434,6 +609,8 @@ export function resetAndReseed(): void {
   clearAccount();
   localStorage.removeItem(INVITES_KEY);
   localStorage.removeItem(SEED_FLAG_KEY);
+  localStorage.removeItem(SEED_POLICY_OVERRIDE_KEY);
+  localStorage.removeItem("engagex_badges");
   seedDummyCompanies();
 }
 

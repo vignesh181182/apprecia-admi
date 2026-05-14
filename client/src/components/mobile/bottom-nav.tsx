@@ -1,6 +1,9 @@
+import { useEffect, useMemo, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { getAccount } from "@/lib/account";
+import { EMPLOYEES } from "@/lib/recognize-data";
+import { getBadges } from "@/lib/badges";
 
 function HomeIcon({ className }: { className?: string }) {
   return (
@@ -70,9 +73,40 @@ const TABS: Tab[] = [
   { to: "/m/ranks", label: "Ranks", Icon: StatsIcon },
 ];
 
+function usePendingApprovalCount(): number {
+  const account = getAccount();
+  const approverId = useMemo(() => {
+    if (!account) return null;
+    const me = EMPLOYEES.find(
+      (e) => e.email.toLowerCase() === account.adminEmail.toLowerCase(),
+    );
+    return (me ?? EMPLOYEES[0])?.id ?? "hr-admin";
+  }, [account]);
+
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    function refresh() {
+      if (!approverId) return setCount(0);
+      const pending = getBadges().filter(
+        (b) => b.status === "pending-approval" && b.pendingApproverId === approverId,
+      );
+      setCount(pending.length);
+    }
+    refresh();
+    window.addEventListener("storage", refresh);
+    const t = window.setInterval(refresh, 3000);
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.clearInterval(t);
+    };
+  }, [approverId]);
+  return count;
+}
+
 export function MobileBottomNav() {
   const account = getAccount();
   const avatarSrc = account?.companyLogo;
+  const pendingApprovals = usePendingApprovalCount();
 
   return (
     <nav
@@ -103,22 +137,32 @@ export function MobileBottomNav() {
           );
         })}
 
-        <NavLink to="/m/profile" aria-label="Profile" className="flex items-center justify-center">
+        <NavLink to="/m/profile" aria-label="Profile" className="relative flex items-center justify-center">
           {({ isActive }) => (
-            <span
-              className={cn(
-                "block w-10 h-10 rounded-full overflow-hidden ring-2 transition-shadow",
-                isActive ? "ring-[#a87a3a]" : "ring-transparent",
-              )}
-            >
-              {avatarSrc ? (
-                <img src={avatarSrc} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="w-full h-full bg-stone-300 flex items-center justify-center text-sm font-semibold text-stone-700">
-                  {(account?.adminName?.[0] || "?").toUpperCase()}
+            <>
+              <span
+                className={cn(
+                  "block w-10 h-10 rounded-full overflow-hidden ring-2 transition-shadow",
+                  isActive ? "ring-[#a87a3a]" : "ring-transparent",
+                )}
+              >
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="w-full h-full bg-stone-300 flex items-center justify-center text-sm font-semibold text-stone-700">
+                    {(account?.adminName?.[0] || "?").toUpperCase()}
+                  </span>
+                )}
+              </span>
+              {pendingApprovals > 0 && (
+                <span
+                  aria-label={`${pendingApprovals} pending approvals`}
+                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center ring-2 ring-[#ebebe6]"
+                >
+                  {pendingApprovals > 9 ? "9+" : pendingApprovals}
                 </span>
               )}
-            </span>
+            </>
           )}
         </NavLink>
       </div>

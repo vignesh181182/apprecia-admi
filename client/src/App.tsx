@@ -41,6 +41,7 @@ import MobileSettings from "@/pages/mobile/settings";
 import { ComingSoon } from "@/components/coming-soon";
 import MobileProfile from "@/pages/mobile/profile";
 import MobileNotifications from "@/pages/mobile/notifications";
+import ApprovalsAppreciations from "@/pages/mobile/approvals-appreciations";
 import { useIsMobile } from "@/hooks/use-viewport";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -51,6 +52,7 @@ import OnboardingIntegrations from "@/pages/onboarding/integrations";
 import OnboardingRecognition from "@/pages/onboarding/recognition";
 import OnboardingReview from "@/pages/onboarding/review";
 import { isAuthenticated, getAccount, setAuthenticated, isAdmin, isSuperAdminAuthenticated } from "@/lib/account";
+import { processAppreciationAutoApprovals } from "@/lib/badges";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated()) return <Navigate to="/auth/sign-in" replace />;
@@ -240,6 +242,7 @@ function Router() {
       <Route path="/m/programs/:id" element={<MobileGuard><ProgramDetail /></MobileGuard>} />
       <Route path="/m/profile" element={<MobileGuard><MobileProfile /></MobileGuard>} />
       <Route path="/m/notifications" element={<MobileGuard><MobileNotifications /></MobileGuard>} />
+      <Route path="/m/approvals/appreciations" element={<MobileGuard><ApprovalsAppreciations /></MobileGuard>} />
       <Route path="/m/settings" element={<MobileGuard><MobileSettings /></MobileGuard>} />
       <Route path="/m/*" element={<MobileGuard><ComingSoon title="Page" description="This page isn't ready yet." withBack /></MobileGuard>} />
 
@@ -248,12 +251,20 @@ function Router() {
   );
 }
 
+function AutoApprovalRunner() {
+  useEffect(() => {
+    processAppreciationAutoApprovals();
+  }, []);
+  return null;
+}
+
 function App() {
   return (
     <HashRouter>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
+          <AutoApprovalRunner />
           <MobileRedirect />
           <Router />
         </TooltipProvider>
