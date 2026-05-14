@@ -51,6 +51,12 @@ export type ApprovalLevel =
 
 export type AppreciationPolicy = {
   monetaryEnabled: boolean;
+  /** Conversion rate between recognition points and account currency.
+   *  Example: { points: 100, amount: 50 } means 100 pts = ₹50. */
+  pointValue: {
+    points: number;
+    amount: number;
+  };
   window: {
     mode: "always" | "scheduled";
     startDate?: string;
@@ -140,6 +146,7 @@ export const DEFAULT_CATEGORIES: RecognitionCategory[] = [
 
 export const DEFAULT_APPRECIATION_POLICY: AppreciationPolicy = {
   monetaryEnabled: true,
+  pointValue: { points: 100, amount: 100 },
   window: { mode: "always" },
   approval: { required: false, approverLevel: "direct-manager" },
 };
@@ -182,6 +189,12 @@ export function getAccount(): Account | null {
 
     if (!parsed.appreciationPolicy) {
       parsed.appreciationPolicy = { ...DEFAULT_APPRECIATION_POLICY };
+      mutated = true;
+    } else if (!parsed.appreciationPolicy.pointValue) {
+      parsed.appreciationPolicy = {
+        ...parsed.appreciationPolicy,
+        pointValue: { ...DEFAULT_APPRECIATION_POLICY.pointValue },
+      };
       mutated = true;
     }
 
@@ -439,6 +452,7 @@ const SEED_COMPANIES: SeedSpec[] = [
     daysAgo: 21,
     appreciationPolicy: {
       monetaryEnabled: true,
+      pointValue: { points: 100, amount: 100 },
       window: { mode: "always" },
       approval: { required: false, approverLevel: "direct-manager" },
     },
@@ -456,6 +470,7 @@ const SEED_COMPANIES: SeedSpec[] = [
     daysAgo: 14,
     appreciationPolicy: {
       monetaryEnabled: true,
+      pointValue: { points: 100, amount: 50 },
       window: { mode: "always" },
       approval: {
         required: true,
@@ -477,6 +492,7 @@ const SEED_COMPANIES: SeedSpec[] = [
     daysAgo: 5,
     appreciationPolicy: {
       monetaryEnabled: false,
+      pointValue: { points: 100, amount: 100 },
       window: {
         mode: "scheduled",
         startDate: inDaysIso(-3),
@@ -499,6 +515,7 @@ const SEED_COMPANIES: SeedSpec[] = [
     daysAgo: 3,
     appreciationPolicy: {
       monetaryEnabled: true,
+      pointValue: { points: 250, amount: 100 },
       window: {
         mode: "scheduled",
         startDate: inDaysIso(0),

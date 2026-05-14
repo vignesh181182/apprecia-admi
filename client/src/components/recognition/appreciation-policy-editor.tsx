@@ -25,6 +25,7 @@ type Props = {
   onChange: (next: AppreciationPolicy) => void;
   onSave: () => void;
   accountTimezone?: string;
+  accountCurrency?: string;
 };
 
 const APPROVER_LABELS: Record<ApprovalLevel, { label: string; help: string }> = {
@@ -70,7 +71,8 @@ function fromDateInput(value: string, endOfDay = false): string | undefined {
   return d.toISOString();
 }
 
-export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTimezone }: Props) {
+export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTimezone, accountCurrency }: Props) {
+  const currency = accountCurrency || "₹";
   const windowOpen = isSendingWindowOpen(policy);
   const reopenAt = nextWindowReopenAt(policy);
   const sampleSender = EMPLOYEES.find((e) => e.managerId) ?? EMPLOYEES[0];
@@ -85,6 +87,18 @@ export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTime
   function patchApproval(updates: Partial<AppreciationPolicy["approval"]>) {
     onChange({ ...policy, approval: { ...policy.approval, ...updates } });
   }
+  function patchPointValue(updates: Partial<AppreciationPolicy["pointValue"]>) {
+    onChange({
+      ...policy,
+      pointValue: { ...policy.pointValue, ...updates },
+    });
+  }
+
+  const pointValueValid =
+    policy.pointValue.points > 0 && policy.pointValue.amount > 0;
+  const perPoint = pointValueValid
+    ? policy.pointValue.amount / policy.pointValue.points
+    : 0;
 
   return (
     <div className="space-y-4">
@@ -111,6 +125,53 @@ export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTime
               onCheckedChange={(v) => patch({ monetaryEnabled: !!v })}
             />
           </div>
+
+          {policy.monetaryEnabled && (
+            <div className="p-3 rounded-lg border border-stone-200 space-y-3">
+              <div>
+                <p className="text-sm font-medium text-stone-900">Point value</p>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  How much one point is worth when employees redeem rewards.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700">Points</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={policy.pointValue.points}
+                    onChange={(e) =>
+                      patchPointValue({ points: Math.max(1, Number(e.target.value) || 0) })
+                    }
+                    className="h-9 text-sm border-stone-200 w-24"
+                  />
+                </div>
+                <span className="text-sm text-stone-500 pb-2">=</span>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700">Amount ({currency})</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={policy.pointValue.amount}
+                    onChange={(e) =>
+                      patchPointValue({ amount: Math.max(0, Number(e.target.value) || 0) })
+                    }
+                    className="h-9 text-sm border-stone-200 w-28"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-stone-600">
+                {pointValueValid
+                  ? <>1 point ≈ <strong>{currency}{perPoint.toFixed(2)}</strong>. A 100-pt badge redeems for {currency}{(perPoint * 100).toFixed(2)}.</>
+                  : <span className="text-red-600">Both values must be greater than 0.</span>
+                }
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -296,7 +357,12 @@ export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTime
                     : "Closed"}
             </li>
             <li>
-              <strong>Monetary:</strong> {policy.monetaryEnabled ? "On" : "Off"}
+              <strong>Monetary:</strong>{" "}
+              {policy.monetaryEnabled
+                ? pointValueValid
+                  ? `On — ${policy.pointValue.points} pts = ${currency}${policy.pointValue.amount}`
+                  : "On (point value not set)"
+                : "Off"}
             </li>
             <li>
               <strong>Approval:</strong>{" "}
@@ -312,6 +378,7 @@ export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTime
         <Button
           size="sm"
           className="bg-stone-900 hover:bg-stone-700 text-white"
+          disabled={policy.monetaryEnabled && !pointValueValid}
           onClick={onSave}
         >
           Save Appreciation Policy

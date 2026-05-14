@@ -288,6 +288,7 @@ export default function HRSettings() {
               toast({ title: "Appreciation policy saved", description: "Your changes will apply on the next badge sent." });
             }}
             accountTimezone={account?.timezone}
+            accountCurrency={account?.currency}
           />
         </TabsContent>
 
