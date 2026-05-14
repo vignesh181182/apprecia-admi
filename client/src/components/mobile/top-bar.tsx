@@ -1,6 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { getAccount } from "@/lib/account";
+import { currentEmployee } from "@/lib/recognize-data";
+import { getWallet } from "@/lib/wallet";
+import { isMonetaryActive } from "@/lib/appreciation-policy";
 
 type Props = {
   title?: string;
@@ -9,9 +13,39 @@ type Props = {
   rightSlot?: React.ReactNode;
 };
 
+function useReceiveBalance(): number | null {
+  const account = getAccount();
+  const employee = useMemo(() => currentEmployee(account?.adminEmail), [account]);
+  const monetary = isMonetaryActive(account);
+
+  const [balance, setBalance] = useState<number | null>(() =>
+    monetary && employee ? getWallet(employee.id, "employee", account).receiveBalance : null,
+  );
+
+  useEffect(() => {
+    if (!monetary || !employee) {
+      setBalance(null);
+      return;
+    }
+    function refresh() {
+      setBalance(getWallet(employee!.id, "employee", account).receiveBalance);
+    }
+    refresh();
+    window.addEventListener("storage", refresh);
+    const timer = window.setInterval(refresh, 3000);
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.clearInterval(timer);
+    };
+  }, [monetary, employee, account]);
+
+  return balance;
+}
+
 export function MobileTopBar({ title, showBack, onBack, rightSlot }: Props) {
   const account = getAccount();
   const logoSrc = account?.companyLogo || "/m/svgs/logo.svg";
+  const receiveBalance = useReceiveBalance();
 
   return (
     <header className="sticky top-0 z-30 bg-stone-50/95 backdrop-blur supports-[backdrop-filter]:bg-stone-50/80 border-b border-stone-200/60">
@@ -38,7 +72,18 @@ export function MobileTopBar({ title, showBack, onBack, rightSlot }: Props) {
             </h1>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          {receiveBalance !== null && (
+            <Link
+              to="/m/rewards"
+              aria-label={`${receiveBalance} points available — open rewards`}
+              className="inline-flex items-center gap-1 h-8 px-2.5 rounded-full bg-amber-50 border border-amber-100 text-amber-900 text-xs font-mobile font-semibold hover:bg-amber-100 transition-colors"
+            >
+              <span className="text-amber-700">★</span>
+              {receiveBalance.toLocaleString()}
+              <span className="text-amber-700/70 font-medium">pts</span>
+            </Link>
+          )}
           {rightSlot ?? (
             <Link
               to="/m/notifications"
