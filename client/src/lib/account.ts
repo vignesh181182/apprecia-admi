@@ -72,6 +72,36 @@ export type AppreciationPolicy = {
 
 export type Role = "admin" | "employee";
 
+/**
+ * Role buckets used by the per-user wallet for monthly allowances. This is
+ * distinct from Account.role — every signed-in user maps to one of these
+ * three tiers regardless of whether they're the account owner.
+ */
+export type WalletRole = "employee" | "manager" | "admin";
+
+export type PointsPolicy = {
+  /** Existing fields. */
+  startingBudget: number;
+  expiryMonths: number;
+  maxPerRecognition: number;
+  /** Superseded by appreciationPolicy.approval; kept for backwards compat. */
+  requireManagerApproval: boolean;
+  /** Monthly give-balance refilled per role on the first day of each month. */
+  monthlyAllowance: {
+    employee: number;
+    manager: number;
+    admin: number;
+  };
+  /** Point values awarded by the three appreciation tiers. */
+  tierValues: {
+    thanks: number;
+    goodJob: number;
+    exceptional: number;
+  };
+  /** Reset unused give-balance to allowance on each rollover when true. */
+  expireUnused: boolean;
+};
+
 export type Account = {
   accountId: string;
   companyName: string;
@@ -93,12 +123,7 @@ export type Account = {
   integrations: Integrations;
   recognitionCategories: RecognitionCategory[];
   appreciationPolicy: AppreciationPolicy;
-  pointsPolicy: {
-    startingBudget: number;
-    expiryMonths: number;
-    maxPerRecognition: number;
-    requireManagerApproval: boolean;
-  };
+  pointsPolicy: PointsPolicy;
   notifications: {
     weeklyDigest: boolean;
     budgetAlerts: boolean;
@@ -151,6 +176,16 @@ export const DEFAULT_APPRECIATION_POLICY: AppreciationPolicy = {
   approval: { required: false, approverLevel: "direct-manager" },
 };
 
+export const DEFAULT_POINTS_POLICY: PointsPolicy = {
+  startingBudget: 50000,
+  expiryMonths: 12,
+  maxPerRecognition: 500,
+  requireManagerApproval: false,
+  monthlyAllowance: { employee: 100, manager: 200, admin: 300 },
+  tierValues: { thanks: 0, goodJob: 25, exceptional: 100 },
+  expireUnused: true,
+};
+
 const MIGRATION_COLORS: RecognitionCategoryColor[] = [
   "blue", "amber", "stone", "purple", "rose", "green", "sky", "teal",
 ];
@@ -196,6 +231,21 @@ export function getAccount(): Account | null {
         pointValue: { ...DEFAULT_APPRECIATION_POLICY.pointValue },
       };
       mutated = true;
+    }
+
+    if (!parsed.pointsPolicy) {
+      parsed.pointsPolicy = { ...DEFAULT_POINTS_POLICY };
+      mutated = true;
+    } else {
+      const pp = parsed.pointsPolicy as Partial<PointsPolicy>;
+      const missing: Partial<PointsPolicy> = {};
+      if (!pp.monthlyAllowance) missing.monthlyAllowance = { ...DEFAULT_POINTS_POLICY.monthlyAllowance };
+      if (!pp.tierValues) missing.tierValues = { ...DEFAULT_POINTS_POLICY.tierValues };
+      if (typeof pp.expireUnused !== "boolean") missing.expireUnused = DEFAULT_POINTS_POLICY.expireUnused;
+      if (Object.keys(missing).length > 0) {
+        parsed.pointsPolicy = { ...DEFAULT_POINTS_POLICY, ...pp, ...missing } as PointsPolicy;
+        mutated = true;
+      }
     }
 
     if (mutated) saveAccount(parsed);
@@ -363,9 +413,9 @@ export function createAccountFromInvite(invite: InviteRecord): Account {
     appreciationPolicy:
       getSeedPolicyOverride(invite.accountId) ?? { ...DEFAULT_APPRECIATION_POLICY },
     pointsPolicy: {
-      startingBudget: 50000,
-      expiryMonths: 12,
-      maxPerRecognition: 500,
+      ...DEFAULT_POINTS_POLICY,
+      // Keep the legacy "require manager approval" default for invites that
+      // pre-dated the appreciationPolicy.approval setting.
       requireManagerApproval: true,
     },
     notifications: {

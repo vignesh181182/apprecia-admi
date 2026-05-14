@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Star, Bell, Plug, Shield, Check, Tags, Sparkles } from "lucide-react";
+import { Building2, Star, Bell, Plug, Shield, Check, Tags, Sparkles, AlertTriangle, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getAccount, updateAccount, DEFAULT_CATEGORIES, DEFAULT_APPRECIATION_POLICY } from "@/lib/account";
-import type { RecognitionCategory, AppreciationPolicy } from "@/lib/account";
+import { getAccount, updateAccount, DEFAULT_CATEGORIES, DEFAULT_APPRECIATION_POLICY, DEFAULT_POINTS_POLICY } from "@/lib/account";
+import type { RecognitionCategory, AppreciationPolicy, PointsPolicy } from "@/lib/account";
 import { CategoryEditor } from "@/components/recognition/category-editor";
 import { AppreciationPolicyEditor } from "@/components/recognition/appreciation-policy-editor";
 
@@ -30,6 +30,30 @@ export default function HRSettings() {
   const [policy, setPolicy] = useState<AppreciationPolicy>(
     account?.appreciationPolicy ?? DEFAULT_APPRECIATION_POLICY,
   );
+  const [pointsPolicy, setPointsPolicy] = useState<PointsPolicy>(
+    account?.pointsPolicy ?? DEFAULT_POINTS_POLICY,
+  );
+  const monetaryActive = !!account?.appreciationPolicy?.monetaryEnabled;
+
+  function patchPoints(updates: Partial<PointsPolicy>) {
+    setPointsPolicy((prev) => ({ ...prev, ...updates }));
+  }
+  function patchAllowance(updates: Partial<PointsPolicy["monthlyAllowance"]>) {
+    setPointsPolicy((prev) => ({
+      ...prev,
+      monthlyAllowance: { ...prev.monthlyAllowance, ...updates },
+    }));
+  }
+  function patchTierValues(updates: Partial<PointsPolicy["tierValues"]>) {
+    setPointsPolicy((prev) => ({
+      ...prev,
+      tierValues: { ...prev.tierValues, ...updates },
+    }));
+  }
+  function savePointsPolicy() {
+    updateAccount({ pointsPolicy });
+    toast({ title: "Wallet policy saved", description: "Per-role allowances and tier values updated." });
+  }
 
   function save() {
     toast({ title: "Settings saved", description: "Your changes have been applied." });
@@ -123,6 +147,126 @@ export default function HRSettings() {
 
         {/* ── Points Policy ── */}
         <TabsContent value="points" className="space-y-4 mt-0">
+          {!monetaryActive && (
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>
+                Monetary recognition is currently disabled in <strong>Appreciation Policy</strong>. These
+                settings have no effect until it's re-enabled.
+              </span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-4">
+              <Card className="border border-stone-200">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-stone-500" /> Per-role monthly allowance
+                  </CardTitle>
+                  <p className="text-xs text-stone-500">
+                    How many points each role can give out per month. Resets on the 1st when "Expire unused" is on.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {([
+                    { key: "employee", label: "Employee" },
+                    { key: "manager",  label: "Manager"  },
+                    { key: "admin",    label: "Admin"    },
+                  ] as const).map(({ key, label }) => (
+                    <div key={key} className="flex items-center gap-4">
+                      <span className="text-sm text-stone-700 flex-1">{label}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={pointsPolicy.monthlyAllowance[key]}
+                        onChange={(e) => patchAllowance({ [key]: Math.max(0, Number(e.target.value) || 0) } as Partial<PointsPolicy["monthlyAllowance"]>)}
+                        className="h-8 text-sm border-stone-200 w-24 text-right"
+                      />
+                      <span className="text-xs text-stone-500 w-12">pts/mo</span>
+                    </div>
+                  ))}
+                  <div className="flex items-center justify-between p-3 mt-2 rounded-lg bg-stone-50 border border-stone-200">
+                    <div>
+                      <p className="text-sm font-medium text-stone-900">Expire unused balance on rollover</p>
+                      <p className="text-xs text-stone-500">When off, leftover give-points carry into next month.</p>
+                    </div>
+                    <Switch
+                      checked={pointsPolicy.expireUnused}
+                      onCheckedChange={(v) => patchPoints({ expireUnused: !!v })}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-stone-200">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-stone-900">Appreciation tier values</CardTitle>
+                  <p className="text-xs text-stone-500">
+                    Points credited when a sender picks each tier. "Thanks" is always free.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {([
+                    { key: "thanks",      label: "Thanks",      locked: true },
+                    { key: "goodJob",     label: "Good Job",    locked: false },
+                    { key: "exceptional", label: "Exceptional", locked: false },
+                  ] as const).map(({ key, label, locked }) => (
+                    <div key={key} className="flex items-center gap-4">
+                      <span className="text-sm text-stone-700 flex-1">{label}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        disabled={locked}
+                        value={locked ? 0 : pointsPolicy.tierValues[key]}
+                        onChange={(e) => patchTierValues({ [key]: Math.max(0, Number(e.target.value) || 0) } as Partial<PointsPolicy["tierValues"]>)}
+                        className="h-8 text-sm border-stone-200 w-24 text-right disabled:bg-stone-50"
+                      />
+                      <span className="text-xs text-stone-500 w-6">pts</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end">
+                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={savePointsPolicy}>
+                  Save Wallet Policy
+                </Button>
+              </div>
+            </div>
+
+            <Card className="border border-stone-200 bg-stone-50 h-fit">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold text-stone-900">Live preview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-xs text-stone-700">
+                <div>
+                  <p className="font-medium text-stone-900 mb-1">Monthly allowance</p>
+                  <ul className="space-y-0.5">
+                    <li>Employee: <strong>{pointsPolicy.monthlyAllowance.employee} pts</strong></li>
+                    <li>Manager: <strong>{pointsPolicy.monthlyAllowance.manager} pts</strong></li>
+                    <li>Admin: <strong>{pointsPolicy.monthlyAllowance.admin} pts</strong></li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-medium text-stone-900 mb-1">Tier credit to receiver</p>
+                  <ul className="space-y-0.5">
+                    <li>Thanks: <strong>0 pts</strong></li>
+                    <li>Good Job: <strong>{pointsPolicy.tierValues.goodJob} pts</strong></li>
+                    <li>Exceptional: <strong>{pointsPolicy.tierValues.exceptional} pts</strong></li>
+                  </ul>
+                </div>
+                <p className="text-stone-600">
+                  A manager gets <strong>{pointsPolicy.monthlyAllowance.manager} pts</strong> to give each month.
+                  Sending an "Exceptional" badge ({pointsPolicy.tierValues.exceptional} pts) credits the receiver's redeemable balance.
+                </p>
+                <p className="text-stone-500">
+                  Unused balance {pointsPolicy.expireUnused ? "expires" : "rolls over"} on the 1st.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card className="border border-stone-200">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-semibold text-stone-900">Point Values by Category</CardTitle>
