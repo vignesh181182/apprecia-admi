@@ -5,19 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, X, Wallet, Bell } from "lucide-react";
+import { Wallet, Bell } from "lucide-react";
 import { WizardLayout, ONBOARDING_STEPS } from "@/components/onboarding/wizard-layout";
 import { getAccount, updateAccount, DEFAULT_CATEGORIES } from "@/lib/account";
+import type { RecognitionCategory } from "@/lib/account";
+import { CategoryEditor } from "@/components/recognition/category-editor";
 
 export default function OnboardingRecognition() {
   const navigate = useNavigate();
   const account = getAccount();
 
-  const [categories, setCategories] = useState<string[]>(
+  const [categories, setCategories] = useState<RecognitionCategory[]>(
     account?.recognitionCategories?.length ? account.recognitionCategories : DEFAULT_CATEGORIES,
   );
-  const [newCategory, setNewCategory] = useState("");
   const [requireApproval, setRequireApproval] = useState(account?.pointsPolicy.requireManagerApproval ?? true);
   const [startingBudget, setStartingBudget] = useState(account?.pointsPolicy.startingBudget ?? 50000);
   const [expiryMonths, setExpiryMonths] = useState(account?.pointsPolicy.expiryMonths ?? 12);
@@ -30,17 +30,8 @@ export default function OnboardingRecognition() {
 
   const rnrEnabled = account.products.rnr;
 
-  function addCategory() {
-    const v = newCategory.trim();
-    if (!v) return;
-    if (categories.some((c) => c.toLowerCase() === v.toLowerCase())) return;
-    setCategories([...categories, v]);
-    setNewCategory("");
-  }
-
-  function removeCategory(c: string) {
-    setCategories(categories.filter((x) => x !== c));
-  }
+  const hasMinCategories = categories.length >= 3;
+  const allNamed = categories.every((c) => c.name.trim().length > 0);
 
   function handleContinue() {
     updateAccount({
@@ -68,54 +59,12 @@ export default function OnboardingRecognition() {
       description="Define your company values and approval workflow. You can fine-tune all of this in Settings later."
       onBack={() => navigate("/onboarding/integrations")}
       onContinue={handleContinue}
-      continueDisabled={categories.length === 0}
+      continueDisabled={!hasMinCategories || !allNamed}
     >
       <div className="space-y-4">
         <Card className="border border-stone-200">
-          <CardContent className="p-5 space-y-3">
-            <div>
-              <p className="text-sm font-semibold text-stone-900">Recognition categories</p>
-              <p className="text-xs text-stone-500 mt-0.5">
-                Tags employees pick when sending recognitions. Map these to your company values.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((c) => (
-                <Badge
-                  key={c}
-                  variant="secondary"
-                  className="bg-stone-100 text-stone-700 hover:bg-stone-100 pr-1 gap-1.5 py-1"
-                >
-                  {c}
-                  <button
-                    type="button"
-                    onClick={() => removeCategory(c)}
-                    className="rounded-full p-0.5 hover:bg-stone-200 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            <div className="flex gap-2 pt-1">
-              <Input
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCategory())}
-                placeholder="Add a category (e.g. Excellence)"
-                className="h-9 text-sm border-stone-200"
-              />
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={addCategory}
-                className="h-9 border-stone-200 gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add
-              </Button>
-            </div>
+          <CardContent className="p-5">
+            <CategoryEditor categories={categories} onChange={setCategories} />
           </CardContent>
         </Card>
 

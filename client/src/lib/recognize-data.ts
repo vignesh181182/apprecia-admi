@@ -7,19 +7,43 @@ export type Employee = {
   role: string;
   email: string;
   avatar: string;
+  managerId?: string;
+  businessUnitId?: string;
+  businessUnitName?: string;
+  functionLeadId?: string;
 };
 
+// Org chart for the mock employees:
+// • Ralph Edwards (CTO) — top of Engineering/Product
+// • Cristofer Botosh — Director, Engineering BU (function lead: ralph)
+// • Talan Dias — Director, Design BU
+// • Robert Fox — Director, Customer Success BU
+// • Courtney Ralph — Delivery Head, reports to Cristofer
+// • Courtney Henry — Delivery Head, reports to Robert
+// • James Wilson — Product Manager, reports to Cristofer
+// • Rahul / Albert — engineers under Courtney Ralph
+// • Dianne — designer under Talan
 export const EMPLOYEES: Employee[] = [
-  { id: "u-courtney",   name: "Courtney Ralph",       role: "Delivery Head",            email: "courtney.ralph@example.com",   avatar: "/m/images/user02.png" },
-  { id: "u-robert",     name: "Robert Fox",           role: "Director",                 email: "robert.fox@example.com",       avatar: "/m/images/user05.png" },
-  { id: "u-dianne",     name: "Dianne Russell",       role: "UI Designer",              email: "dianne.russell@example.com",   avatar: "/m/images/user04.png" },
-  { id: "u-ralph",      name: "Ralph Edwards",        role: "Chief Technology Officer", email: "ralph.edwards@example.com",    avatar: "/m/images/user01.png" },
-  { id: "u-rahul",      name: "Rahul Albert Floraes", role: "Sr Software Engineer",     email: "rahul.albert@example.com",     avatar: "/m/images/user03.png" },
-  { id: "u-courtney-h", name: "Courtney Henry",       role: "Delivery Head",            email: "courtney.henry@example.com",   avatar: "/m/images/user02.png" },
-  { id: "u-albert",     name: "Albert Flores",        role: "Sr Software Engineer",     email: "albert.flores@example.com",    avatar: "/m/images/user03.png" },
-  { id: "u-cristofer",  name: "Cristofer Botosh",     role: "Director",                 email: "cristofer.botosh@example.com", avatar: "/m/images/user06.png" },
-  { id: "u-talan",      name: "Talan Dias",           role: "Director",                 email: "talan.dias@example.com",       avatar: "/m/images/user07.png" },
-  { id: "u-james",      name: "James Wilson",         role: "Product Manager",          email: "james.wilson@example.com",     avatar: "/m/images/user07.png" },
+  { id: "u-ralph",      name: "Ralph Edwards",        role: "Chief Technology Officer", email: "ralph.edwards@example.com",    avatar: "/m/images/user01.png",
+    businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-cristofer",  name: "Cristofer Botosh",     role: "Director",                 email: "cristofer.botosh@example.com", avatar: "/m/images/user06.png",
+    managerId: "u-ralph", businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-talan",      name: "Talan Dias",           role: "Director",                 email: "talan.dias@example.com",       avatar: "/m/images/user07.png",
+    managerId: "u-ralph", businessUnitId: "bu-design", businessUnitName: "Design", functionLeadId: "u-talan" },
+  { id: "u-robert",     name: "Robert Fox",           role: "Director",                 email: "robert.fox@example.com",       avatar: "/m/images/user05.png",
+    businessUnitId: "bu-customer-success", businessUnitName: "Customer Success", functionLeadId: "u-robert" },
+  { id: "u-courtney",   name: "Courtney Ralph",       role: "Delivery Head",            email: "courtney.ralph@example.com",   avatar: "/m/images/user02.png",
+    managerId: "u-cristofer", businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-courtney-h", name: "Courtney Henry",       role: "Delivery Head",            email: "courtney.henry@example.com",   avatar: "/m/images/user02.png",
+    managerId: "u-robert", businessUnitId: "bu-customer-success", businessUnitName: "Customer Success", functionLeadId: "u-robert" },
+  { id: "u-james",      name: "James Wilson",         role: "Product Manager",          email: "james.wilson@example.com",     avatar: "/m/images/user07.png",
+    managerId: "u-cristofer", businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-rahul",      name: "Rahul Albert Floraes", role: "Sr Software Engineer",     email: "rahul.albert@example.com",     avatar: "/m/images/user03.png",
+    managerId: "u-courtney", businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-albert",     name: "Albert Flores",        role: "Sr Software Engineer",     email: "albert.flores@example.com",    avatar: "/m/images/user03.png",
+    managerId: "u-courtney", businessUnitId: "bu-engineering", businessUnitName: "Engineering", functionLeadId: "u-ralph" },
+  { id: "u-dianne",     name: "Dianne Russell",       role: "UI Designer",              email: "dianne.russell@example.com",   avatar: "/m/images/user04.png",
+    managerId: "u-talan", businessUnitId: "bu-design", businessUnitName: "Design", functionLeadId: "u-talan" },
 ];
 
 export type RecognizeBadge = {
