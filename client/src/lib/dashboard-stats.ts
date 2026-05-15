@@ -1,6 +1,12 @@
 import type { Account } from "./account";
 import type { Badge } from "./badges";
 import type { Employee } from "./recognize-data";
+import type {
+  Nomination,
+  NominationStatus,
+  PastProgram,
+  Program,
+} from "./programs-data";
 
 export type DateRange = { start: Date; end: Date };
 
@@ -408,4 +414,434 @@ export function formatRangeLabel(range: DateRange): string {
   const fmt = (d: Date) =>
     d.toLocaleDateString("default", { month: "short", day: "numeric", year: "numeric" });
   return `${fmt(range.start)} → ${fmt(range.end)}`;
+}
+
+// ─── RnR stats ─────────────────────────────────────────────────────────
+
+export type CycleFilter = "current" | "last" | "all";
+
+export type RnRPendingItem = {
+  nominationId: string;
+  programId: string;
+  programName: string;
+  categoryName?: string;
+  nomineeId: string;
+  nomineeName: string;
+  nomineeAvatar: string;
+  nominatorName: string;
+  daysWaiting: number;
+};
+
+export type RnRBudgetRow = {
+  programId: string;
+  programName: string;
+  emoji: string;
+  status: string;
+  allocated: number;
+  spent: number;
+  pct: number;
+  daysLeft: number;
+};
+
+export type RnRWinnerEntry = {
+  nominationId: string;
+  programId: string;
+  programName: string;
+  programEmoji: string;
+  cycleId: string;
+  nomineeId: string;
+  nomineeName: string;
+  nomineeAvatar: string;
+  nomineeRole?: string;
+  decidedAt?: string;
+  prizeAmount?: number;
+};
+
+export type RnRFunnelRow = {
+  programId: string;
+  programName: string;
+  pendingManager: number;
+  pendingPanel: number;
+  approved: number;
+  winner: number;
+  rejected: number;
+  total: number;
+};
+
+export type RnRRiskRow = {
+  programId: string;
+  programName: string;
+  emoji: string;
+  daysLeft: number;
+  current: number;
+  expected: number;
+  pct: number;
+};
+
+export type RnRStats = {
+  totalBudget: { allocated: number; spent: number; pct: number; deltaSpent: number };
+  activePrograms: { count: number; endingThisWeek: number };
+  budgetUtilization: RnRBudgetRow[];
+  pendingActions: {
+    managerApprovals: RnRPendingItem[];
+    panelReviews: RnRPendingItem[];
+    winnerSelection: RnRPendingItem[];
+    total: number;
+  };
+  totalNominations: { count: number; delta: number };
+  programsHittingTarget: { count: number; total: number; target: number };
+  recentWinners: RnRWinnerEntry[];
+  /** 6 buckets: each entry has { month, label, perProgram }. */
+  nominationsTrend: { month: string; label: string; perProgram: Record<string, number> }[];
+  /** Top 5 programs by total nomination volume — UI uses these as the lines drawn on the trend. */
+  topProgramsByVolume: { programId: string; programName: string }[];
+  approvalFunnel: RnRFunnelRow[];
+  programsAtRisk: RnRRiskRow[];
+  nonParticipants: {
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    userRole: string;
+    department: string;
+    managerId?: string;
+    managerName?: string;
+  }[];
+};
+
+const PARTICIPATION_TARGET_DEFAULT = 50;
+
+function isLikePast(p: Program | PastProgram): p is PastProgram {
+  return p.status === "ended";
+}
+
+function isActiveStatus(p: Program | PastProgram): boolean {
+  return p.status === "active" || p.status === "ending-soon";
+}
+
+function daysBetween(a: Date, b: Date): number {
+  return Math.floor((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function programEndDate(p: Program | PastProgram, now: Date): Date {
+  if (isLikePast(p)) return new Date(p.endedOn);
+  return new Date(now.getTime() + p.daysLeft * 24 * 60 * 60 * 1000);
+}
+
+function inRangeNomination(n: Nomination, range: DateRange): boolean {
+  const t = new Date(n.createdAt).getTime();
+  return t >= range.start.getTime() && t <= range.end.getTime();
+}
+
+function nominationCycleMatches(
+  n: Nomination,
+  cycle: CycleFilter,
+  programs: Map<string, Program | PastProgram>,
+): boolean {
+  if (cycle === "all") return true;
+  const program = programs.get(n.programId);
+  if (!program) return false;
+  if (cycle === "current") {
+    return isActiveStatus(program) && n.cycleId === "current";
+  }
+  // "last" — most recent ended cycle for this program family.
+  return isLikePast(program);
+}
+
+/**
+ * Compute every RnR-tab stat from raw programs + nominations + employees.
+ *
+ * Pure: no localStorage reads. The caller decides which programs are in scope
+ * (e.g., excludes drafts) by passing them in.
+ */
+export function getRnRStats(
+  programs: (Program | PastProgram)[],
+  nominations: Nomination[],
+  badges: Badge[],
+  employees: Employee[],
+  account: Account | null,
+  range: DateRange,
+  programFilter?: string[],
+  cycleFilter: CycleFilter = "current",
+  now: Date = new Date(),
+): RnRStats {
+  const programById = new Map<string, Program | PastProgram>(programs.map((p) => [p.id, p]));
+  const empById = new Map(employees.map((e) => [e.id, e]));
+  const programSet = programFilter && programFilter.length > 0 ? new Set(programFilter) : null;
+
+  function passesProgram(programId: string): boolean {
+    if (!programSet) return true;
+    return programSet.has(programId);
+  }
+
+  const inScopePrograms = programs.filter((p) => passesProgram(p.id));
+  const activePrograms = inScopePrograms.filter(isActiveStatus) as Program[];
+  const endingThisWeek = activePrograms.filter((p) => p.daysLeft > 0 && p.daysLeft <= 7).length;
+
+  // ── Total budget ─────────────────────────────────────────────────────
+  const allocated = activePrograms.reduce((s, p) => s + p.budgetAllocated, 0);
+  const spent = activePrograms.reduce((s, p) => s + p.budgetUsed, 0);
+  const prevSpent = inScopePrograms
+    .filter(isLikePast)
+    .reduce((s, p) => s + p.budgetUsed, 0);
+  const totalBudget = {
+    allocated,
+    spent,
+    pct: allocated === 0 ? 0 : Math.round((spent / allocated) * 100),
+    deltaSpent: spent - prevSpent,
+  };
+
+  // ── Per-program budget utilization (active only) ─────────────────────
+  const budgetUtilization: RnRBudgetRow[] = activePrograms.map((p) => ({
+    programId: p.id,
+    programName: p.name,
+    emoji: p.emoji,
+    status: p.status,
+    allocated: p.budgetAllocated,
+    spent: p.budgetUsed,
+    pct: p.budgetAllocated === 0 ? 0 : Math.round((p.budgetUsed / p.budgetAllocated) * 100),
+    daysLeft: p.daysLeft,
+  }));
+
+  // ── Filter nominations down to scope ────────────────────────────────
+  const inScopeNoms = nominations.filter(
+    (n) =>
+      passesProgram(n.programId) &&
+      nominationCycleMatches(n, cycleFilter, programById),
+  );
+  const inWindowNoms = inScopeNoms.filter((n) => inRangeNomination(n, range));
+  const prev = previousRange(range);
+  const prevWindowNoms = inScopeNoms.filter((n) => inRangeNomination(n, prev));
+
+  // ── Pending actions ──────────────────────────────────────────────────
+  function toPendingItem(n: Nomination): RnRPendingItem {
+    const program = programById.get(n.programId);
+    const created = new Date(n.createdAt);
+    return {
+      nominationId: n.id,
+      programId: n.programId,
+      programName: program?.name ?? n.programId,
+      categoryName: n.categoryName,
+      nomineeId: n.nomineeId,
+      nomineeName: n.nomineeName,
+      nomineeAvatar: n.nomineeAvatar,
+      nominatorName: n.nominatorName,
+      daysWaiting: Math.max(0, daysBetween(created, now)),
+    };
+  }
+  const managerApprovals = inScopeNoms
+    .filter((n) => n.status === "pending-manager")
+    .map(toPendingItem)
+    .sort((a, b) => b.daysWaiting - a.daysWaiting);
+  const panelReviews = inScopeNoms
+    .filter((n) => n.status === "pending-panel")
+    .map(toPendingItem)
+    .sort((a, b) => b.daysWaiting - a.daysWaiting);
+  // "Winner selection" pending = approved nominations on a program whose cycle
+  // is ending soon and no winner has been declared yet.
+  const winnerSelectionPrograms = new Set(
+    activePrograms.filter((p) => p.daysLeft <= 7).map((p) => p.id),
+  );
+  const winnerSelection = inScopeNoms
+    .filter((n) => n.status === "approved" && winnerSelectionPrograms.has(n.programId))
+    .map(toPendingItem)
+    .sort((a, b) => b.daysWaiting - a.daysWaiting);
+  const pendingActions = {
+    managerApprovals,
+    panelReviews,
+    winnerSelection,
+    total: managerApprovals.length + panelReviews.length + winnerSelection.length,
+  };
+
+  // ── Total nominations + delta ────────────────────────────────────────
+  const totalNominations = {
+    count: inWindowNoms.length,
+    delta: inWindowNoms.length - prevWindowNoms.length,
+  };
+
+  // ── Programs hitting target participation ────────────────────────────
+  const target = PARTICIPATION_TARGET_DEFAULT;
+  const programsHittingTarget = {
+    count: activePrograms.filter((p) => p.nominations >= target).length,
+    total: activePrograms.length,
+    target,
+  };
+
+  // ── Recent winners (top 10 most recent across all cycles in scope) ──
+  const recentWinners: RnRWinnerEntry[] = inScopeNoms
+    .filter((n) => n.status === "winner")
+    .sort((a, b) => {
+      const aT = new Date(a.decidedAt ?? a.createdAt).getTime();
+      const bT = new Date(b.decidedAt ?? b.createdAt).getTime();
+      return bT - aT;
+    })
+    .slice(0, 10)
+    .map((n) => {
+      const program = programById.get(n.programId);
+      return {
+        nominationId: n.id,
+        programId: n.programId,
+        programName: program?.name ?? n.programId,
+        programEmoji: program?.emoji ?? "🏆",
+        cycleId: n.cycleId,
+        nomineeId: n.nomineeId,
+        nomineeName: n.nomineeName,
+        nomineeAvatar: n.nomineeAvatar,
+        nomineeRole: n.nomineeRole,
+        decidedAt: n.decidedAt,
+        prizeAmount: n.prizeAmount,
+      };
+    });
+
+  // ── Nominations trend (6 months, top 5 programs by volume) ──────────
+  const monthBuckets = new Map<string, { label: string; perProgram: Record<string, number> }>();
+  const trendEnd = new Date(range.end.getFullYear(), range.end.getMonth(), 1);
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(trendEnd.getFullYear(), trendEnd.getMonth() - i, 1);
+    monthBuckets.set(monthKey(d), { label: monthLabel(d), perProgram: {} });
+  }
+  const trendStart = new Date(trendEnd.getFullYear(), trendEnd.getMonth() - 5, 1);
+
+  // First, score programs by total volume in the trend window so we know which
+  // 5 lines to draw.
+  const volume = new Map<string, number>();
+  for (const n of inScopeNoms) {
+    const t = new Date(n.createdAt);
+    if (t < trendStart) continue;
+    volume.set(n.programId, (volume.get(n.programId) || 0) + 1);
+  }
+  const topProgramsByVolume = Array.from(volume.entries())
+    .map(([programId, count]) => ({
+      programId,
+      programName: programById.get(programId)?.name ?? programId,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map(({ programId, programName }) => ({ programId, programName }));
+  const topProgramSet = new Set(topProgramsByVolume.map((p) => p.programId));
+
+  for (const n of inScopeNoms) {
+    if (!topProgramSet.has(n.programId)) continue;
+    const t = new Date(n.createdAt);
+    if (t < trendStart) continue;
+    const key = monthKey(t);
+    const bucket = monthBuckets.get(key);
+    if (!bucket) continue;
+    bucket.perProgram[n.programId] = (bucket.perProgram[n.programId] || 0) + 1;
+  }
+  const nominationsTrend = Array.from(monthBuckets.entries()).map(([month, v]) => ({
+    month,
+    label: v.label,
+    perProgram: v.perProgram,
+  }));
+
+  // ── Approval funnel per program ──────────────────────────────────────
+  const funnelMap = new Map<string, RnRFunnelRow>();
+  for (const p of inScopePrograms) {
+    funnelMap.set(p.id, {
+      programId: p.id,
+      programName: p.name,
+      pendingManager: 0,
+      pendingPanel: 0,
+      approved: 0,
+      winner: 0,
+      rejected: 0,
+      total: 0,
+    });
+  }
+  for (const n of inScopeNoms) {
+    const row = funnelMap.get(n.programId);
+    if (!row) continue;
+    row.total += 1;
+    const map: Record<NominationStatus, keyof RnRFunnelRow> = {
+      "pending-manager": "pendingManager",
+      "pending-panel": "pendingPanel",
+      approved: "approved",
+      winner: "winner",
+      rejected: "rejected",
+    };
+    const k = map[n.status];
+    (row[k] as number) += 1;
+  }
+  const approvalFunnel = Array.from(funnelMap.values())
+    .filter((r) => r.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  // ── Programs at risk ─────────────────────────────────────────────────
+  // Active programs ending within 14 days where current nominations are below
+  // 50% of an "expected" target (we treat target = max(participation target,
+  // panel.totalToReview)).
+  const programsAtRisk: RnRRiskRow[] = activePrograms
+    .filter((p) => p.daysLeft >= 0 && p.daysLeft <= 14)
+    .map((p) => {
+      const expected = Math.max(
+        PARTICIPATION_TARGET_DEFAULT,
+        p.panel?.[0]?.totalToReview ?? 0,
+      );
+      const pct = expected === 0 ? 0 : Math.round((p.nominations / expected) * 100);
+      return {
+        programId: p.id,
+        programName: p.name,
+        emoji: p.emoji,
+        daysLeft: p.daysLeft,
+        current: p.nominations,
+        expected,
+        pct,
+      };
+    })
+    .filter((r) => r.pct < 50)
+    .sort((a, b) => a.daysLeft - b.daysLeft);
+
+  // ── Non-participants (no badge AND no nomination submitted) ──────────
+  const sentBadge = new Set<string>();
+  for (const b of badges) {
+    if (b.status === "rejected") continue;
+    if (b.kind !== "appreciation") continue;
+    const t = new Date(b.createdAt).getTime();
+    if (t >= range.start.getTime() && t <= range.end.getTime()) {
+      sentBadge.add(b.fromUserId);
+    }
+  }
+  const nominated = new Set<string>();
+  for (const n of inWindowNoms) {
+    nominated.add(n.nominatorId);
+  }
+  const nonParticipants = employees
+    .filter((e) => !sentBadge.has(e.id) && !nominated.has(e.id))
+    .map((e) => {
+      const manager = e.managerId ? empById.get(e.managerId) : undefined;
+      return {
+        userId: e.id,
+        userName: e.name,
+        userAvatar: e.avatar,
+        userRole: e.role,
+        department: deptOf(e),
+        managerId: e.managerId,
+        managerName: manager?.name,
+      };
+    });
+
+  return {
+    totalBudget,
+    activePrograms: { count: activePrograms.length, endingThisWeek },
+    budgetUtilization,
+    pendingActions,
+    totalNominations,
+    programsHittingTarget,
+    recentWinners,
+    nominationsTrend,
+    topProgramsByVolume,
+    approvalFunnel,
+    programsAtRisk,
+    nonParticipants,
+  };
+}
+
+export function listProgramsForFilter(
+  programs: (Program | PastProgram)[],
+): { id: string; name: string; status: string }[] {
+  return programs
+    .filter((p) => p.status !== "draft")
+    .map((p) => ({ id: p.id, name: p.name, status: p.status }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
