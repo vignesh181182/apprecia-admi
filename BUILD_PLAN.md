@@ -459,6 +459,408 @@ The wallet exists in localStorage but isn't visible to employees. Make it visibl
 
 ---
 
+
+
+---
+
+## Phase 1.6 — HR Admin Enhancements
+
+These prompts add a tabbed HR Admin dashboard (Appreciation + RnR), replace the existing program creation flow with a richer form (banners, icons, cycles, categories, panel, draft/publish), and add a post-cycle AI-style shortlister for panel leads. The AI uses a deterministic scoring formula — no API key required. PDF/PPT/email/social actions are stubbed in this phase and built out in Phase 3 of the broader roadmap.
+
+### Prompt 1.6.1 — Tabbed HR Dashboard + Appreciation tab
+
+~~~
+EngageX has an HR Admin dashboard at `client/src/pages/hr-dashboard.tsx`. Refactor it into a tabbed layout with two tabs: "Appreciation" and "RnR". Build the Appreciation tab fully in this prompt; the RnR tab gets a placeholder for now (filled in next prompt).
+
+**Layout**:
+- Keep the page route at `/` (or wherever `hr-dashboard` currently mounts)
+- Two-tab structure using shadcn `Tabs` component
+- Tab state persisted to URL query param `?tab=appreciation` or `?tab=rnr` so deep-linking works
+- Default tab: "Appreciation"
+- Hide the RnR tab entirely if `account.products.rnr === false`
+
+**Appreciation tab — sections, top to bottom**:
+
+1. **Filter bar**
+   - Date range select: This month / Last month / Last 3 months / This year / Custom (custom shows two date pickers)
+   - Department multi-select (pulled from existing employee data)
+   - All numbers below recompute when filters change
+
+2. **KPI strip** (6 cards, 2 rows of 3 on mobile / 1 row of 6 on desktop)
+   - **Utilization** — % of employees who sent at least 1 badge in the period
+     - Subtitle: "{N} of {total} employees active"
+     - Color tint: green if ≥70%, amber 40–70%, red < 40%
+   - **Approval status** — count of pending badges + average decision time (when `appreciationPolicy.approval.required`)
+     - When approval is disabled, replace with "Auto-published" pill and a different KPI: "Avg response time" (time from badge → first reaction)
+   - **Total appreciations** — count, with delta vs previous period
+   - **Top giver** — name + count this period
+   - **Top receiver** — name + count this period
+   - **Points circulated** — total points credited via badges this period (hide entirely if `monetaryEnabled === false`)
+
+3. **Month-wise trend** chart (Recharts `LineChart` or `AreaChart`)
+   - X-axis: last 12 months
+   - Two series: badges sent (primary brand color), points circulated (secondary, dashed)
+   - Tooltip shows month + both values
+   - Hide the points series when monetary is disabled
+
+4. **Approval funnel** card (only when approval is required)
+   - Stacked horizontal bar: Approved / Pending / Rejected with counts and %
+   - Below: top 3 slowest approvers (name + avg decision time) to spot bottlenecks
+   - Quick action: "Send reminder to approvers" button (toast stub for now)
+
+5. **Recognition by department** — Recharts `BarChart`
+   - X-axis: department names
+   - Y-axis: avg badges per employee
+   - Red tint where < 50% of company average
+
+6. **Top values used** — horizontal bar chart, top 6 categories
+   - Bar = count of badges tagged with that category
+   - Bar fill uses each category's brand color
+
+7. **Underrecognized employees** table (collapsible, default collapsed)
+   - Employees who received 0 badges in the period
+   - Columns: name, role, department, last received date, manager
+   - Sort by longest-without-recognition
+   - "Nudge their manager" button (toast stub)
+
+**New helper** in a new file `client/src/lib/dashboard-stats.ts`:
+
+  export type DateRange = { start: Date; end: Date };
+
+  export function getAppreciationStats(
+    badges: Badge[],
+    employees: Employee[],
+    range: DateRange,
+    departmentFilter?: string[]
+  ): {
+    utilization: { active: number; total: number; pct: number };
+    approval: { pending: number; approved: number; rejected: number; avgDecisionHours: number };
+    totals: { badges: number; pointsCirculated: number; deltaBadges: number };
+    topGiver: { userId: string; count: number } | null;
+    topReceiver: { userId: string; count: number } | null;
+    monthlyTrend: { month: string; badges: number; points: number }[]; // 12 months
+    byDepartment: { department: string; avgPerEmployee: number }[];
+    byCategory: { categoryId: string; categoryName: string; count: number }[];
+    slowApprovers: { userId: string; avgDecisionHours: number; backlog: number }[];
+    underrecognized: { userId: string; lastReceivedAt: string | null }[];
+  };
+
+All stats computed from `engagex_badges` and account data. Pure function, no side effects.
+
+**Empty states**:
+- If no badges exist in the period, every chart shows "No data for this period" with a small icon
+- If approval is disabled, the approval funnel section is hidden entirely
+
+**RnR tab content** for this prompt: a single placeholder card that says "RnR dashboard coming in next update" — next prompt fills this.
+
+**Existing `client/src/pages/hr-dashboard.tsx` content**: preserve any sections that are still useful by moving them into the Appreciation tab. If anything overlaps with the new KPI strip, prefer the new design. Old data sources (mock arrays) can be replaced with the new stats helper.
+
+**Don't break existing routing or sidebar nav** — the dashboard link in the HR admin sidebar should still work and land on the new tabbed page.
+~~~
+
+---
+
+### Prompt 1.6.2 — RnR Dashboard tab
+
+~~~
+Now build the RnR tab in the HR admin dashboard (the one stubbed out in the previous prompt).
+
+The page is `client/src/pages/hr-dashboard.tsx`. The "RnR" tab is currently a placeholder — replace its content with the full dashboard below.
+
+**Section ordering, top to bottom**:
+
+1. **Filter bar** (reuses the date range + department filter pattern from the Appreciation tab)
+   - Add a program multi-select: filter views to one or more programs
+   - "Cycle" selector: Current cycle / Last cycle / All cycles
+
+2. **KPI strip** (6 cards)
+   - **Total budget** — sum of all program budgets (allocated) + delta vs last period
+     - Subtitle: "{currency}{spent} spent ({pct}%)"
+   - **Active programs** — count of programs with `status: "active"` or `"ending-soon"`
+     - Subtitle: "{N} ending this week"
+   - **Budget utilization** — overall % spent
+     - Color tint: green < 70%, amber 70–90%, red > 90%
+   - **Pending actions** — sum of nominations needing manager approval + nominations needing panel review + cycles awaiting winner selection
+     - Make this clickable — drops down a small popover listing each action with a link
+   - **Total nominations** this period + delta
+   - **Programs hitting target participation** — count of programs where nomination count ≥ target (use 50 as default target)
+
+3. **Budget utilization** — horizontal stacked bar per program
+   - One row per active program
+   - Allocated bar with spent portion filled, color-coded (green/amber/red by % used)
+   - Right side: "{spent} / {allocated} ({pct}%)" + "{days} days left"
+   - "Top up" button per row (opens existing top-up dialog if it exists, otherwise a stub)
+
+4. **Pending actions** — itemized list
+   - Group by type: "Manager approvals (N)", "Panel reviews (N)", "Winner selection (N)"
+   - Each item: program name + category + nominee + nominator + "X days waiting"
+   - Action button: "Go to inbox" → navigates to the relevant inbox page
+
+5. **Recent winners** — horizontal scrollable strip
+   - Last 10 winners across all programs (where `nomination.status === "winner"`)
+   - Each card: avatar, name, program · category, "Won {timeAgo}"
+   - "View all winners" link at the end → opens a full-page winners archive
+
+6. **Performance / trend charts** — two side-by-side
+   - **Nominations over time** (line chart, 6 months): one line per program (top 5 programs by volume)
+   - **Approval funnel** (stacked bar, per program): pending-manager / pending-panel / approved / winner / rejected counts per program
+
+7. **Programs at risk** — table
+   - Programs ending soon with low nomination counts (< 50% of expected)
+   - Columns: program, days left, current nominations, expected, action
+   - Action button: "Promote this program" (toast stub — will tie to email/social in Phase 3)
+
+8. **People who haven't appreciated** (cross-product, lives here since it complements RnR engagement too)
+   - Employees who have sent 0 badges AND submitted 0 nominations in the period
+   - Sortable table: name, role, department, manager, "Send reminder" button (toast stub)
+   - This is the HR-visible engagement gap. Use this list to drive nudge campaigns.
+
+**Helper file** — extend `client/src/lib/dashboard-stats.ts`:
+
+  export function getRnRStats(
+    programs: Program[],
+    nominations: Nomination[],
+    badges: Badge[],
+    employees: Employee[],
+    account: Account,
+    range: DateRange,
+    programFilter?: string[]
+  ): {
+    totalBudget: { allocated: number; spent: number; pct: number };
+    activePrograms: { count: number; endingThisWeek: number };
+    budgetUtilization: { programId: string; programName: string; allocated: number; spent: number; daysLeft: number }[];
+    pendingActions: {
+      managerApprovals: PendingItem[];
+      panelReviews: PendingItem[];
+      winnerSelection: PendingItem[];
+    };
+    recentWinners: WinnerEntry[];
+    nominationsTrend: { month: string; perProgram: Record<string, number> }[];
+    approvalFunnel: { programId: string; programName: string; pendingManager: number; pendingPanel: number; approved: number; winner: number; rejected: number }[];
+    programsAtRisk: ProgramRiskEntry[];
+    nonParticipants: { userId: string; managerId: string }[];
+  };
+
+**Empty states**:
+- If RnR product isn't enabled (`account.products.rnr === false`), the entire RnR tab is hidden upstream — don't worry about an empty state for that
+- If there are no active programs: hero card "No programs yet. Create your first program →" with a CTA link to the program creation page (next prompt builds it)
+- Per-section empty states for each chart/table
+
+**Performance note**: with many badges/nominations, the helper could be slow. Memoize the result based on `(range, filters, dataLength)` so the tab doesn't recompute on every render.
+~~~
+
+---
+
+### Prompt 1.6.3 — Create/Edit Program form
+
+~~~
+Replace the existing program creation flow with a richer create/edit form for HR admins.
+
+**Find and remove the current creation flow** first — likely lives at `client/src/pages/programs.tsx` or there's a dialog inside it. Audit before changing anything.
+
+**New page**: `client/src/pages/program-edit.tsx` with two routes:
+- `/programs/new` — create a new program
+- `/programs/:programId/edit` — edit an existing one
+
+Both routes render the same form component.
+
+**Form sections** (use a long single-page form, NOT a wizard — admins want to fill it fast):
+
+1. **Basics**
+   - Program name (required, max 80 chars)
+   - Description (textarea, max 500 chars)
+   - **Banner picker** — grid of 12 preset banner gradients + image overlays:
+     - Use the existing `themeBg` palette as a starting set
+     - Render each as a 16:9 thumbnail
+     - Selected one gets a checkmark + ring
+     - "Upload custom" button — accepts an image file, stores as data URL in localStorage (50KB max, show error otherwise)
+   - **Icon picker** — grid of 24 emoji options (mix of trophy, badge, star, target, idea, etc.) + a "Custom" input for any emoji
+     - These can hardcode in a `BANNER_PRESETS` and `ICON_PRESETS` array in a new file `client/src/lib/program-presets.ts`
+
+2. **Cycle**
+   - Cadence radio: Monthly / Quarterly / Yearly / One-off
+   - Start date (date picker, required, can be future)
+   - End date (date picker, required, computed default based on cadence — e.g., monthly = start + 30 days)
+   - If cadence ≠ "one-off": "Repeat automatically after end date" toggle (default on)
+   - Preview line: "Runs from {start} to {end} — {N} cycles per year"
+
+3. **Award categories**
+   - Repeating list, min 1 required, max 8
+   - Each row: name input, emoji picker (small), description (short), "Number of winners" number input (1–10), "Prize points per winner" number input (0–10000)
+     - When `appreciationPolicy.monetaryEnabled === false`: hide the prize points field; categories run as recognition-only
+   - "Add category" button
+   - Trash icon to delete; disabled when only 1 category left
+   - Preset shortcut chips at top: "Innovation Champ", "People's Champ", "Customer Hero", "Mentor of the Month", "Quick Helper", "Years of Service" — clicking adds a pre-filled row
+
+4. **Eligibility** (optional collapsible section, default open)
+   - Departments multi-select (or "Open to all")
+   - Locations multi-select (or "Open to all")
+   - Min tenure months (number, default 0)
+   - "Exclude past winners for the last N cycles" (number, default 0 = no exclusion)
+
+5. **Panel of judges**
+   - Searchable employee picker — add multiple panel members
+   - Each added member: avatar, name, role, dept, "Mark as Lead" toggle, remove button
+   - Exactly one member must be marked Lead
+   - Min 1 required, max 12
+   - Add a small info card: "Panel members review nominations after manager approval and select the winners."
+
+6. **Budget**
+   - Total allocated budget (number, currency from account)
+   - Period: "current-cycle" (default for monthly/quarterly) or "annual"
+   - Auto-calculated preview: "Budget per winner: {budget / total winners across categories} {currency}"
+
+7. **Notifications** (collapsible, default closed)
+   - "Notify nominees when nominated" (default on)
+   - "Notify all employees when program goes live" (default on)
+   - "Announce winners to Slack" (only shown if `integrations.slackWebhookUrl` is set; for Phase 1 just a toggle)
+
+**Footer bar** (sticky at bottom):
+- Left side: "Last saved {timeAgo}" if draft
+- Right side: three buttons
+  - **Save as draft** — stores program with `status: "draft"`
+  - **Publish** — sets `status: "active"` (or `"scheduled"` if start date is future) and shows confirmation: "This program will go live on {date}. Continue?"
+  - **Cancel** — back to /programs (warns about unsaved changes if dirty)
+
+**Schema additions** in `client/src/lib/programs-data.ts` — extend Program type with:
+
+  status: "draft" | "scheduled" | "active" | "ending-soon" | "ended";
+  bannerId?: string;
+  customBannerDataUrl?: string;
+  iconEmoji: string;
+  cadence: ProgramCadence;
+  repeatAutomatically?: boolean;
+  notifications: {
+    notifyNominees: boolean;
+    notifyAllOnLaunch: boolean;
+    announceWinnersToSlack: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+
+**Status transitions**:
+- New program → `"draft"`
+- Saved with future start date and Publish → `"scheduled"`
+- Saved with start date today/past and Publish → `"active"`
+- Background job (run on app mount in `App.tsx`): `transitionScheduledPrograms()` flips scheduled programs to active when their start date arrives, and flips active programs to ended when end date passes. Same idempotent pattern as `seedDummyCompanies`.
+
+**Programs list page** (`/programs`) updates:
+- Add a status filter pill row: All / Draft / Scheduled / Active / Ended
+- Each row shows the status badge
+- "New program" button → /programs/new
+- Each row's edit icon → /programs/{id}/edit
+- Draft programs are only visible to HR admins (not to employees)
+
+**Validation**:
+- Block Publish if: no name, no categories, no panel lead, end date before start date
+- Inline error messages near each invalid field
+- Save as draft has lighter validation (just name required)
+
+**Don't touch**: existing program detail page (`program-detail.tsx`), nomination flow, panel review. They consume the data this form produces.
+~~~
+
+---
+
+### Prompt 1.6.4 — Post-cycle AI shortlister + post-winner action stubs
+
+~~~
+When a program cycle ends, an AI-style shortlister scores all approved nominations and surfaces the top 10 for the panel lead to consider. Use a deterministic mock scoring function — no real API call.
+
+**Where this lives**: extend the winner selection page from Phase 3.4 (panel review and winner selection). If that hasn't been built yet, this prompt creates it from scratch.
+
+**Schema** in `client/src/lib/ai-shortlister.ts`:
+
+  export type ShortlistEntry = {
+    nominationId: string;
+    score: number;           // 0–100
+    rank: number;            // 1 = top
+    reasoning: string;       // 2-3 sentence "AI" summary
+    highlights: string[];    // 2-3 bullet points pulled from the reason text
+  };
+
+  export function shortlistNominations(
+    nominations: Nomination[],
+    account: Account,
+    panel: PanelMember[]
+  ): ShortlistEntry[];
+
+**Scoring formula** (deterministic, transparent):
+
+  score =
+    (managerApprovalWeight * 25) +              // 25 if manager-approved with positive comment, 15 if neutral
+    (panelApprovalRatio * 30) +                 // 0–30 based on % of panel members who voted approve
+    (reasonQualityScore * 20) +                 // 0–20: length + presence of specific verbs/numbers
+    (impactKeywordsScore * 15) +                // 0–15: keywords like "saved", "shipped", "led", "first"
+    (timelinessBonus * 10)                      // 10 if nominated in first half of cycle, 5 if mid, 0 if last week
+
+**Reason quality heuristics**:
+- < 100 chars: 0
+- 100–300 chars: 10
+- 300+ chars: 15
+- Contains numbers (matches `/\d/`): +3
+- Contains specific verbs (saved, delivered, shipped, led, mentored, fixed, launched, improved): +2 per match (cap at 20)
+
+**Reasoning generator** — composes a short summary deterministically from the data, NOT random. Format:
+
+  "{NomineeName} scored {score}/100 for this category.
+  {HighlightOne}. {HighlightTwo}.
+  {PanelSentiment}."
+
+Where:
+- HighlightOne pulls the highest-impact sentence from the reason (longest sentence with most impact verbs)
+- HighlightTwo pulls a second one if the reason is long enough
+- PanelSentiment is generated from votes — examples:
+  - "Panel was unanimous in their support."
+  - "5 of 7 panel members approved this nomination."
+  - "Approved by manager and lead reviewer."
+
+The output should feel AI-generated but be 100% deterministic — same input always produces same output. This avoids needing an API key.
+
+**Winner selection page updates** (`client/src/pages/winner-selection.tsx` or wherever panel lead selects winners):
+
+1. **AI Shortlist banner at top** (collapsible, default expanded)
+   - "✨ AI shortlist — top 10 nominations" heading
+   - "{N} approved nominations were scored. Here are the top 10. The panel lead can override these picks."
+   - 10 cards stacked vertically, each showing:
+     - Rank pill (1, 2, 3…)
+     - Score: "{score}/100"
+     - Nominee avatar + name + role
+     - Reasoning paragraph (2-3 sentences from the generator above)
+     - 2-3 highlight bullets
+     - Checkbox: "Include as winner" (top N checked by default based on category's maxWinners)
+     - "View full nomination" expandable
+
+2. **Below the shortlist**: full list of all approved nominations, paginated. Lead can still browse and pick from outside the top 10.
+
+3. **Confirm winners** button at bottom — promotes selected nominations to `status: "winner"` with their `finalRank` set by selection order.
+
+**After winners are selected** — the "Winners declared" page (`/programs/:id/winners` or a section on the program detail page):
+
+Show each winner as a card with these action buttons:
+
+- **Create citation** (button stub) — toast: "Citation editor coming in Phase 3 — will let you add custom text and photo"
+- **Generate PDF** (button stub) — toast: "PDF generation coming in Phase 3"
+- **Generate PowerPoint** (button stub) — toast: "PPT generation coming in Phase 3"
+- **Send to HR for publishing** (button stub) — toast: "Workflow coming in Phase 3"
+
+Then a section at the bottom for the HR admin specifically (visible only to admins, gated by role):
+
+- **Publish to award night display** — toast: "Award-night display coming in Phase 3"
+- **Email announcement** — toast: "Email blast coming in Phase 3 (uses SendGrid)"
+- **Post to social channels** — small grid of buttons (LinkedIn, Twitter, Slack, MS Teams) — each shows a toast: "Social post composer coming in Phase 3"
+
+All these stubs include a tooltip on hover: "Phase 3 feature — Phase 2 ships the foundation." This signals to demo viewers that this is intentional, not broken.
+
+**Audit log entry**: each time the AI shortlist is generated, write a small entry to `engagex_ai_shortlist_log_{programId}_{cycleId}` so it's reproducible. Lets you debug why a specific score was given.
+
+**Visualization**: above the AI shortlist banner, show a horizontal bar chart of score distribution across all approved nominations for the category. Helps the panel lead see where the natural cutoff is.
+
+**Don't change**: nomination flow, manager approval inbox, panel review page. Those upstream stay as-is.
+~~~
+---
+
+
 ## Phase 2 — Feed + Social Layer
 
 ### Prompt 2.1 — Wire the existing FEED-based feed to localStorage badges

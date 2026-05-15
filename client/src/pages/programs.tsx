@@ -1,184 +1,255 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { programsData, type Program, type ProgramStatus } from "@/lib/hr-data";
-import { Plus, Users, Calendar, Trophy, Pencil, Star } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+  getStoredPrograms,
+  type ProgramStatus,
+  type StoredProgram,
+} from "@/lib/programs-data";
+import { getAccount, isAdmin } from "@/lib/account";
+import { Plus, Users, Calendar, Pencil, Star } from "lucide-react";
+import { BannerArt } from "@/components/programs/banner-art";
 
-const statusColors: Record<ProgramStatus, string> = {
-  Active: "bg-green-100 text-green-700",
-  Draft: "bg-yellow-100 text-yellow-700",
-  Ended: "bg-stone-100 text-stone-500",
-};
+const STATUS_FILTERS: { id: "all" | ProgramStatus; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "draft", label: "Draft" },
+  { id: "scheduled", label: "Scheduled" },
+  { id: "active", label: "Active" },
+  { id: "ended", label: "Ended" },
+];
 
-const typeColors: Record<string, string> = {
-  "Monthly Award": "bg-purple-100 text-purple-700",
-  Ongoing: "bg-blue-100 text-blue-700",
-  Milestone: "bg-cyan-100 text-cyan-700",
-  "Quarterly Award": "bg-orange-100 text-orange-700",
-  "One-time": "bg-pink-100 text-pink-700",
+const statusBadgeClass: Record<ProgramStatus, string> = {
+  draft: "bg-amber-100 text-amber-800 hover:bg-amber-100",
+  scheduled: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+  active: "bg-green-100 text-green-800 hover:bg-green-100",
+  "ending-soon": "bg-orange-100 text-orange-800 hover:bg-orange-100",
+  ended: "bg-stone-100 text-stone-700 hover:bg-stone-100",
 };
 
 export default function Programs() {
-  const { toast } = useToast();
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editProgram, setEditProgram] = useState<Program | null>(null);
+  const account = getAccount();
+  const adminView = isAdmin(account);
+  const currency = account?.currency ?? "₹";
 
-  const filtered = programsData.filter((p) =>
-    statusFilter === "all" || p.status === statusFilter
-  );
+  const [statusFilter, setStatusFilter] = useState<"all" | ProgramStatus>("all");
+  const [version, setVersion] = useState(0);
 
-  const counts = {
-    Active: programsData.filter((p) => p.status === "Active").length,
-    Draft: programsData.filter((p) => p.status === "Draft").length,
-    Ended: programsData.filter((p) => p.status === "Ended").length,
-  };
+  // Refresh when storage changes (covers another tab editing programs).
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === "engagex_programs") setVersion((v) => v + 1);
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const all = useMemo<StoredProgram[]>(() => {
+    const list = getStoredPrograms();
+    // Drafts only show to HR admins.
+    return adminView ? list : list.filter((p) => p.status !== "draft");
+  }, [adminView, version]);
+
+  const filtered = useMemo(() => {
+    if (statusFilter === "all") return all;
+    if (statusFilter === "active") {
+      return all.filter((p) => p.status === "active" || p.status === "ending-soon");
+    }
+    return all.filter((p) => p.status === statusFilter);
+  }, [all, statusFilter]);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: all.length };
+    for (const f of STATUS_FILTERS) {
+      if (f.id === "all") continue;
+      if (f.id === "active") {
+        c[f.id] = all.filter((p) => p.status === "active" || p.status === "ending-soon").length;
+      } else {
+        c[f.id] = all.filter((p) => p.status === f.id).length;
+      }
+    }
+    return c;
+  }, [all]);
 
   return (
     <div className="p-6 space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-2">
-          {(["all", "Active", "Draft", "Ended"] as const).map((s) => (
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex flex-wrap gap-2">
+          {STATUS_FILTERS.map((f) => (
             <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${statusFilter === s ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"}`}
+              key={f.id}
+              onClick={() => setStatusFilter(f.id)}
+              data-testid={`programs-filter-${f.id}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                statusFilter === f.id
+                  ? "bg-stone-900 text-white border-stone-900"
+                  : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+              }`}
             >
-              {s === "all" ? "All" : `${s} (${counts[s as ProgramStatus]})`}
+              {f.label} ({counts[f.id] ?? 0})
             </button>
           ))}
         </div>
 
-        <Sheet open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) setEditProgram(null); }}>
-          <SheetTrigger asChild>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
-              <Plus className="w-4 h-4" /> New Program
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>{editProgram ? "Edit Program" : "Create Program"}</SheetTitle>
-              <SheetDescription>
-                {editProgram ? "Update program details and settings." : "Set up a new recognition program for your team."}
-              </SheetDescription>
-            </SheetHeader>
-            <ProgramForm
-              program={editProgram}
-              onSubmit={() => {
-                setSheetOpen(false);
-                setEditProgram(null);
-                toast({ title: editProgram ? "Program updated" : "Program created", description: "Changes saved successfully." });
-              }}
-            />
-          </SheetContent>
-        </Sheet>
+        {adminView && (
+          <Button
+            asChild
+            size="sm"
+            className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9"
+          >
+            <Link to="/programs/new" data-testid="programs-new">
+              <Plus className="w-4 h-4" /> New program
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { label: "Active Programs", value: counts.Active, color: "text-green-600" },
-          { label: "Total Budget", value: `$${(programsData.reduce((s, p) => s + p.pointBudget, 0) / 100).toLocaleString()}k`, color: "text-stone-900" },
-          { label: "Total Enrolled", value: programsData.reduce((s, p) => s + p.enrollmentCount, 0).toLocaleString(), color: "text-stone-900" },
-        ].map(({ label, value, color }) => (
-          <Card key={label} className="border border-stone-200">
-            <CardContent className="p-4">
-              <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{label}</p>
-              <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            </CardContent>
-          </Card>
-        ))}
+        <SummaryStat label="Active programs" value={counts.active ?? 0} />
+        <SummaryStat
+          label="Total budget"
+          value={`${currency}${all
+            .filter((p) => p.status !== "ended")
+            .reduce((s, p) => s + p.budgetAllocated, 0)
+            .toLocaleString()}`}
+        />
+        <SummaryStat
+          label="Total nominations"
+          value={all.reduce((s, p) => s + p.nominations, 0).toLocaleString()}
+        />
       </div>
 
       {/* Program Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filtered.map((prog) => {
-          const pct = Math.round((prog.spentPoints / prog.pointBudget) * 100);
+          const pct =
+            prog.budgetAllocated === 0
+              ? 0
+              : Math.round((prog.budgetUsed / prog.budgetAllocated) * 100);
           const isOverBudget = pct >= 80;
+          const ended = prog.status === "ended";
 
           return (
-            <Card key={prog.id} className={`border border-stone-200 hover:shadow-sm transition-all ${prog.status === "Ended" ? "opacity-70" : ""}`}>
+            <Card
+              key={prog.id}
+              className={`border border-stone-200 hover:shadow-sm transition-all ${
+                ended ? "opacity-70" : ""
+              }`}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-stone-600" />
+                  <Link
+                    to={`/programs/${prog.id}`}
+                    className="flex items-start gap-3 min-w-0 hover:opacity-90"
+                    data-testid={`programs-open-${prog.id}`}
+                  >
+                    <div className="w-12 h-12 rounded-xl shrink-0 relative overflow-hidden flex items-center justify-center">
+                      <BannerArt
+                        bannerId={prog.bannerId}
+                        customDataUrl={prog.customBannerDataUrl}
+                        className="absolute inset-0"
+                      />
+                      <span className="relative z-10 text-xl drop-shadow-sm">
+                        {prog.iconEmoji ?? prog.emoji ?? "🏆"}
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-stone-900">{prog.name}</p>
-                      <p className="text-xs text-stone-500 mt-0.5">{prog.description}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-stone-900 truncate">{prog.name}</p>
+                      <p className="text-xs text-stone-500 mt-0.5 line-clamp-2">
+                        {prog.description ?? prog.shortDesc}
+                      </p>
                     </div>
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge className={`text-xs ${statusColors[prog.status]}`} variant="secondary">
+                    <Badge
+                      className={`text-xs ${statusBadgeClass[prog.status]}`}
+                      variant="secondary"
+                    >
                       {prog.status}
                     </Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
-                      onClick={() => { setEditProgram(prog); setSheetOpen(true); }}
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
+                    {adminView && (
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                      >
+                        <Link
+                          to={`/programs/${prog.id}/edit`}
+                          data-testid={`programs-edit-${prog.id}`}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0 space-y-3">
-                {/* Type */}
-                <Badge className={`text-xs ${typeColors[prog.type] ?? "bg-stone-100 text-stone-600"}`} variant="secondary">
-                  {prog.type}
-                </Badge>
-
-                {/* Budget */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-stone-600 flex items-center gap-1">
                       <Star className="w-3 h-3 text-yellow-500" /> Budget
                     </span>
-                    <span className={`text-xs font-medium ${isOverBudget ? "text-red-600" : "text-stone-700"}`}>
-                      {prog.spentPoints.toLocaleString()} / {prog.pointBudget.toLocaleString()} pts ({pct}%)
+                    <span
+                      className={`text-xs font-medium ${
+                        isOverBudget ? "text-red-600" : "text-stone-700"
+                      }`}
+                    >
+                      {currency}
+                      {prog.budgetUsed.toLocaleString()} / {currency}
+                      {prog.budgetAllocated.toLocaleString()} ({pct}%)
                     </span>
                   </div>
                   <Progress
                     value={pct}
-                    className={`h-1.5 ${isOverBudget ? "[&>div]:bg-red-500" : pct >= 60 ? "[&>div]:bg-yellow-500" : ""}`}
+                    className={`h-1.5 ${
+                      isOverBudget
+                        ? "[&>div]:bg-red-500"
+                        : pct >= 60
+                          ? "[&>div]:bg-yellow-500"
+                          : ""
+                    }`}
                   />
                 </div>
 
-                {/* Meta */}
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="flex items-center gap-1.5 text-xs text-stone-600">
                     <Users className="w-3.5 h-3.5 text-stone-400" />
-                    {prog.enrollmentCount} enrolled
+                    {prog.nominations} nomination{prog.nominations === 1 ? "" : "s"}
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-stone-600">
                     <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                    {new Date(prog.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    {prog.endDate
+                      ? new Date(prog.endDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      : `${prog.daysLeft} days left`}
                   </div>
                 </div>
+
+                {(prog.status === "active" ||
+                  prog.status === "ending-soon" ||
+                  prog.status === "ended") && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+                    <Button asChild variant="ghost" size="sm" className="h-7 text-xs flex-1">
+                      <Link to={`/programs/${prog.id}?focus=shortlist`}>
+                        Pick winners
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" size="sm" className="h-7 text-xs flex-1">
+                      <Link to={`/programs/${prog.id}?focus=winners`}>
+                        View winners
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
@@ -194,62 +265,13 @@ export default function Programs() {
   );
 }
 
-function ProgramForm({ program, onSubmit }: { program: Program | null; onSubmit: () => void }) {
+function SummaryStat({ label, value }: { label: string; value: number | string }) {
   return (
-    <form className="mt-6 space-y-4" onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Program Name</Label>
-        <Input defaultValue={program?.name} placeholder="e.g. Employee of the Month" className="h-9 text-sm border-stone-200" />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Description</Label>
-        <Textarea defaultValue={program?.description} placeholder="Describe the program…" className="text-sm border-stone-200 resize-none" rows={3} />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Type</Label>
-          <Select defaultValue={program?.type}>
-            <SelectTrigger className="h-9 text-sm border-stone-200">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              {["Monthly Award", "Quarterly Award", "Ongoing", "Milestone", "One-time"].map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Status</Label>
-          <Select defaultValue={program?.status ?? "Draft"}>
-            <SelectTrigger className="h-9 text-sm border-stone-200">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Draft">Draft</SelectItem>
-              <SelectItem value="Ended">Ended</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Point Budget</Label>
-        <Input type="number" defaultValue={program?.pointBudget} placeholder="e.g. 10000" min={100} className="h-9 text-sm border-stone-200" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Start Date</Label>
-          <Input type="date" defaultValue={program?.startDate} className="h-9 text-sm border-stone-200" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">End Date</Label>
-          <Input type="date" defaultValue={program?.endDate} className="h-9 text-sm border-stone-200" />
-        </div>
-      </div>
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
-        {program ? "Save Changes" : "Create Program"}
-      </Button>
-    </form>
+    <Card className="border border-stone-200">
+      <CardContent className="p-4">
+        <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{label}</p>
+        <p className="text-2xl font-bold text-stone-900">{value}</p>
+      </CardContent>
+    </Card>
   );
 }

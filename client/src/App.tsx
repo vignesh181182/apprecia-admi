@@ -14,6 +14,10 @@ import Recognitions from "@/pages/recognitions";
 import Employees from "@/pages/employees";
 import Rewards from "@/pages/rewards";
 import Programs from "@/pages/programs";
+import ProgramEdit from "@/pages/program-edit";
+import ProgramDetailAdmin from "@/pages/program-detail";
+import WinnerSelection from "@/pages/winner-selection";
+import ProgramWinners from "@/pages/program-winners";
 import Redemptions from "@/pages/redemptions";
 import Analytics from "@/pages/analytics";
 import HRSettings from "@/pages/hr-settings";
@@ -53,6 +57,7 @@ import OnboardingRecognition from "@/pages/onboarding/recognition";
 import OnboardingReview from "@/pages/onboarding/review";
 import { isAuthenticated, getAccount, setAuthenticated, isAdmin, isSuperAdminAuthenticated } from "@/lib/account";
 import { processAppreciationAutoApprovals } from "@/lib/badges";
+import { transitionScheduledPrograms } from "@/lib/programs-data";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated()) return <Navigate to="/auth/sign-in" replace />;
@@ -218,6 +223,11 @@ function Router() {
       <Route path="/recognitions" element={<Protected title="Recognitions" description="Manage and approve employee recognition submissions"><Recognitions /></Protected>} />
       <Route path="/employees" element={<Protected title="Employees" description="Browse your workforce and track recognition activity"><Employees /></Protected>} />
       <Route path="/programs" element={<Protected title="Programs" description="Create and manage recognition programs and campaigns"><Programs /></Protected>} />
+      <Route path="/programs/new" element={<Protected><ProgramEdit /></Protected>} />
+      <Route path="/programs/:programId/edit" element={<Protected><ProgramEdit /></Protected>} />
+      <Route path="/programs/:programId/winner-selection" element={<ProtectedRnR><WinnerSelection /></ProtectedRnR>} />
+      <Route path="/programs/:programId/winners" element={<ProtectedRnR><ProgramWinners /></ProtectedRnR>} />
+      <Route path="/programs/:programId" element={<ProtectedRnR><ProgramDetailAdmin /></ProtectedRnR>} />
       <Route path="/badges" element={<Protected title="Badges & Tags" description="Manage recognition tags and achievement badge taxonomy"><BadgesAndTags /></Protected>} />
       <Route path="/check-ins" element={<Protected title="Weekly Check-ins" description="Track employee weekly updates and manager responses"><CheckIns /></Protected>} />
       <Route path="/one-on-ones" element={<Protected title="1-on-1s" description="Structured manager-employee meeting agendas and notes"><OneOnOnes /></Protected>} />
@@ -254,6 +264,7 @@ function Router() {
 function AutoApprovalRunner() {
   useEffect(() => {
     processAppreciationAutoApprovals();
+    transitionScheduledPrograms();
   }, []);
   return null;
 }
