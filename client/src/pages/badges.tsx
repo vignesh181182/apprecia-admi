@@ -64,6 +64,7 @@ import {
   Award,
   LayoutGrid,
   List,
+  Filter,
 } from "lucide-react";
 
 type ViewMode = "cards" | "list";
@@ -75,14 +76,30 @@ function readViewMode(): ViewMode {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type TagColor = "blue" | "amber" | "stone" | "purple" | "rose" | "green" | "sky" | "teal";
+
 type TagItem = {
   id: string;
   name: string;
   description: string;
   icon: string;
+  color: TagColor;
   points: number;
   isActive: boolean;
 };
+
+const TAG_COLOR_STYLES: Record<TagColor, { bg: string; icon: string; ring: string }> = {
+  blue:   { bg: "bg-blue-100",   icon: "text-blue-700",   ring: "ring-blue-400" },
+  amber:  { bg: "bg-amber-100",  icon: "text-amber-700",  ring: "ring-amber-400" },
+  stone:  { bg: "bg-stone-200",  icon: "text-stone-700",  ring: "ring-stone-400" },
+  purple: { bg: "bg-purple-100", icon: "text-purple-700", ring: "ring-purple-400" },
+  rose:   { bg: "bg-rose-100",   icon: "text-rose-700",   ring: "ring-rose-400" },
+  green:  { bg: "bg-green-100",  icon: "text-green-700",  ring: "ring-green-400" },
+  sky:    { bg: "bg-sky-100",    icon: "text-sky-700",    ring: "ring-sky-400" },
+  teal:   { bg: "bg-teal-100",   icon: "text-teal-700",   ring: "ring-teal-400" },
+};
+
+const TAG_COLOR_ORDER: TagColor[] = ["blue", "amber", "purple", "rose", "green", "sky", "teal", "stone"];
 
 import {
   BADGE_CATEGORIES,
@@ -93,12 +110,12 @@ import {
 // ─── Seed Data ─────────────────────────────────────────────────────────────────
 
 const INITIAL_TAGS: TagItem[] = [
-  { id: "t1", name: "Great Work", description: "Exceptional output or result", icon: "Star", points: 50, isActive: true },
-  { id: "t2", name: "Team Player", description: "Collaboration and support", icon: "Users", points: 50, isActive: true },
-  { id: "t3", name: "Innovation", description: "Creative, forward-thinking idea", icon: "Lightbulb", points: 75, isActive: true },
-  { id: "t4", name: "Leadership", description: "Guided or inspired the team", icon: "Target", points: 75, isActive: true },
-  { id: "t5", name: "Helpful", description: "Went out of their way to help", icon: "ThumbsUp", points: 50, isActive: true },
-  { id: "t6", name: "Dedication", description: "Consistent effort and commitment", icon: "Shield", points: 50, isActive: true },
+  { id: "t1", name: "Great Work", description: "Exceptional output or result", icon: "Star", color: "amber", points: 50, isActive: true },
+  { id: "t2", name: "Team Player", description: "Collaboration and support", icon: "Users", color: "green", points: 50, isActive: true },
+  { id: "t3", name: "Innovation", description: "Creative, forward-thinking idea", icon: "Lightbulb", color: "blue", points: 75, isActive: true },
+  { id: "t4", name: "Leadership", description: "Guided or inspired the team", icon: "Target", color: "purple", points: 75, isActive: true },
+  { id: "t5", name: "Helpful", description: "Went out of their way to help", icon: "ThumbsUp", color: "sky", points: 50, isActive: true },
+  { id: "t6", name: "Dedication", description: "Consistent effort and commitment", icon: "Shield", color: "rose", points: 50, isActive: true },
 ];
 
 // ─── Category Config ───────────────────────────────────────────────────────────
@@ -125,6 +142,42 @@ const TAG_ICONS: Record<string, React.ElementType> = {
 };
 
 const TAG_ICON_OPTIONS = ["Star", "Users", "Lightbulb", "Target", "ThumbsUp", "Shield", "Zap", "Heart", "Gift", "Award"];
+
+function ViewToggle({
+  value,
+  onChange,
+}: {
+  value: ViewMode;
+  onChange: (next: ViewMode) => void;
+}) {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(v) => {
+        if (v === "cards" || v === "list") onChange(v);
+      }}
+      className="bg-white border border-stone-200 rounded-lg p-0.5 shrink-0"
+    >
+      <ToggleGroupItem
+        value="cards"
+        aria-label="Card view"
+        data-testid="badges-view-cards"
+        className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+      >
+        <LayoutGrid className="w-4 h-4" />
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        value="list"
+        aria-label="List view"
+        data-testid="badges-view-list"
+        className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+      >
+        <List className="w-4 h-4" />
+      </ToggleGroupItem>
+    </ToggleGroup>
+  );
+}
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
@@ -213,52 +266,24 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
   const activeBadgeCount = badges.filter((b) => b.isActive).length;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="px-6 pt-3 pb-6 space-y-5">
       <Tabs defaultValue={lockedSection ?? "tags"}>
-        <div className="flex items-center justify-between mb-4">
-          {lockedSection ? (
-            <div />
-          ) : (
-          <TabsList className="bg-stone-100 h-9">
-            <TabsTrigger value="tags" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              <Tag className="w-3.5 h-3.5 mr-1.5" />
-              Recognition Tags
-              <span className="ml-1.5 text-stone-400 font-normal">({tags.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="badges" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
-              <Award className="w-3.5 h-3.5 mr-1.5" />
-              Achievement Badges
-              <span className="ml-1.5 text-stone-400 font-normal">({badges.length})</span>
-            </TabsTrigger>
-          </TabsList>
-          )}
-
-          <ToggleGroup
-            type="single"
-            value={viewMode}
-            onValueChange={(v) => {
-              if (v === "cards" || v === "list") setViewMode(v);
-            }}
-            className="bg-white border border-stone-200 rounded-lg p-0.5"
-          >
-            <ToggleGroupItem
-              value="cards"
-              aria-label="Card view"
-              data-testid="badges-view-cards"
-              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="list"
-              aria-label="List view"
-              data-testid="badges-view-list"
-              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
-            >
-              <List className="w-4 h-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+        {!lockedSection && (
+          <div className="mb-4">
+            <TabsList className="bg-stone-100 h-9">
+              <TabsTrigger value="tags" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Tag className="w-3.5 h-3.5 mr-1.5" />
+                Recognition Tags
+                <span className="ml-1.5 text-stone-400 font-normal">({tags.length})</span>
+              </TabsTrigger>
+              <TabsTrigger value="badges" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Award className="w-3.5 h-3.5 mr-1.5" />
+                Achievement Badges
+                <span className="ml-1.5 text-stone-400 font-normal">({badges.length})</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        )}
 
         {/* ─── TAGS TAB ─────────────────────────────────────────────────────── */}
         <TabsContent value="tags" className="space-y-4 mt-0">
@@ -289,26 +314,29 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                 className="pl-9 h-9 text-sm border-stone-200"
               />
             </div>
-            <Sheet open={tagSheetOpen} onOpenChange={(o) => { setTagSheetOpen(o); if (!o) setEditTag(null); }}>
-              <SheetTrigger asChild>
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
-                  <Plus className="w-4 h-4" /> Add Tag
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-md">
-                <SheetHeader>
-                  <SheetTitle>{editTag ? "Edit Tag" : "New Recognition Tag"}</SheetTitle>
-                  <SheetDescription>
-                    Tags are the quick-select reasons employees pick when sending an appreciation.
-                  </SheetDescription>
-                </SheetHeader>
-                <TagForm
-                  tag={editTag}
-                  onSubmit={saveTag}
-                  onCancel={() => { setTagSheetOpen(false); setEditTag(null); }}
-                />
-              </SheetContent>
-            </Sheet>
+            <div className="flex items-center gap-2">
+              <ViewToggle value={viewMode} onChange={setViewMode} />
+              <Sheet open={tagSheetOpen} onOpenChange={(o) => { setTagSheetOpen(o); if (!o) setEditTag(null); }}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+                    <Plus className="w-4 h-4" /> Add Tag
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-full sm:max-w-md">
+                  <SheetHeader>
+                    <SheetTitle>{editTag ? "Edit Tag" : "New Recognition Tag"}</SheetTitle>
+                    <SheetDescription>
+                      Tags are the quick-select reasons employees pick when sending an appreciation.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <TagForm
+                    tag={editTag}
+                    onSubmit={saveTag}
+                    onCancel={() => { setTagSheetOpen(false); setEditTag(null); }}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
 
           {/* Tag Cards */}
@@ -316,13 +344,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTags.map((tag) => {
               const Icon = TAG_ICONS[tag.icon] ?? Star;
+              const tagStyle = TAG_COLOR_STYLES[tag.color] ?? TAG_COLOR_STYLES.stone;
               return (
                 <Card key={tag.id} className={`border border-stone-200 transition-all ${!tag.isActive ? "opacity-50" : "hover:shadow-sm"}`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center shrink-0">
-                          <Icon className="w-5 h-5 text-white" />
+                        <div className={`w-10 h-10 rounded-xl ${tagStyle.bg} flex items-center justify-center shrink-0`}>
+                          <Icon className={`w-5 h-5 ${tagStyle.icon}`} />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-stone-900">{tag.name}</p>
@@ -404,6 +433,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                 <TableBody>
                   {filteredTags.map((tag) => {
                     const Icon = TAG_ICONS[tag.icon] ?? Star;
+                    const tagStyle = TAG_COLOR_STYLES[tag.color] ?? TAG_COLOR_STYLES.stone;
                     return (
                       <TableRow
                         key={tag.id}
@@ -412,8 +442,8 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                       >
                         <TableCell className="min-w-[280px]">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-stone-900 flex items-center justify-center shrink-0">
-                              <Icon className="w-4 h-4 text-white" />
+                            <div className={`w-9 h-9 rounded-lg ${tagStyle.bg} flex items-center justify-center shrink-0`}>
+                              <Icon className={`w-4 h-4 ${tagStyle.icon}`} />
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-stone-900 truncate">{tag.name}</p>
@@ -506,21 +536,42 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
 
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-              <Input
-                placeholder="Search badges…"
-                value={badgeSearch}
-                onChange={(e) => setBadgeSearch(e.target.value)}
-                className="pl-9 h-9 text-sm border-stone-200"
-              />
+            <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Input
+                  placeholder="Search badges…"
+                  value={badgeSearch}
+                  onChange={(e) => setBadgeSearch(e.target.value)}
+                  className="pl-9 h-9 text-sm border-stone-200"
+                />
+              </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-9 w-56 text-sm border-stone-200" data-testid="badges-category-filter">
+                  <Filter className="w-4 h-4 mr-2 text-stone-400" />
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All categories ({badges.length})</SelectItem>
+                  {BADGE_CATEGORIES.map((cat) => {
+                    const count = badges.filter((b) => b.category === cat).length;
+                    return (
+                      <SelectItem key={cat} value={cat}>
+                        {cat} ({count})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
-            <Sheet open={badgeSheetOpen} onOpenChange={(o) => { setBadgeSheetOpen(o); if (!o) setEditBadge(null); }}>
-              <SheetTrigger asChild>
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
-                  <Plus className="w-4 h-4" /> Add Badge
-                </Button>
-              </SheetTrigger>
+            <div className="flex items-center gap-2">
+              <ViewToggle value={viewMode} onChange={setViewMode} />
+              <Sheet open={badgeSheetOpen} onOpenChange={(o) => { setBadgeSheetOpen(o); if (!o) setEditBadge(null); }}>
+                <SheetTrigger asChild>
+                  <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+                    <Plus className="w-4 h-4" /> Add Badge
+                  </Button>
+                </SheetTrigger>
               <SheetContent className="w-full sm:max-w-md">
                 <SheetHeader>
                   <SheetTitle>{editBadge ? "Edit Badge" : "New Badge"}</SheetTitle>
@@ -534,34 +585,8 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                   onCancel={() => { setBadgeSheetOpen(false); setEditBadge(null); }}
                 />
               </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Category filter pills */}
-          <div className="flex flex-wrap gap-2">
-            {["All", ...BADGE_CATEGORIES].map((cat) => {
-              const count = cat === "All"
-                ? badges.length
-                : badges.filter((b) => b.category === cat).length;
-              const cfg = CATEGORY_CONFIG[cat];
-              const isActive = categoryFilter === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    isActive
-                      ? "border-stone-800 bg-stone-900 text-white"
-                      : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
-                  }`}
-                >
-                  {cfg && !isActive && (
-                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.bg} ${cfg.color}`} />
-                  )}
-                  {cat === "All" ? `All (${count})` : `${cat.split(" & ")[0]} (${count})`}
-                </button>
-              );
-            })}
+              </Sheet>
+            </div>
           </div>
 
           {/* Badges — grouped by category */}
@@ -788,23 +813,25 @@ function TagForm({
   const [name, setName]           = useState(tag?.name ?? "");
   const [description, setDescription] = useState(tag?.description ?? "");
   const [icon, setIcon]           = useState(tag?.icon ?? "Star");
+  const [color, setColor]         = useState<TagColor>(tag?.color ?? "blue");
   const [points, setPoints]       = useState(String(tag?.points ?? 50));
   const [isActive, setIsActive]   = useState(tag?.isActive ?? true);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    onSubmit({ name: name.trim(), description, icon, points: Number(points), isActive });
+    onSubmit({ name: name.trim(), description, icon, color, points: Number(points), isActive });
   }
 
   const PreviewIcon = TAG_ICONS[icon] ?? Star;
+  const previewStyle = TAG_COLOR_STYLES[color];
 
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
       {/* Live preview */}
       <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-200">
-        <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center">
-          <PreviewIcon className="w-5 h-5 text-white" />
+        <div className={`w-10 h-10 rounded-xl ${previewStyle.bg} flex items-center justify-center`}>
+          <PreviewIcon className={`w-5 h-5 ${previewStyle.icon}`} />
         </div>
         <div>
           <p className="text-sm font-semibold text-stone-900">{name || "Tag name"}</p>
@@ -861,6 +888,26 @@ function TagForm({
         </div>
       </div>
 
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-stone-700">Color</Label>
+        <div className="flex gap-2 flex-wrap">
+          {TAG_COLOR_ORDER.map((c) => {
+            const s = TAG_COLOR_STYLES[c];
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={`Pick ${c} color`}
+                className={`w-8 h-8 rounded-full ${s.bg} transition-all ${
+                  color === c ? `ring-2 ${s.ring} ring-offset-1` : ""
+                }`}
+              />
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex items-center justify-between p-3 rounded-lg border border-stone-200">
         <div>
           <p className="text-sm font-medium text-stone-900">Active</p>
@@ -873,7 +920,7 @@ function TagForm({
         />
       </div>
 
-      <div className="flex gap-2 pt-1">
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
         <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-stone-200" onClick={onCancel}>
           Cancel
         </Button>
@@ -971,7 +1018,7 @@ function BadgeForm({
         />
       </div>
 
-      <div className="flex gap-2 pt-1">
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
         <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-stone-200" onClick={onCancel}>
           Cancel
         </Button>

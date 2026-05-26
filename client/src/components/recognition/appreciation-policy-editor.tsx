@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -23,7 +22,6 @@ import { EMPLOYEES } from "@/lib/recognize-data";
 type Props = {
   policy: AppreciationPolicy;
   onChange: (next: AppreciationPolicy) => void;
-  onSave: () => void;
   accountTimezone?: string;
   accountCurrency?: string;
 };
@@ -71,7 +69,7 @@ function fromDateInput(value: string, endOfDay = false): string | undefined {
   return d.toISOString();
 }
 
-export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTimezone, accountCurrency }: Props) {
+export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, accountCurrency }: Props) {
   const currency = accountCurrency || "₹";
   const windowOpen = isSendingWindowOpen(policy);
   const reopenAt = nextWindowReopenAt(policy);
@@ -374,16 +372,6 @@ export function AppreciationPolicyEditor({ policy, onChange, onSave, accountTime
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button
-          size="sm"
-          className="bg-stone-900 hover:bg-stone-700 text-white"
-          disabled={policy.monetaryEnabled && !pointValueValid}
-          onClick={onSave}
-        >
-          Save Appreciation Policy
-        </Button>
-      </div>
     </div>
   );
 }

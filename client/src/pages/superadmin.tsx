@@ -37,7 +37,6 @@ import {
   saveInvite,
   getInvites,
   setSuperAdminAuthenticated,
-  seedDummyCompanies,
   resetAndReseed,
   type InviteRecord,
 } from "@/lib/account";
@@ -87,10 +86,11 @@ export default function SuperAdmin() {
   const [statusFilter, setStatusFilter] = useState<"all" | CompanyStatus>("all");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // First-load seed: populate dummy companies if the list is empty.
-  // No-op on subsequent visits.
+  // On every Super Admin page mount (incl. hard refresh) wipe local state
+  // and re-seed dummy companies so the demo always starts from a clean,
+  // predictable snapshot.
   useEffect(() => {
-    seedDummyCompanies();
+    resetAndReseed();
     setInvites(getInvites());
   }, []);
 
