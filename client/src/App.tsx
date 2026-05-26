@@ -41,6 +41,7 @@ import MobileRanks from "@/pages/mobile/ranks";
 import MobileInsights from "@/pages/mobile/insights";
 import ProgramDetail from "@/pages/mobile/program-detail";
 import MobilePrograms from "@/pages/mobile/programs";
+import MobileWinnerSelection from "@/pages/mobile/winner-selection";
 import MobileSettings from "@/pages/mobile/settings";
 import { ComingSoon } from "@/components/coming-soon";
 import MobileProfile from "@/pages/mobile/profile";
@@ -220,7 +221,8 @@ function Router() {
       <Route path="/onboarding/review" element={<RequireSetupInProgress><OnboardingReview /></RequireSetupInProgress>} />
 
       <Route path="/" element={<Protected><HRDashboard /></Protected>} />
-      <Route path="/recognitions" element={<Protected title="Recognitions" description="Manage and approve employee recognition submissions"><Recognitions /></Protected>} />
+      <Route path="/recognitions" element={<Protected title="Recognitions" description="All recognitions created across your organization"><Recognitions showCreate={true} /></Protected>} />
+      <Route path="/approvals" element={<Protected title="Approval" description="Review and approve pending recognition submissions"><Recognitions showCreate={false} defaultStatusFilter="Pending" approvalMode={true} /></Protected>} />
       <Route path="/employees" element={<Protected title="Employees" description="Browse your workforce and track recognition activity"><Employees /></Protected>} />
       <Route path="/programs" element={<Protected title="Programs" description="Create and manage recognition programs and campaigns"><Programs /></Protected>} />
       <Route path="/programs/new" element={<Protected><ProgramEdit /></Protected>} />
@@ -229,6 +231,8 @@ function Router() {
       <Route path="/programs/:programId/winners" element={<ProtectedRnR><ProgramWinners /></ProtectedRnR>} />
       <Route path="/programs/:programId" element={<ProtectedRnR><ProgramDetailAdmin /></ProtectedRnR>} />
       <Route path="/badges" element={<Protected title="Badges & Tags" description="Manage recognition tags and achievement badge taxonomy"><BadgesAndTags /></Protected>} />
+      <Route path="/appreciation-settings" element={<Protected title="Appreciation Settings" description="Achievement badges employees can earn"><BadgesAndTags lockedSection="badges" /></Protected>} />
+      <Route path="/recognition-tags" element={<ProtectedRnR title="Recognition Tags" description="Quick-select reasons employees pick when sending appreciation"><BadgesAndTags lockedSection="tags" /></ProtectedRnR>} />
       <Route path="/check-ins" element={<Protected title="Weekly Check-ins" description="Track employee weekly updates and manager responses"><CheckIns /></Protected>} />
       <Route path="/one-on-ones" element={<Protected title="1-on-1s" description="Structured manager-employee meeting agendas and notes"><OneOnOnes /></Protected>} />
       <Route path="/surveys" element={<Protected title="Engagement Surveys" description="Pulse, lifecycle, and custom employee surveys"><Surveys /></Protected>} />
@@ -250,6 +254,7 @@ function Router() {
       <Route path="/m/insights" element={<MobileGuard><RequireAdmin><MobileInsights /></RequireAdmin></MobileGuard>} />
       <Route path="/m/programs" element={<MobileGuard><MobilePrograms /></MobileGuard>} />
       <Route path="/m/programs/:id" element={<MobileGuard><ProgramDetail /></MobileGuard>} />
+      <Route path="/m/programs/:id/winner-selection" element={<MobileGuard><MobileWinnerSelection /></MobileGuard>} />
       <Route path="/m/profile" element={<MobileGuard><MobileProfile /></MobileGuard>} />
       <Route path="/m/notifications" element={<MobileGuard><MobileNotifications /></MobileGuard>} />
       <Route path="/m/approvals/appreciations" element={<MobileGuard><ApprovalsAppreciations /></MobileGuard>} />

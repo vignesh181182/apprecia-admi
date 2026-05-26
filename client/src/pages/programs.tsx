@@ -5,13 +5,30 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
   getStoredPrograms,
   type ProgramStatus,
   type StoredProgram,
 } from "@/lib/programs-data";
 import { getAccount, isAdmin } from "@/lib/account";
-import { Plus, Users, Calendar, Pencil, Star } from "lucide-react";
+import { Plus, Users, Calendar, Pencil, Star, LayoutGrid, List } from "lucide-react";
 import { BannerArt } from "@/components/programs/banner-art";
+
+type ViewMode = "cards" | "list";
+const VIEW_MODE_KEY = "engagex_programs_view";
+
+function readViewMode(): ViewMode {
+  if (typeof window === "undefined") return "list";
+  return window.localStorage.getItem(VIEW_MODE_KEY) === "cards" ? "cards" : "list";
+}
 
 const STATUS_FILTERS: { id: "all" | ProgramStatus; label: string }[] = [
   { id: "all", label: "All" },
@@ -35,7 +52,12 @@ export default function Programs() {
   const currency = account?.currency ?? "₹";
 
   const [statusFilter, setStatusFilter] = useState<"all" | ProgramStatus>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
   const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    window.localStorage.setItem(VIEW_MODE_KEY, viewMode);
+  }, [viewMode]);
 
   // Refresh when storage changes (covers another tab editing programs).
   useEffect(() => {
@@ -94,17 +116,45 @@ export default function Programs() {
           ))}
         </div>
 
-        {adminView && (
-          <Button
-            asChild
-            size="sm"
-            className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9"
+        <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={viewMode}
+            onValueChange={(v) => {
+              if (v === "cards" || v === "list") setViewMode(v);
+            }}
+            className="bg-white border border-stone-200 rounded-lg p-0.5"
           >
-            <Link to="/programs/new" data-testid="programs-new">
-              <Plus className="w-4 h-4" /> New program
-            </Link>
-          </Button>
-        )}
+            <ToggleGroupItem
+              value="cards"
+              aria-label="Card view"
+              data-testid="programs-view-cards"
+              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="list"
+              aria-label="List view"
+              data-testid="programs-view-list"
+              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+            >
+              <List className="w-4 h-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+
+          {adminView && (
+            <Button
+              asChild
+              size="sm"
+              className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9"
+            >
+              <Link to="/programs/new" data-testid="programs-new">
+                <Plus className="w-4 h-4" /> New program
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Summary stats */}
@@ -124,6 +174,7 @@ export default function Programs() {
       </div>
 
       {/* Program Cards */}
+      {viewMode === "cards" && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filtered.map((prog) => {
           const pct =
@@ -261,6 +312,156 @@ export default function Programs() {
           </div>
         )}
       </div>
+      )}
+
+      {/* Program List */}
+      {viewMode === "list" && (
+        <Card className="border border-stone-200 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-stone-50 hover:bg-stone-50">
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Program</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Status</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Budget</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Nominations</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500">End date</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((prog) => {
+                const pct =
+                  prog.budgetAllocated === 0
+                    ? 0
+                    : Math.round((prog.budgetUsed / prog.budgetAllocated) * 100);
+                const isOverBudget = pct >= 80;
+                const ended = prog.status === "ended";
+
+                return (
+                  <TableRow
+                    key={prog.id}
+                    className={`hover:bg-stone-50 ${ended ? "opacity-70" : ""}`}
+                    data-testid={`programs-row-${prog.id}`}
+                  >
+                    <TableCell className="min-w-[260px]">
+                      <Link
+                        to={`/programs/${prog.id}`}
+                        className="flex items-center gap-3 hover:opacity-90"
+                        data-testid={`programs-open-${prog.id}`}
+                      >
+                        <div className="w-10 h-10 rounded-lg shrink-0 relative overflow-hidden flex items-center justify-center">
+                          <BannerArt
+                            bannerId={prog.bannerId}
+                            customDataUrl={prog.customBannerDataUrl}
+                            className="absolute inset-0"
+                          />
+                          <span className="relative z-10 text-lg drop-shadow-sm">
+                            {prog.iconEmoji ?? prog.emoji ?? "🏆"}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-stone-900 truncate">{prog.name}</p>
+                          <p className="text-xs text-stone-500 truncate max-w-[320px]">
+                            {prog.description ?? prog.shortDesc}
+                          </p>
+                        </div>
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs ${statusBadgeClass[prog.status]}`} variant="secondary">
+                        {prog.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="min-w-[200px]">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-stone-600 flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-500" />
+                          {pct}%
+                        </span>
+                        <span
+                          className={`text-xs font-medium ${
+                            isOverBudget ? "text-red-600" : "text-stone-700"
+                          }`}
+                        >
+                          {currency}
+                          {prog.budgetUsed.toLocaleString()} / {currency}
+                          {prog.budgetAllocated.toLocaleString()}
+                        </span>
+                      </div>
+                      <Progress
+                        value={pct}
+                        className={`h-1.5 ${
+                          isOverBudget
+                            ? "[&>div]:bg-red-500"
+                            : pct >= 60
+                              ? "[&>div]:bg-yellow-500"
+                              : ""
+                        }`}
+                      />
+                    </TableCell>
+                    <TableCell className="text-right text-xs text-stone-600">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-stone-400" />
+                        {prog.nominations}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-stone-600">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                        {prog.endDate
+                          ? new Date(prog.endDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : `${prog.daysLeft} days left`}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="inline-flex items-center gap-1">
+                        {(prog.status === "active" ||
+                          prog.status === "ending-soon" ||
+                          prog.status === "ended") && (
+                          <>
+                            <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+                              <Link to={`/programs/${prog.id}?focus=shortlist`}>Pick</Link>
+                            </Button>
+                            <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
+                              <Link to={`/programs/${prog.id}?focus=winners`}>Winners</Link>
+                            </Button>
+                          </>
+                        )}
+                        {adminView && (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                          >
+                            <Link
+                              to={`/programs/${prog.id}/edit`}
+                              data-testid={`programs-edit-${prog.id}`}
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-16 text-stone-500 text-sm">
+                    No programs found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
     </div>
   );
 }

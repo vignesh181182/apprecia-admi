@@ -860,6 +860,131 @@ All these stubs include a tooltip on hover: "Phase 3 feature — Phase 2 ships t
 ~~~
 ---
 
+## Phase 1.7 — Program detail post-cycle features (mobile)
+
+When a program cycle ends, HR admins and panel members on mobile should see the AI shortlister and post-winner action stubs **inside the existing program detail page** — same mobile styling, no redirect to a separate dashboard. Regular employees continue to see the normal program detail page.
+
+### Prompt 1.7.1 — Embed AI shortlister + post-winner stubs into mobile program detail
+
+~~~
+Extend `client/src/pages/mobile/program-detail.tsx` to embed the AI shortlister and post-winner action stubs directly inside the Dashboard tab. Do NOT create a separate HR admin dashboard page — everything lives inline in the existing mobile program detail page, inheriting the existing mobile styling (rounded-2xl cards, font-mobile class, brand color #a87a3a, bottom-safe padding).
+
+**Visibility rules**:
+- AI shortlist section: visible to HR admins AND panel members of this program. Hidden from regular employees.
+- Winners declared section: visible to everyone (winners are celebrated company-wide).
+- Action stubs (citation, PDF, PPT, send to HR): visible to HR admins AND panel members.
+- HR-only stubs (publish to award night, email, social): visible only to HR admins.
+
+Use a helper `currentUserCanManageProgram(account, program): boolean` in `client/src/lib/programs-data.ts` that returns true if the current user is an HR admin OR is in the program's panel.
+
+---
+
+**Section 1 — AI Shortlist panel**
+
+Trigger: visible when the program's current cycle has ended (status === "ended" OR cycleEndDate has passed) AND no winners have been declared yet for the current cycle (no nominations with status === "winner").
+
+Place this section at the **top of the Dashboard tab**, above the existing leaderboard / categories sections.
+
+UI:
+- Hero card with banner background (use the program's themeBg) and amber border
+- Icon: ✨ + heading "Cycle ended — AI shortlist ready"
+- Subheading: "{N} approved nominations were scored. Review the top picks below."
+- For each category in the program:
+  - Category header row: emoji + name + "Max winners: {N}" pill
+  - Horizontal scrollable card strip (overflow-x-auto, snap-x), 3 cards visible per scroll
+  - Each card (~280px wide, mobile-optimized):
+    - Rank pill in top-left ("#1", "#2", "#3"), score badge top-right ("87/100")
+    - Nominee avatar (large, centered)
+    - Nominee name (font-mobile font-semibold)
+    - Role + dept (text-xs, text-stone-500)
+    - Reasoning paragraph clamped to 3 lines (use `line-clamp-3`)
+    - "Tap to expand" hint at bottom
+  - Tapping a card opens a bottom sheet (use shadcn Sheet, side="bottom") with the full reasoning, all highlights, manager comment, and panel vote tally
+- Below the category strips: a single full-width button "Review and select winners" — navigates to the existing winner-selection page from 1.6.4 (where the panel lead picks winners)
+
+Use the existing `shortlistNominations()` helper from `client/src/lib/ai-shortlister.ts` (built in 1.6.4). Cache the result per program+cycle so it doesn't recompute on every render — use `useMemo` with `[programId, cycleEndDate, nominationsCount]` as dependencies.
+
+---
+
+**Section 2 — Winners declared**
+
+Trigger: visible when the program has any nominations with status === "winner" for the current cycle. Replaces Section 1 once winners are confirmed.
+
+Place at the top of the Dashboard tab.
+
+UI:
+- Hero card: "🏆 Winners declared" with confetti-style icon backdrop
+- Subheading: "{N} winners across {C} categories"
+- For each category:
+  - Category header row (same as section 1)
+  - Stacked list of winner cards (vertical, full-width on mobile):
+    - Avatar + name (font-semibold) + role · dept
+    - Right side: rank badge ("#1", "#2", "#3"), prize points pill (e.g., "100 pts" — hide if monetary disabled)
+    - "Won {timeAgo}"
+    - Tappable to expand the original nomination reason
+- Below the winners list, the action-stubs block (see Section 3)
+
+---
+
+**Section 3 — Action stubs (inside Winners declared)**
+
+Per winner card, show a row of small icon buttons (horizontal scroll if overflow):
+
+For all users with `currentUserCanManageProgram()`:
+- 📝 **Create citation** — toast: "Citation editor coming in Phase 3 — will let you add custom text and photo"
+- 📄 **Generate PDF** — toast: "PDF generation coming in Phase 3"
+- 📊 **Generate PowerPoint** — toast: "PPT generation coming in Phase 3"
+- 📨 **Send to HR for publishing** — toast: "Workflow coming in Phase 3"
+
+Beneath the per-winner rows, ONE shared HR-admin-only section (visible only when `account.role === "admin"`), styled as a separate card:
+- Card heading: "HR actions" with a small lock icon
+- Vertical button stack (full-width on mobile):
+  - 🎬 **Publish to award night display** — toast: "Award-night display coming in Phase 3"
+  - 📧 **Email announcement** — toast: "Email blast coming in Phase 3 (uses SendGrid)"
+  - 📱 **Post to social channels** — opens a sub-popover with LinkedIn / Twitter / Slack / MS Teams options; each shows a toast: "Social post composer coming in Phase 3"
+
+All stubs include a tooltip on long-press (mobile-friendly): "Phase 3 feature — Phase 2 ships the foundation."
+
+---
+
+**Section 4 — Past winners archive (existing functionality)**
+
+After Section 1/2, keep any existing "past winners" or historical sections that already render in the Dashboard tab. Don't remove existing content — these two new sections (AI shortlist OR Winners declared) just live above whatever's already there.
+
+---
+
+**Mobile styling specifics — inherit existing patterns**:
+- Wrap each section in `<div className="bg-white rounded-2xl border border-stone-200 p-4 mt-4">`
+- Headings use `font-mobile font-semibold text-stone-900`
+- Body text uses `text-sm text-stone-700`
+- Action buttons use existing patterns from the Reward your teammate card built earlier
+- Horizontal scroll strips use `overflow-x-auto snap-x snap-mandatory -mx-4 px-4` so cards bleed past the page padding for visual depth
+- Bottom sheets use shadcn `Sheet` with `side="bottom"` and `max-h-[85vh]`
+- No new components in `client/src/components/ui/` — reuse existing primitives
+
+---
+
+**Cycle transition logic**:
+
+In `client/src/lib/programs-data.ts`, ensure `transitionScheduledPrograms()` (added in 1.6.3) also handles the "active → ended" transition when `cycleEndDate` has passed. This is what makes the AI shortlist section appear automatically when the cycle ends.
+
+---
+
+**Don't touch**:
+- The desktop winner-selection page from 1.6.4 (Section 1's "Review and select winners" button just links there)
+- The existing program detail Dashboard tab content below the new sections
+- The Details and Admin tabs on this page
+- The HR Admin web dashboard at `client/src/pages/hr-dashboard.tsx` (separate file, separate flow)
+- The mobile bottom nav (HR admins continue using the same nav as employees on mobile)
+
+---
+
+**Testing**:
+- Seeded program "Years of Service" → set its `cycleEndDate` to yesterday in seed data → verify Section 1 (AI shortlist) appears when an HR admin logs in
+- Manually mark one nomination in that program as status="winner" → verify Section 2 (Winners declared) replaces Section 1
+- Sign in as a regular employee → verify Section 1 stub is hidden but Section 2 (winners) is visible
+~~~
+
 
 ## Phase 2 — Feed + Social Layer
 

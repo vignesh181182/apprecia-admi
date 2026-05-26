@@ -12,11 +12,12 @@ import { useIsMobile } from "@/hooks/use-viewport";
 import { EmployeeLayout } from "@/components/employee-layout";
 import { RecognizeDialog } from "@/components/recognize/recognize-dialog";
 import { cn } from "@/lib/utils";
-import { getProgram, type Program } from "@/lib/programs-data";
+import { getProgramById, type Program } from "@/lib/programs-data";
 import { isAdmin } from "@/lib/account";
 import { DashboardOverview } from "@/components/programs/dashboard-overview";
 import { PanelTab } from "@/components/programs/panel-tab";
 import { DetailsTab, AboutCard, LastWinnerCard } from "@/components/programs/details-tab";
+import { PostCycleMobileSection } from "@/components/programs/post-cycle-mobile";
 
 type AdminTab = "dashboard" | "panel" | "details";
 
@@ -24,7 +25,7 @@ export default function ProgramDetail() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const program = getProgram(id);
+  const program = getProgramById(id);
   const admin = isAdmin();
   const [tab, setTab] = useState<AdminTab>(admin ? "dashboard" : "details");
 
@@ -49,7 +50,12 @@ export default function ProgramDetail() {
         <CompactHero program={program} onBack={() => navigate(-1)} />
         <ProgramTabs value={tab} onChange={setTab} />
         <main className="flex-1 px-5 pb-32 pt-4">
-          {tab === "dashboard" && <DashboardOverview program={program} />}
+          {tab === "dashboard" && (
+            <>
+              <PostCycleMobileSection program={program} />
+              <DashboardOverview program={program} />
+            </>
+          )}
           {tab === "panel" && <PanelTab program={program} />}
           {tab === "details" && <DetailsTab program={program} />}
         </main>
@@ -70,7 +76,12 @@ export default function ProgramDetail() {
         </button>
         <CompactHero program={program} variant="web" />
         <ProgramTabs value={tab} onChange={setTab} variant="web" />
-        {tab === "dashboard" && <DashboardOverview program={program} variant="web" />}
+        {tab === "dashboard" && (
+          <>
+            <PostCycleMobileSection program={program} variant="web" />
+            <DashboardOverview program={program} variant="web" />
+          </>
+        )}
         {tab === "panel" && <PanelTab program={program} variant="web" />}
         {tab === "details" && <DetailsTab program={program} variant="web" />}
       </div>

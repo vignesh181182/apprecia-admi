@@ -12,6 +12,17 @@ import { WalletCard } from "@/components/profile/wallet-card";
 import { getAccount, setAuthenticated } from "@/lib/account";
 import { FEED, MY_BADGES, MY_RANK, ME, isMe, type RecognitionFeedItem } from "@/lib/mobile-data";
 import { loadMyRecognitions } from "@/lib/recognize-data";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function MobileProfile() {
   const navigate = useNavigate();
@@ -91,13 +102,34 @@ export default function MobileProfile() {
         </div>
 
         <div className="md:hidden rounded-2xl border border-stone-200 bg-white divide-y divide-stone-100">
-          <button
-            onClick={() => navigate("/")}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50"
-          >
-            <Monitor className="w-4 h-4 text-stone-500" />
-            Switch to admin web
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50"
+              >
+                <Monitor className="w-4 h-4 text-stone-500" />
+                Switch to admin web
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Leave mobile view?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This opens the desktop admin panel. The mobile experience
+                  won't follow.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Stay in mobile</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => navigate("/")}
+                  className="bg-[#a87a3a] hover:bg-[#8e6630]"
+                >
+                  Continue to admin
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <button
             onClick={signOut}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
