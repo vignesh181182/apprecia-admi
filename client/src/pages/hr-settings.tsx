@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,26 +15,105 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Star, Bell, Plug, Shield, Check, Tags, Sparkles, AlertTriangle, Wallet } from "lucide-react";
+import { StickyActions } from "@/components/ui/sticky-actions";
+import { Building2, Star, Bell, Plug, Shield, Check, AlertTriangle, Wallet, Upload, X, UserPlus, Mail, Users, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getAccount, updateAccount, DEFAULT_CATEGORIES, DEFAULT_APPRECIATION_POLICY, DEFAULT_POINTS_POLICY } from "@/lib/account";
-import type { RecognitionCategory, AppreciationPolicy, PointsPolicy } from "@/lib/account";
-import { CategoryEditor } from "@/components/recognition/category-editor";
-import { AppreciationPolicyEditor } from "@/components/recognition/appreciation-policy-editor";
+import { getAccount, updateAccount, DEFAULT_POINTS_POLICY, type HRAdmin } from "@/lib/account";
+import type { PointsPolicy } from "@/lib/account";
+
+const COLOR_PRESETS = [
+  "#1c1917", "#0f172a", "#1e3a8a", "#7c2d12",
+  "#065f46", "#831843", "#5b21b6", "#9a3412",
+];
 
 export default function HRSettings() {
   const { toast } = useToast();
   const account = getAccount();
-  const [categories, setCategories] = useState<RecognitionCategory[]>(
-    account?.recognitionCategories?.length ? account.recognitionCategories : DEFAULT_CATEGORIES,
-  );
-  const [policy, setPolicy] = useState<AppreciationPolicy>(
-    account?.appreciationPolicy ?? DEFAULT_APPRECIATION_POLICY,
-  );
   const [pointsPolicy, setPointsPolicy] = useState<PointsPolicy>(
     account?.pointsPolicy ?? DEFAULT_POINTS_POLICY,
   );
   const monetaryActive = !!account?.appreciationPolicy?.monetaryEnabled;
+
+  // ── Company profile state (General tab)
+  const [companyName, setCompanyName] = useState(account?.companyName ?? "");
+  const [companyAddress, setCompanyAddress] = useState(account?.address ?? "");
+  const [companyPhone, setCompanyPhone] = useState(account?.phone ?? "");
+  const [companyLogo, setCompanyLogo] = useState<string | null>(account?.companyLogo ?? null);
+  const [brandColor, setBrandColor] = useState(account?.brandColor ?? "#1c1917");
+
+  // ── HR Admins state
+  const [hrAdmins, setHrAdmins] = useState<HRAdmin[]>(account?.hrAdmins ?? []);
+  const [newAdminName, setNewAdminName] = useState("");
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [adminError, setAdminError] = useState("");
+
+  function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCompanyLogo(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  function saveCompanyProfile() {
+    if (!companyName.trim()) {
+      toast({
+        title: "Company name required",
+        description: "Please enter a company name before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateAccount({
+      companyName: companyName.trim(),
+      address: companyAddress.trim(),
+      phone: companyPhone.trim(),
+      companyLogo,
+      brandColor,
+    });
+    toast({ title: "Company profile saved", description: "Your changes are visible across the portal." });
+  }
+
+  function addHrAdmin() {
+    setAdminError("");
+    if (!newAdminName.trim() || !newAdminEmail.trim()) {
+      setAdminError("Both name and email are required.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(newAdminEmail)) {
+      setAdminError("Please enter a valid email address.");
+      return;
+    }
+    if (account && newAdminEmail.toLowerCase() === account.adminEmail.toLowerCase()) {
+      setAdminError("This is the primary admin email — no need to add it again.");
+      return;
+    }
+    if (hrAdmins.some((a) => a.email.toLowerCase() === newAdminEmail.toLowerCase())) {
+      setAdminError("This email is already added.");
+      return;
+    }
+    const next: HRAdmin[] = [
+      ...hrAdmins,
+      {
+        id: Math.random().toString(36).slice(2, 10),
+        name: newAdminName.trim(),
+        email: newAdminEmail.trim(),
+        invitedAt: new Date().toISOString(),
+      },
+    ];
+    setHrAdmins(next);
+    updateAccount({ hrAdmins: next });
+    setNewAdminName("");
+    setNewAdminEmail("");
+    toast({ title: "HR admin added", description: `${newAdminName.trim()} has been invited.` });
+  }
+
+  function removeHrAdmin(id: string) {
+    const next = hrAdmins.filter((a) => a.id !== id);
+    setHrAdmins(next);
+    updateAccount({ hrAdmins: next });
+    toast({ title: "HR admin removed" });
+  }
 
   function patchPoints(updates: Partial<PointsPolicy>) {
     setPointsPolicy((prev) => ({ ...prev, ...updates }));
@@ -75,11 +155,8 @@ export default function HRSettings() {
           <TabsTrigger value="integrations" className="text-xs gap-1.5 h-8">
             <Plug className="w-3.5 h-3.5" /> Integrations
           </TabsTrigger>
-          <TabsTrigger value="appreciation" className="text-xs gap-1.5 h-8">
-            <Sparkles className="w-3.5 h-3.5" /> Appreciation Policy
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="text-xs gap-1.5 h-8">
-            <Tags className="w-3.5 h-3.5" /> Categories
+          <TabsTrigger value="hr-admins" className="text-xs gap-1.5 h-8">
+            <Users className="w-3.5 h-3.5" /> HR Admins
           </TabsTrigger>
           <TabsTrigger value="roles" className="text-xs gap-1.5 h-8">
             <Shield className="w-3.5 h-3.5" /> Roles
@@ -88,61 +165,140 @@ export default function HRSettings() {
 
         {/* ── General ── */}
         <TabsContent value="general" className="space-y-4 mt-0">
+          <div>
+            <h2 className="text-base font-semibold text-stone-900">Tell us about your company</h2>
+            <p className="text-xs text-stone-500 mt-0.5">
+              This information appears on your portal, recognition emails, and reports.
+            </p>
+          </div>
+
           <Card className="border border-stone-200">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-semibold text-stone-900">Company Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Company Name</Label>
-                  <Input defaultValue="Acme Corp" className="h-9 text-sm border-stone-200" />
+                  <Label className="text-xs font-medium text-stone-700">Account ID</Label>
+                  <Input
+                    value={account?.accountId ?? ""}
+                    readOnly
+                    className="h-9 text-sm border-stone-200 bg-stone-50 font-mono text-stone-500"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Portal Subdomain</Label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 text-xs text-stone-500 bg-stone-50 border border-r-0 border-stone-200 rounded-l-lg">rewards.</span>
-                    <Input defaultValue="acme.com" className="h-9 text-sm border-stone-200 rounded-l-none" />
+                  <Label className="text-xs font-medium text-stone-700">Admin email</Label>
+                  <Input
+                    value={account?.adminEmail ?? ""}
+                    readOnly
+                    className="h-9 text-sm border-stone-200 bg-stone-50 text-stone-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-stone-700">
+                  Company name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Acme Corp"
+                  className="h-9 text-sm border-stone-200"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-stone-700">Company logo</Label>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center overflow-hidden shrink-0">
+                    {companyLogo ? (
+                      <img src={companyLogo} alt="Company logo" className="w-full h-full object-contain" />
+                    ) : (
+                      <Building2 className="w-6 h-6 text-stone-400" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                      <span className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium border border-stone-200 rounded-md hover:bg-stone-50 transition-colors">
+                        <Upload className="w-3.5 h-3.5" />
+                        {companyLogo ? "Replace" : "Upload"}
+                      </span>
+                    </label>
+                    {companyLogo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCompanyLogo(null)}
+                        className="text-stone-500 hover:text-stone-900 h-8 gap-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Remove
+                      </Button>
+                    )}
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Fiscal Year Start</Label>
-                  <Select defaultValue="jan">
-                    <SelectTrigger className="h-9 text-sm border-stone-200">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["January","February","March","April","May","June","July","August","September","October","November","December"].map((m, i) => (
-                        <SelectItem key={m} value={["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"][i]}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Timezone</Label>
-                  <Select defaultValue="pt">
-                    <SelectTrigger className="h-9 text-sm border-stone-200">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pt">Pacific Time (PT)</SelectItem>
-                      <SelectItem value="mt">Mountain Time (MT)</SelectItem>
-                      <SelectItem value="ct">Central Time (CT)</SelectItem>
-                      <SelectItem value="et">Eastern Time (ET)</SelectItem>
-                      <SelectItem value="utc">UTC</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <p className="text-xs text-stone-500">PNG or SVG, square format works best. Stored locally for now.</p>
               </div>
+
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Admin Email</Label>
-                <Input defaultValue="hr-admin@acme.com" type="email" className="h-9 text-sm border-stone-200" />
+                <Label className="text-xs font-medium text-stone-700">Address</Label>
+                <Textarea
+                  value={companyAddress}
+                  onChange={(e) => setCompanyAddress(e.target.value)}
+                  placeholder="Street, city, state, postal code, country"
+                  className="text-sm border-stone-200 min-h-[72px]"
+                />
               </div>
-              <div className="flex justify-end pt-2">
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={save}>Save Changes</Button>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-stone-700">Phone number</Label>
+                <Input
+                  value={companyPhone}
+                  onChange={(e) => setCompanyPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="h-9 text-sm border-stone-200"
+                />
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border border-stone-200">
+            <CardContent className="p-5 space-y-3">
+              <div>
+                <p className="text-sm font-medium text-stone-900">Brand color</p>
+                <p className="text-xs text-stone-500 mt-0.5">Used for highlights in your portal and email headers.</p>
+              </div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {COLOR_PRESETS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBrandColor(c)}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                      brandColor === c ? "border-stone-900 scale-110" : "border-stone-200"
+                    }`}
+                    style={{ backgroundColor: c }}
+                    aria-label={`Pick color ${c}`}
+                  />
+                ))}
+                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-stone-200">
+                  <input
+                    type="color"
+                    value={brandColor}
+                    onChange={(e) => setBrandColor(e.target.value)}
+                    className="w-8 h-8 rounded cursor-pointer border border-stone-200"
+                  />
+                  <span className="text-xs font-mono text-stone-500">{brandColor.toUpperCase()}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <StickyActions>
+            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={saveCompanyProfile}>
+              Save Changes
+            </Button>
+          </StickyActions>
         </TabsContent>
 
         {/* ── Points Policy ── */}
@@ -324,11 +480,12 @@ export default function HRSettings() {
                 </div>
                 <Switch defaultChecked />
               </div>
-              <div className="flex justify-end">
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={save}>Save Policy</Button>
-              </div>
             </CardContent>
           </Card>
+
+          <StickyActions>
+            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={save}>Save Policy</Button>
+          </StickyActions>
         </TabsContent>
 
         {/* ── Notifications ── */}
@@ -423,46 +580,118 @@ export default function HRSettings() {
         </TabsContent>
 
         {/* ── Appreciation Policy ── */}
-        <TabsContent value="appreciation" className="space-y-4 mt-0">
-          <AppreciationPolicyEditor
-            policy={policy}
-            onChange={setPolicy}
-            onSave={() => {
-              updateAccount({ appreciationPolicy: policy });
-              toast({ title: "Appreciation policy saved", description: "Your changes will apply on the next badge sent." });
-            }}
-            accountTimezone={account?.timezone}
-            accountCurrency={account?.currency}
-          />
-        </TabsContent>
+        {/* ── HR Admins ── */}
+        <TabsContent value="hr-admins" className="space-y-4 mt-0">
+          <div>
+            <h2 className="text-base font-semibold text-stone-900">HR Admins</h2>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Invite teammates to co-manage the account. HR admins can manage everything except adding more admins —
+              that stays with you.
+            </p>
+          </div>
 
-        {/* ── Recognition Categories ── */}
-        <TabsContent value="categories" className="space-y-4 mt-0">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-100">
+            <Shield className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900">
+              <p className="font-medium">HR Admin permissions</p>
+              <p className="text-amber-800 mt-0.5">
+                Full access to programs, recognitions, employees, rewards, analytics, and settings.
+                <span className="font-medium"> They cannot add or remove other admins</span> — only you can.
+              </p>
+            </div>
+          </div>
+
           <Card className="border border-stone-200">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-semibold text-stone-900">Recognition Categories</CardTitle>
-              <p className="text-xs text-stone-500">Manage the values employees can tag when sending recognitions.</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <CategoryEditor categories={categories} onChange={setCategories} />
-              <div className="flex justify-end pt-2">
-                <Button
-                  size="sm"
-                  className="bg-stone-900 hover:bg-stone-700 text-white"
-                  disabled={categories.length < 3 || !categories.every((c) => c.name.trim())}
-                  onClick={() => {
-                    updateAccount({ recognitionCategories: categories });
-                    toast({ title: "Categories saved", description: "Recognition categories have been updated." });
-                  }}
-                >
-                  Save Categories
-                </Button>
+            <CardContent className="p-5 space-y-3">
+              <p className="text-sm font-semibold text-stone-900">Invite an HR admin</p>
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.4fr_auto] gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700">Full name</Label>
+                  <Input
+                    value={newAdminName}
+                    onChange={(e) => setNewAdminName(e.target.value)}
+                    placeholder="Jane Doe"
+                    className="h-9 text-sm border-stone-200"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-stone-700">Email</Label>
+                  <Input
+                    type="email"
+                    value={newAdminEmail}
+                    onChange={(e) => setNewAdminEmail(e.target.value)}
+                    placeholder="jane@company.com"
+                    className="h-9 text-sm border-stone-200"
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addHrAdmin())}
+                  />
+                </div>
+                <div className="flex items-end">
+                  <Button
+                    size="sm"
+                    onClick={addHrAdmin}
+                    className="h-9 bg-stone-900 hover:bg-stone-700 text-white gap-1.5"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Add
+                  </Button>
+                </div>
               </div>
+              {adminError && (
+                <div className="flex items-center gap-1.5 text-xs text-red-600">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {adminError}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border border-stone-200">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-semibold text-stone-900">
+                  Current HR admins{" "}
+                  <span className="text-xs font-normal text-stone-500">({hrAdmins.length})</span>
+                </p>
+              </div>
+              {hrAdmins.length === 0 ? (
+                <p className="text-sm text-stone-500 text-center py-6">
+                  No HR admins yet. Add one above and they'll get an invite email.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {hrAdmins.map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between p-3 rounded-lg border border-stone-100 hover:border-stone-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-700 font-semibold text-sm shrink-0">
+                          {a.name[0]?.toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-stone-900 truncate">{a.name}</p>
+                          <p className="text-xs text-stone-500 flex items-center gap-1 truncate">
+                            <Mail className="w-3 h-3" />
+                            {a.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeHrAdmin(a.id)}
+                        className="text-stone-400 hover:text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* ── Roles ── */}
         <TabsContent value="roles" className="space-y-4 mt-0">
           <Card className="border border-stone-200">
             <CardHeader className="pb-2">

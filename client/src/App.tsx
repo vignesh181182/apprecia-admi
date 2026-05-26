@@ -23,6 +23,7 @@ import Analytics from "@/pages/analytics";
 import HRSettings from "@/pages/hr-settings";
 import HRNotifications from "@/pages/hr-notifications";
 import BadgesAndTags from "@/pages/badges";
+import AppreciationPolicyPage from "@/pages/appreciation-policy";
 import Budget from "@/pages/budget";
 import CheckIns from "@/pages/check-ins";
 import OneOnOnes from "@/pages/one-on-ones";
@@ -231,7 +232,8 @@ function Router() {
       <Route path="/programs/:programId/winners" element={<ProtectedRnR><ProgramWinners /></ProtectedRnR>} />
       <Route path="/programs/:programId" element={<ProtectedRnR><ProgramDetailAdmin /></ProtectedRnR>} />
       <Route path="/badges" element={<Protected title="Badges & Tags" description="Manage recognition tags and achievement badge taxonomy"><BadgesAndTags /></Protected>} />
-      <Route path="/appreciation-settings" element={<Protected title="Appreciation Settings" description="Achievement badges employees can earn"><BadgesAndTags lockedSection="badges" /></Protected>} />
+      <Route path="/appreciation-settings" element={<Protected title="Appreciation Badges" description="Achievement badges employees can earn"><BadgesAndTags lockedSection="badges" /></Protected>} />
+      <Route path="/appreciation-policy" element={<Protected title="Appreciation Policy" description="Approval rules, point value, and recognition window"><AppreciationPolicyPage /></Protected>} />
       <Route path="/recognition-tags" element={<ProtectedRnR title="Recognition Tags" description="Quick-select reasons employees pick when sending appreciation"><BadgesAndTags lockedSection="tags" /></ProtectedRnR>} />
       <Route path="/check-ins" element={<Protected title="Weekly Check-ins" description="Track employee weekly updates and manager responses"><CheckIns /></Protected>} />
       <Route path="/one-on-ones" element={<Protected title="1-on-1s" description="Structured manager-employee meeting agendas and notes"><OneOnOnes /></Protected>} />

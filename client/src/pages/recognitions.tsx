@@ -833,9 +833,11 @@ function RecognitionForm({
         />
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
-        {submitLabel}
-      </Button>
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)]">
+        <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import {
   BarChart2,
   CheckSquare,
-  SlidersHorizontal,
   Star,
   Users,
   Gift,
@@ -16,6 +15,8 @@ import {
   LogOut,
   Wallet,
   Building2,
+  Sparkles,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,8 @@ const navGroups: NavGroup[] = [
       { title: "Analytics",              href: "/",                       icon: BarChart2          },
       // { title: "Recognitions",           href: "/recognitions",           icon: Star               },
       { title: "Approval",               href: "/approvals",              icon: CheckSquare        },
-      { title: "Appreciation Settings",  href: "/appreciation-settings",  icon: SlidersHorizontal  },
+      { title: "Appreciation Badges",    href: "/appreciation-settings",  icon: Award              },
+      { title: "Appreciation Policy",    href: "/appreciation-policy",    icon: Sparkles           },
     ],
   },
   {

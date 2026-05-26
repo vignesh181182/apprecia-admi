@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,8 +55,23 @@ export default function Redemptions() {
   const [items, setItems] = useState<Redemption[]>(redemptionsData);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [account, setAccount] = useState(getAccount());
 
-  const account = getAccount();
+  // Re-read the account when localStorage changes (e.g. policy toggled in
+  // another tab) and whenever the window regains focus, so the disabled
+  // banner flips immediately once monetary recognition is turned back on.
+  useEffect(() => {
+    function refresh() {
+      setAccount(getAccount());
+    }
+    window.addEventListener("storage", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   if (!isMonetaryActive(account)) {
     return (
       <div className="p-6">
@@ -68,8 +83,8 @@ export default function Redemptions() {
             <p className="text-base font-semibold text-stone-900">Redemptions are disabled</p>
             <p className="text-sm text-stone-600 max-w-md">
               Monetary recognition is currently off at the org level. Re-enable it in{" "}
-              <Link to="/settings" className="text-stone-900 underline underline-offset-2 font-medium">
-                Settings → Appreciation Policy
+              <Link to="/appreciation-policy" className="text-stone-900 underline underline-offset-2 font-medium">
+                Appreciation → Appreciation Policy
               </Link>{" "}
               to start accepting employee redemptions.
             </p>
