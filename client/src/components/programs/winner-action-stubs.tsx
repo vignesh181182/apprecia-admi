@@ -28,7 +28,7 @@ import {
   type StoredProgram,
 } from "@/lib/programs-data";
 
-const PHASE3_TIP = "Phase 3 feature — Phase 2 ships the foundation.";
+export const PHASE3_TIP = "Phase 3 feature — Phase 2 ships the foundation.";
 
 export function WinnerActionStubs({
   program,

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -116,21 +116,15 @@ export default function HRDashboard() {
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-stone-900">Dashboard</h1>
+            <h1 className="text-xl font-semibold text-stone-900">
+              {tab === RNR_TAB ? "Rewards & Recognition Analytics" : "Appreciation Analytics"}
+            </h1>
             <p className="text-sm text-stone-500 mt-0.5">
-              Recognition activity, approvals, and program health
+              {tab === RNR_TAB
+                ? "Programs, redemptions, and budget health"
+                : "Recognition activity, approvals, and badge trends"}
             </p>
           </div>
-          <TabsList>
-            <TabsTrigger value={APPRECIATION_TAB} data-testid="tab-appreciation">
-              Appreciation
-            </TabsTrigger>
-            {rnrEnabled && (
-              <TabsTrigger value={RNR_TAB} data-testid="tab-rnr">
-                RnR
-              </TabsTrigger>
-            )}
-          </TabsList>
         </div>
 
         <TabsContent value={APPRECIATION_TAB} className="mt-0">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Select,
   SelectContent,
@@ -53,7 +62,16 @@ import {
   Search,
   Tag,
   Award,
+  LayoutGrid,
+  List,
 } from "lucide-react";
+
+type ViewMode = "cards" | "list";
+const VIEW_MODE_KEY = "engagex_badges_view";
+function readViewMode(): ViewMode {
+  if (typeof window === "undefined") return "list";
+  return window.localStorage.getItem(VIEW_MODE_KEY) === "cards" ? "cards" : "list";
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -66,13 +84,11 @@ type TagItem = {
   isActive: boolean;
 };
 
-type BadgeItem = {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  isActive: boolean;
-};
+import {
+  BADGE_CATEGORIES,
+  INITIAL_BADGES,
+  type BadgeItem,
+} from "@/lib/badges-catalog";
 
 // ─── Seed Data ─────────────────────────────────────────────────────────────────
 
@@ -83,70 +99,6 @@ const INITIAL_TAGS: TagItem[] = [
   { id: "t4", name: "Leadership", description: "Guided or inspired the team", icon: "Target", points: 75, isActive: true },
   { id: "t5", name: "Helpful", description: "Went out of their way to help", icon: "ThumbsUp", points: 50, isActive: true },
   { id: "t6", name: "Dedication", description: "Consistent effort and commitment", icon: "Shield", points: 50, isActive: true },
-];
-
-const BADGE_CATEGORIES = [
-  "Performance & Impact",
-  "Innovation & Thinking",
-  "Collaboration & Culture",
-  "Growth & Learning",
-  "Creativity & Expression",
-  "Reliability & Trust",
-  "Wellbeing & Human",
-  "Managers / Leaders",
-  "Celebrations & Lightweight",
-] as const;
-
-const INITIAL_BADGES: BadgeItem[] = [
-  // Performance & Impact
-  { id: "b1",  name: "Game Changer",       description: "Created measurable impact",              category: "Performance & Impact",      isActive: true  },
-  { id: "b2",  name: "Outcome Achiever",   description: "Delivered beyond expectations",          category: "Performance & Impact",      isActive: true  },
-  { id: "b3",  name: "Moment of Impact",   description: "Delivered when it mattered most",        category: "Performance & Impact",      isActive: true  },
-  { id: "b4",  name: "Execution Ninja",    description: "Fast, flawless delivery",                category: "Performance & Impact",      isActive: true  },
-  // Innovation & Thinking
-  { id: "b5",  name: "Sharp Thinking",     description: "Smart, original thinking",               category: "Innovation & Thinking",     isActive: true  },
-  { id: "b6",  name: "Unblocked It",       description: "Solved a tough challenge",               category: "Innovation & Thinking",     isActive: true  },
-  { id: "b7",  name: "Fresh Approach",     description: "Tried something new",                    category: "Innovation & Thinking",     isActive: true  },
-  { id: "b8",  name: "Future Builder",     description: "Thinking ahead, not sideways",           category: "Innovation & Thinking",     isActive: true  },
-  { id: "b9",  name: "Idea Machine",       description: "Constant source of ideas",               category: "Innovation & Thinking",     isActive: true  },
-  // Collaboration & Culture
-  { id: "b10", name: "Culture Carrier",    description: "Lives company values",                   category: "Collaboration & Culture",   isActive: true  },
-  { id: "b11", name: "Team Glue",          description: "Keeps people together",                  category: "Collaboration & Culture",   isActive: true  },
-  { id: "b12", name: "Collab Champion",    description: "Makes teamwork easy",                    category: "Collaboration & Culture",   isActive: true  },
-  { id: "b13", name: "People's MVP",       description: "Trusted and respected",                  category: "Collaboration & Culture",   isActive: true  },
-  { id: "b14", name: "Energy Uplifter",    description: "Raises the room's energy",               category: "Collaboration & Culture",   isActive: true  },
-  { id: "b15", name: "Safe Space Creator", description: "Inclusive and supportive",               category: "Collaboration & Culture",   isActive: true  },
-  // Growth & Learning
-  { id: "b16", name: "Skill Builder",      description: "Picked up a new capability",             category: "Growth & Learning",         isActive: true  },
-  { id: "b17", name: "Growth Mindset",     description: "Learns from mistakes",                   category: "Growth & Learning",         isActive: true  },
-  { id: "b18", name: "Level Up Award",     description: "Visible improvement",                    category: "Growth & Learning",         isActive: true  },
-  { id: "b19", name: "Curious Cat",        description: "Asks the right questions",               category: "Growth & Learning",         isActive: true  },
-  // Creativity & Expression
-  { id: "b20", name: "Creative Spark",     description: "Unique creative input",                  category: "Creativity & Expression",   isActive: true  },
-  { id: "b21", name: "Design Sensei",      description: "Visual or UX excellence",                category: "Creativity & Expression",   isActive: true  },
-  { id: "b22", name: "Storyteller",        description: "Clear, compelling communication",        category: "Creativity & Expression",   isActive: true  },
-  { id: "b23", name: "Brand Builder",      description: "Strengthened brand presence",            category: "Creativity & Expression",   isActive: true  },
-  { id: "b24", name: "Vibe Curator",       description: "Elevated look, feel, or tone",           category: "Creativity & Expression",   isActive: true  },
-  // Reliability & Trust
-  { id: "b25", name: "Rock Solid",         description: "Always dependable",                      category: "Reliability & Trust",       isActive: true  },
-  { id: "b26", name: "Consistency Champ",  description: "Delivers every time",                    category: "Reliability & Trust",       isActive: true  },
-  { id: "b27", name: "Quiet Achiever",     description: "Impact without noise",                   category: "Reliability & Trust",       isActive: true  },
-  // Wellbeing & Human
-  { id: "b28", name: "Burnout Blocker",    description: "Protected team wellbeing",               category: "Wellbeing & Human",         isActive: true  },
-  { id: "b29", name: "Empathy Champ",      description: "Led with care",                          category: "Wellbeing & Human",         isActive: true  },
-  { id: "b30", name: "Mental Health Ally", description: "Supportive and aware",                   category: "Wellbeing & Human",         isActive: true  },
-  { id: "b31", name: "Human First",        description: "Did the right thing",                    category: "Wellbeing & Human",         isActive: true  },
-  { id: "b32", name: "Kindness Counts",    description: "Simple, genuine kindness",               category: "Wellbeing & Human",         isActive: true  },
-  // Managers / Leaders
-  { id: "b33", name: "Talent Builder",     description: "Helped others grow",                     category: "Managers / Leaders",        isActive: true  },
-  { id: "b34", name: "Decisive Leader",    description: "Took timely, confident decisions",       category: "Managers / Leaders",        isActive: true  },
-  { id: "b35", name: "Career Enabler",     description: "Actively supported progression",         category: "Managers / Leaders",        isActive: true  },
-  { id: "b36", name: "Psych Safety Champ", description: "Created a safe team space",              category: "Managers / Leaders",        isActive: true  },
-  { id: "b37", name: "People First Leader",description: "Balanced results with humanity",         category: "Managers / Leaders",        isActive: true  },
-  // Celebrations & Lightweight
-  { id: "b38", name: "Thank You",          description: "Simple gratitude — low bar, high impact", category: "Celebrations & Lightweight", isActive: true },
-  { id: "b39", name: "Big Win",            description: "Significant success worth celebrating",  category: "Celebrations & Lightweight", isActive: true  },
-  { id: "b40", name: "Celebration Time",   description: "Just because",                           category: "Celebrations & Lightweight", isActive: true  },
 ];
 
 // ─── Category Config ───────────────────────────────────────────────────────────
@@ -176,7 +128,9 @@ const TAG_ICON_OPTIONS = ["Star", "Users", "Lightbulb", "Target", "ThumbsUp", "S
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-export default function BadgesAndTags() {
+type LockedSection = "tags" | "badges";
+
+export default function BadgesAndTags({ lockedSection }: { lockedSection?: LockedSection } = {}) {
   const { toast } = useToast();
   const [tags, setTags] = useState<TagItem[]>(INITIAL_TAGS);
   const [badges, setBadges] = useState<BadgeItem[]>(INITIAL_BADGES);
@@ -191,6 +145,12 @@ export default function BadgesAndTags() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [badgeSheetOpen, setBadgeSheetOpen] = useState(false);
   const [editBadge, setEditBadge] = useState<BadgeItem | null>(null);
+
+  // ── View mode (shared across tabs)
+  const [viewMode, setViewMode] = useState<ViewMode>(readViewMode);
+  useEffect(() => {
+    window.localStorage.setItem(VIEW_MODE_KEY, viewMode);
+  }, [viewMode]);
 
   // ── Tag handlers
   function toggleTag(id: string) {
@@ -254,8 +214,11 @@ export default function BadgesAndTags() {
 
   return (
     <div className="p-6 space-y-5">
-      <Tabs defaultValue="tags">
+      <Tabs defaultValue={lockedSection ?? "tags"}>
         <div className="flex items-center justify-between mb-4">
+          {lockedSection ? (
+            <div />
+          ) : (
           <TabsList className="bg-stone-100 h-9">
             <TabsTrigger value="tags" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <Tag className="w-3.5 h-3.5 mr-1.5" />
@@ -268,6 +231,33 @@ export default function BadgesAndTags() {
               <span className="ml-1.5 text-stone-400 font-normal">({badges.length})</span>
             </TabsTrigger>
           </TabsList>
+          )}
+
+          <ToggleGroup
+            type="single"
+            value={viewMode}
+            onValueChange={(v) => {
+              if (v === "cards" || v === "list") setViewMode(v);
+            }}
+            className="bg-white border border-stone-200 rounded-lg p-0.5"
+          >
+            <ToggleGroupItem
+              value="cards"
+              aria-label="Card view"
+              data-testid="badges-view-cards"
+              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="list"
+              aria-label="List view"
+              data-testid="badges-view-list"
+              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+            >
+              <List className="w-4 h-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         {/* ─── TAGS TAB ─────────────────────────────────────────────────────── */}
@@ -322,6 +312,7 @@ export default function BadgesAndTags() {
           </div>
 
           {/* Tag Cards */}
+          {viewMode === "cards" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTags.map((tag) => {
               const Icon = TAG_ICONS[tag.icon] ?? Star;
@@ -396,6 +387,103 @@ export default function BadgesAndTags() {
               </div>
             )}
           </div>
+          )}
+
+          {/* Tag List */}
+          {viewMode === "list" && (
+            <Card className="border border-stone-200 overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-stone-50 hover:bg-stone-50">
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Tag</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Points</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Active</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTags.map((tag) => {
+                    const Icon = TAG_ICONS[tag.icon] ?? Star;
+                    return (
+                      <TableRow
+                        key={tag.id}
+                        className={`hover:bg-stone-50 ${!tag.isActive ? "opacity-50" : ""}`}
+                        data-testid={`tags-row-${tag.id}`}
+                      >
+                        <TableCell className="min-w-[280px]">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-lg bg-stone-900 flex items-center justify-center shrink-0">
+                              <Icon className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-stone-900 truncate">{tag.name}</p>
+                              <p className="text-xs text-stone-500 truncate max-w-[320px]">{tag.description}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-stone-900">
+                            <Star className="w-3.5 h-3.5 text-yellow-500" />
+                            {tag.points}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={tag.isActive}
+                            onCheckedChange={() => toggleTag(tag.id)}
+                            className="scale-75 data-[state=checked]:bg-stone-900"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                              onClick={() => { setEditTag(tag); setTagSheetOpen(true); }}
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete "{tag.name}"?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This tag will be removed from the mobile app. Any past appreciations using it are unaffected.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteTag(tag.id)}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {filteredTags.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-12 text-stone-400 text-sm">
+                        No tags match your search.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
         </TabsContent>
 
         {/* ─── BADGES TAB ───────────────────────────────────────────────────── */}
@@ -477,6 +565,7 @@ export default function BadgesAndTags() {
           </div>
 
           {/* Badges — grouped by category */}
+          {viewMode === "cards" && (
           <div className="space-y-6">
             {badgesByCategory.map(({ category, items }) => {
               const cfg = CATEGORY_CONFIG[category];
@@ -574,6 +663,111 @@ export default function BadgesAndTags() {
               </div>
             )}
           </div>
+          )}
+
+          {/* Badge List */}
+          {viewMode === "list" && (
+            <Card className="border border-stone-200 overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-stone-50 hover:bg-stone-50">
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Badge</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Category</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Active</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredBadges.map((badge) => {
+                    const cfg = CATEGORY_CONFIG[badge.category];
+                    const Icon = cfg?.icon ?? Award;
+                    return (
+                      <TableRow
+                        key={badge.id}
+                        className={`hover:bg-stone-50 ${!badge.isActive ? "opacity-50" : ""}`}
+                        data-testid={`badges-row-${badge.id}`}
+                      >
+                        <TableCell className="min-w-[280px]">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg?.bg ?? "bg-stone-100"}`}>
+                              <Icon className={`w-4 h-4 ${cfg?.color ?? "text-stone-600"}`} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold text-stone-900 truncate">{badge.name}</p>
+                                {!badge.isActive && (
+                                  <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-400 shrink-0">
+                                    Inactive
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-stone-500 truncate max-w-[320px]">{badge.description}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${cfg?.bg ?? "bg-stone-100"} ${cfg?.color ?? "text-stone-700"}`}>
+                            <Icon className="w-3 h-3" />
+                            {badge.category}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={badge.isActive}
+                            onCheckedChange={() => toggleBadge(badge.id)}
+                            className="scale-75 data-[state=checked]:bg-stone-900"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                              onClick={() => { setEditBadge(badge); setBadgeSheetOpen(true); }}
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete "{badge.name}"?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This badge will be permanently removed. Employees who've earned it keep their record.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteBadge(badge.id)}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {filteredBadges.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-16 text-stone-400 text-sm">
+                        No badges match your search or filter.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

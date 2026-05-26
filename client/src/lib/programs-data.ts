@@ -353,6 +353,103 @@ export const PROGRAMS: Program[] = [
     ],
   },
   {
+    id: "innovation-sprint-q1",
+    name: "Innovation Sprint Q1",
+    shortDesc: "Quarterly cycle celebrating breakthrough product wins.",
+    description: "A cross-functional sprint where any teammate can nominate someone whose work moved a key product or customer metric this quarter.",
+    emoji: "🚀",
+    themeBg: "linear-gradient(180deg, #ede9fe 0%, #c4b5fd 100%)",
+    status: "active",
+    pointsPerWin: 200,
+    daysLeft: 0,
+    startDate: "2026-02-15T00:00:00.000Z",
+    endDate: "2026-05-14T23:59:59.000Z",
+    cadence: "quarterly",
+    nominations: 12,
+    nominationsDelta: 4,
+    participantsRate: 72,
+    participantsDelta: 9,
+    budgetAllocated: 25000,
+    budgetUsed: 19200,
+    prizes: [
+      { rank: 1, amount: 12000 },
+      { rank: 2, amount: 5000 },
+      { rank: 3, amount: 2000 },
+    ],
+    programLeaderboard: [
+      { rank: 1, name: "Albert Flores",  role: "Sr Software Engineer", avatar: "/m/images/user03.png", points: 200 },
+      { rank: 2, name: "Dianne Russell", role: "UI Designer",          avatar: "/m/images/user04.png", points: 180 },
+      { rank: 3, name: "James Wilson",   role: "Product Manager",      avatar: "/m/images/user07.png", points: 160 },
+    ],
+    topNominee: { name: "Albert Flores", nominationCount: 4 },
+    highlights: [
+      { iconKey: "rocket", title: "Who can participate?", body: "Any teammate, across every team." },
+      { iconKey: "target", title: "How it works",        body: "Nominate someone whose work moved a customer or product metric." },
+      { iconKey: "award",  title: "What's in it for you?", body: "Up to 12,000 in points + a Sprint Champion badge." },
+    ],
+    categories: [
+      { id: "cat-impact", name: "Customer Impact",   emoji: "🎯", description: "Measurable wins for customers.",        winnersCount: 1, prizePoints: 200 },
+      { id: "cat-craft",  name: "Engineering Craft", emoji: "🛠️", description: "Built it well, shipped it cleanly.",     winnersCount: 1, prizePoints: 200 },
+      { id: "cat-team",   name: "Team Player",       emoji: "🤝", description: "Made the team stronger this quarter.",  winnersCount: 1, prizePoints: 200 },
+    ],
+    panel: [
+      { id: "p1", name: "Sarah Chen",      role: "VP People Operations", department: "People Ops",  avatar: "/m/images/user02.png", lead: true, reviewed: 12, totalToReview: 12 },
+      { id: "p2", name: "Marcus Johnson",  role: "CHRO",                 department: "Executive",   avatar: "/m/images/user05.png", reviewed: 12, totalToReview: 12 },
+      { id: "p3", name: "Priya Sharma",    role: "Director of Product",  department: "Product",     avatar: "/m/images/user03.png", reviewed: 12, totalToReview: 12 },
+      { id: "p4", name: "James Wilson",    role: "Engineering Director", department: "Engineering", avatar: "/m/images/user04.png", reviewed: 12, totalToReview: 12 },
+    ],
+  },
+  {
+    id: "spring-spotlight-q1",
+    name: "Spring Spotlight — Q1",
+    shortDesc: "Cycle ended yesterday — admin should see the Run AI Shortlist CTA.",
+    description: "Quarterly cross-functional spotlight for teammates whose work moved a customer or product metric. Cycle just closed and the panel is ready to shortlist winners.",
+    emoji: "🌷",
+    themeBg: "linear-gradient(180deg, #fde7f3 0%, #f9b8d8 100%)",
+    status: "active",
+    pointsPerWin: 250,
+    daysLeft: 0,
+    startDate: "2026-02-15T00:00:00.000Z",
+    endDate: "2026-05-15T23:59:59.000Z",
+    cadence: "quarterly",
+    nominations: 14,
+    nominationsDelta: 5,
+    participantsRate: 68,
+    participantsDelta: 7,
+    budgetAllocated: 25000,
+    budgetUsed: 18500,
+    prizes: [
+      { rank: 1, amount: 12000 },
+      { rank: 2, amount: 5000 },
+      { rank: 3, amount: 2500 },
+    ],
+    programLeaderboard: [
+      { rank: 1, name: "Albert Flores",  role: "Sr Software Engineer", avatar: "/m/images/user03.png", points: 240 },
+      { rank: 2, name: "Dianne Russell", role: "UI Designer",          avatar: "/m/images/user04.png", points: 215 },
+      { rank: 3, name: "Courtney Henry", role: "Delivery Head",        avatar: "/m/images/user02.png", points: 190 },
+    ],
+    attentionItems: [
+      { severity: "high", title: "Cycle ended — run AI shortlist", body: "14 nominations are waiting to be scored and ranked" },
+    ],
+    topNominee: { name: "Albert Flores", nominationCount: 4 },
+    highlights: [
+      { iconKey: "rocket", title: "Who can participate?", body: "Any teammate, across every function." },
+      { iconKey: "target", title: "How it works",        body: "Nominate someone whose work moved a customer or product metric this quarter." },
+      { iconKey: "award",  title: "What's in it for you?", body: "Up to 12,000 in points + a Spring Spotlight badge." },
+    ],
+    categories: [
+      { id: "cat-impact", name: "Customer Impact",   emoji: "🎯", description: "Measurable wins for customers.",        winnersCount: 1, prizePoints: 250 },
+      { id: "cat-craft",  name: "Engineering Craft", emoji: "🛠️", description: "Built it well, shipped it cleanly.",     winnersCount: 1, prizePoints: 250 },
+      { id: "cat-team",   name: "Team Player",       emoji: "🤝", description: "Made the team stronger this quarter.",  winnersCount: 1, prizePoints: 250 },
+    ],
+    panel: [
+      { id: "p1", name: "Sarah Chen",     role: "VP People Operations", department: "People Ops",  avatar: "/m/images/user02.png", lead: true, reviewed: 14, totalToReview: 14 },
+      { id: "p2", name: "Marcus Johnson", role: "CHRO",                 department: "Executive",   avatar: "/m/images/user05.png", reviewed: 14, totalToReview: 14 },
+      { id: "p3", name: "Priya Sharma",   role: "Director of Product",  department: "Product",     avatar: "/m/images/user03.png", reviewed: 14, totalToReview: 14 },
+      { id: "p4", name: "James Wilson",   role: "Engineering Director", department: "Engineering", avatar: "/m/images/user04.png", reviewed: 14, totalToReview: 14 },
+    ],
+  },
+  {
     id: "culture-champion",
     name: "Culture Champion",
     shortDesc: "Builds the team we want to work in.",
@@ -394,6 +491,25 @@ export const PROGRAMS: Program[] = [
 export function getProgram(id: string | undefined): Program | undefined {
   if (!id) return undefined;
   return PROGRAMS.find((p) => p.id === id);
+}
+
+/**
+ * 1.7.1 visibility helper. True if the current user can manage this program's
+ * post-cycle workflow — either an HR admin or a named member of the program's
+ * panel. Falls back to a name match against `account.adminName` because the
+ * demo doesn't carry a per-employee identity beyond that.
+ */
+export function currentUserCanManageProgram(
+  account: import("./account").Account | null,
+  program: Pick<Program, "panel"> | undefined | null,
+): boolean {
+  if (!account || !program) return false;
+  if (account.role === "admin") return true;
+  const panel = program.panel ?? [];
+  if (panel.length === 0) return false;
+  const name = (account.adminName ?? "").trim().toLowerCase();
+  if (!name) return false;
+  return panel.some((p) => p.name.trim().toLowerCase() === name);
 }
 
 export function getActivePrograms(): Program[] {
@@ -636,6 +752,9 @@ function buildActiveNominations(program: Program): Nomination[] {
     const nominee = pick(SEED_NOMINEES, n + program.id.length);
     const nominator = pick(SEED_NOMINATORS.filter((s) => s.id !== nominee.id), n + 3);
     const id = `nom-${program.id}-${n}`;
+    const cat = program.categories && program.categories.length > 0
+      ? program.categories[n % program.categories.length]
+      : undefined;
     n += 1;
     const createdAt = isoDaysAgo(ageDays);
     const decided =
@@ -646,6 +765,8 @@ function buildActiveNominations(program: Program): Nomination[] {
       id,
       programId: program.id,
       cycleId: "current",
+      categoryId: cat?.id,
+      categoryName: cat?.name,
       nomineeId: nominee.id,
       nomineeName: nominee.name,
       nomineeAvatar: nominee.avatar,
@@ -808,9 +929,26 @@ function writeStoredNominations(list: Nomination[]): void {
 
 function ensureSeeded(): Nomination[] {
   const stored = readStoredNominations();
-  if (stored) return stored;
-  writeStoredNominations(NOMINATIONS);
-  return NOMINATIONS;
+  if (!stored) {
+    writeStoredNominations(NOMINATIONS);
+    return NOMINATIONS;
+  }
+  // Top up: any seeded program that has zero nominations in storage
+  // gets its nominations built and merged. Idempotent.
+  const existingProgramIds = new Set(stored.map((n) => n.programId));
+  const additions: Nomination[] = [];
+  for (const p of PROGRAMS) {
+    if (existingProgramIds.has(p.id)) continue;
+    additions.push(...buildActiveNominations(p));
+  }
+  for (const p of PAST_PROGRAMS) {
+    if (existingProgramIds.has(p.id)) continue;
+    additions.push(...buildPastNominations(p));
+  }
+  if (additions.length === 0) return stored;
+  const next = [...stored, ...additions];
+  writeStoredNominations(next);
+  return next;
 }
 
 export function getNominationsForProgram(programId: string): Nomination[] {
@@ -896,7 +1034,18 @@ function seedStored(): StoredProgram[] {
 }
 
 export function getStoredPrograms(): StoredProgram[] {
-  return readStored() ?? seedStored();
+  const stored = readStored();
+  if (!stored) return seedStored();
+  // Top up: any seeded program missing from storage gets merged in. Idempotent.
+  const ids = new Set(stored.map((p) => p.id));
+  const missing: StoredProgram[] = [
+    ...PROGRAMS.filter((p) => !ids.has(p.id)),
+    ...PAST_PROGRAMS.filter((p) => !ids.has(p.id)),
+  ];
+  if (missing.length === 0) return stored;
+  const next = [...stored, ...missing];
+  writeStored(next);
+  return next;
 }
 
 export function getProgramById(id: string): StoredProgram | undefined {

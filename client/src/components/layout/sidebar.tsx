@@ -1,24 +1,20 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
+  BarChart2,
+  CheckSquare,
+  SlidersHorizontal,
   Star,
   Users,
   Gift,
   Trophy,
   ShoppingCart,
-  BarChart2,
+  Tag,
   Bell,
   Settings,
   X,
   LogOut,
-  Award,
   Wallet,
-  ClipboardList,
-  MessageSquare,
-  BarChart3,
-  Target,
-  ScrollText,
   Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,48 +27,50 @@ type NavGroup = { label: string; items: NavItem[]; rnrOnly?: boolean };
 
 const navGroups: NavGroup[] = [
   {
-    label: "Main",
+    label: "Appreciation",
     items: [
-      { title: "Dashboard",     href: "/",             icon: LayoutDashboard },
-      { title: "Recognitions",  href: "/recognitions", icon: Star            },
-      { title: "Employees",     href: "/employees",    icon: Users           },
-      { title: "Programs",      href: "/programs",     icon: Trophy          },
-      { title: "Badges & Tags", href: "/badges",       icon: Award           },
+      { title: "Analytics",              href: "/",                       icon: BarChart2          },
+      // { title: "Recognitions",           href: "/recognitions",           icon: Star               },
+      { title: "Approval",               href: "/approvals",              icon: CheckSquare        },
+      { title: "Appreciation Settings",  href: "/appreciation-settings",  icon: SlidersHorizontal  },
     ],
   },
-  // {
-  //   label: "People Ops",
-  //   items: [
-  //     { title: "Check-ins",           href: "/check-ins",    icon: ClipboardList },
-  //     { title: "1-on-1s",             href: "/one-on-ones",  icon: MessageSquare },
-  //     { title: "Engagement Surveys", href: "/surveys",      icon: BarChart3     },
-  //     { title: "OKRs & Goals",        href: "/okrs",         icon: Target        },
-  //     { title: "Performance Reviews", href: "/reviews",      icon: ScrollText    },
-  //   ],
-  // },
   {
-    label: "Rewards",
+    label: "Rewards & Recognition",
     rnrOnly: true,
     items: [
-      { title: "Rewards Catalog", href: "/rewards",     icon: Gift         },
-      { title: "Redemptions",     href: "/redemptions", icon: ShoppingCart },
-      { title: "Points & Budget", href: "/budget",      icon: Wallet       },
-    ],
-  },
-  {
-    label: "Insights",
-    items: [
-      { title: "Analytics", href: "/analytics", icon: BarChart2 },
+      { title: "Analytics",         href: "/?tab=rnr",         icon: BarChart2    },
+      { title: "Programs",          href: "/programs",         icon: Trophy      },
+      { title: "Redemptions",       href: "/redemptions",      icon: ShoppingCart },
+      { title: "Recognition Tags",  href: "/recognition-tags", icon: Tag          },
     ],
   },
   {
     label: "System",
     items: [
-      { title: "Notifications", href: "/notifications", icon: Bell,     badge: 3 },
-      { title: "Settings",      href: "/settings",      icon: Settings           },
+      { title: "Employees",       href: "/employees",     icon: Users               },
+      { title: "Rewards Catalog", href: "/rewards",       icon: Gift                },
+      { title: "Points & Budget", href: "/budget",        icon: Wallet              },
+      { title: "Notifications",   href: "/notifications", icon: Bell,     badge: 3  },
+      { title: "Settings",        href: "/settings",      icon: Settings            },
     ],
   },
 ];
+
+function matchesActive(href: string, pathname: string, search: string): boolean {
+  const [hrefPath, hrefQuery = ""] = href.split("?");
+  if (hrefPath !== pathname) return false;
+  const curParams = new URLSearchParams(search);
+  if (!hrefQuery) {
+    // Bare path: only active if no rnr tab is set.
+    return curParams.get("tab") !== "rnr";
+  }
+  const hrefParams = new URLSearchParams(hrefQuery);
+  for (const [k, v] of hrefParams.entries()) {
+    if (curParams.get(k) !== v) return false;
+  }
+  return true;
+}
 
 const activeClass =
   "px-3 py-2 shadow-sm bg-stone-800 relative bg-gradient-to-b from-stone-700 to-stone-800 border border-stone-900 text-stone-50 after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_1px_0px_rgba(255,255,255,0.25),inset_0_-2px_0px_rgba(0,0,0,0.35)] after:pointer-events-none duration-300";
@@ -128,7 +126,7 @@ export function Sidebar({ onClose, onSignOut }: { onClose?: () => void; onSignOu
             </p>
             {group.items.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.href;
+              const isActive = matchesActive(item.href, location.pathname, location.search);
               return (
                 <NavLink key={item.href} to={item.href}>
                   <div className={cn("flex items-center text-sm font-normal rounded-lg cursor-pointer", isActive ? activeClass : inactiveClass)}>
