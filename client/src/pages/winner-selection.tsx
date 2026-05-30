@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import {
+  getAllProgramPanelMembers,
   getNominationsForProgram,
   getProgramById,
   type StoredProgram,
 } from "@/lib/programs-data";
 import {
+  shortlistByCategory,
   shortlistNominations,
   type ShortlistEntry,
 } from "@/lib/ai-shortlister";
@@ -34,7 +36,18 @@ export default function WinnerSelection() {
     const eligible = getNominationsForProgram(programId).filter(
       (n) => n.status === "approved" || n.status === "pending-panel",
     );
-    return shortlistNominations(eligible, account, program.panel ?? []);
+    // Phase 1.8 — per-category scoring when the program has categories.
+    if (program.categories && program.categories.length > 0) {
+      const byCat = shortlistByCategory(eligible, account, program.categories);
+      const flat: ShortlistEntry[] = [];
+      for (const arr of byCat.values()) flat.push(...arr);
+      flat.sort((a, b) => b.score - a.score || a.nominationId.localeCompare(b.nominationId));
+      flat.forEach((e, i) => {
+        e.rank = i + 1;
+      });
+      return flat;
+    }
+    return shortlistNominations(eligible, account, getAllProgramPanelMembers(program));
   }, [program, programId, account]);
 
   if (!programId || !program) {

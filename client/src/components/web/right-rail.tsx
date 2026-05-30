@@ -8,9 +8,9 @@ export function WebRightRail() {
   const isRnR = searchParams.get("tab") === "rnr";
   return (
     <aside className="sticky top-[80px] py-2 space-y-4">
-      <LeaderboardMini />
+      {!isRnR && <LeaderboardMini />}
       <QuickRecognize isRnR={isRnR} />
-      <RecentlyActive />
+      {!isRnR && <RecentlyActive />}
     </aside>
   );
 }

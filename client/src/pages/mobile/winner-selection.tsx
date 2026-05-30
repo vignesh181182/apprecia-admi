@@ -19,12 +19,14 @@ import { getAccount } from "@/lib/account";
 import {
   currentUserCanManageProgram,
   declareWinners,
+  getAllProgramPanelMembers,
   getNominationsForProgram,
   getProgramById,
   type Nomination,
   type ProgramCategory,
 } from "@/lib/programs-data";
 import {
+  shortlistByCategory,
   shortlistNominations,
   type ShortlistEntry,
 } from "@/lib/ai-shortlister";
@@ -55,12 +57,26 @@ export default function MobileWinnerSelection() {
     [nominations],
   );
 
-  const shortlist = useMemo<ShortlistEntry[]>(
-    () =>
-      program ? shortlistNominations(eligible, account, program.panel ?? []) : [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [program?.id, eligible.length],
+  const programPanel = useMemo(
+    () => (program ? getAllProgramPanelMembers(program) : []),
+    [program],
   );
+  const shortlist = useMemo<ShortlistEntry[]>(() => {
+    if (!program) return [];
+    // Phase 1.8 — per-category scoring when the program has categories.
+    if (program.categories && program.categories.length > 0) {
+      const byCat = shortlistByCategory(eligible, account, program.categories);
+      const flat: ShortlistEntry[] = [];
+      for (const arr of byCat.values()) flat.push(...arr);
+      flat.sort((a, b) => b.score - a.score || a.nominationId.localeCompare(b.nominationId));
+      flat.forEach((e, i) => {
+        e.rank = i + 1;
+      });
+      return flat;
+    }
+    return shortlistNominations(eligible, account, programPanel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [program?.id, eligible.length, programPanel.length]);
 
   const nominationById = useMemo(
     () => new Map(nominations.map((n) => [n.id, n])),
@@ -387,7 +403,7 @@ export default function MobileWinnerSelection() {
             <ShortlistDetail
               entry={openEntry}
               nomination={openNomination}
-              panelSize={(program.panel ?? []).length}
+              panelSize={programPanel.length}
             />
           )}
         </SheetContent>

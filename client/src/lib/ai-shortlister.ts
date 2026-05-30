@@ -1,5 +1,20 @@
 import type { Account } from "./account";
-import type { Nomination, PanelMember } from "./programs-data";
+import type {
+  CategoryCriterion,
+  CategoryGuidelines,
+  Nomination,
+  PanelMember,
+  ProgramCategory,
+} from "./programs-data";
+
+export type CriterionBreakdown = {
+  criterionId: string;
+  label: string;
+  /** 0–100, raw sub-score before weight. */
+  score: number;
+  /** 0–100, the category's weight on this criterion. */
+  weight: number;
+};
 
 export type ShortlistEntry = {
   nominationId: string;
@@ -13,6 +28,8 @@ export type ShortlistEntry = {
   highlights: string[];
   /** Score breakdown for the inspector / audit log. */
   breakdown: ScoreBreakdown;
+  /** Phase 1.8 — per-criterion sub-scores when scoring against a category rubric. */
+  criteriaBreakdown: CriterionBreakdown[];
 };
 
 export type ScoreBreakdown = {
@@ -20,6 +37,8 @@ export type ScoreBreakdown = {
   panelApproval: number;
   reasonQuality: number;
   impactKeywords: number;
+  /** Phase 1.8 — when scoring against a category rubric this replaces reasonQuality+impactKeywords. */
+  criteria: number;
   timeliness: number;
   total: number;
 };
@@ -44,6 +63,33 @@ const SCORE_WEIGHTS = {
   impactKeywords: 15,
   timeliness: 10,
 };
+
+// Phase 1.8 — when scoring against a category rubric, criteria replace the
+// reasonQuality + impactKeywords share (35 points). Manager / panel / timeliness
+// are unchanged so the total still sums to 100.
+const CRITERIA_BUDGET = SCORE_WEIGHTS.reasonQuality + SCORE_WEIGHTS.impactKeywords;
+
+const STOPWORDS = new Set([
+  "the", "and", "for", "with", "that", "this", "from", "what", "how", "who", "why",
+  "into", "onto", "their", "they", "them", "have", "has", "had", "was", "were",
+  "will", "would", "could", "should", "than", "then", "when", "where",
+  "look", "looks", "look's", "looking", "good", "great", "well", "really",
+  "very", "much", "more", "most", "less", "least", "any", "all", "some",
+  "your", "you", "our", "ours", "his", "her", "him", "she", "ours",
+  "value", "values", "people", "person", "team", "teams", "work", "works",
+  "make", "makes", "made", "doing", "does", "done", "did", "get", "gets",
+  "lookslike", "criteria", "criterion", "rubric",
+]);
+
+function extractKeywords(text: string): string[] {
+  const out = new Set<string>();
+  for (const raw of text.toLowerCase().split(/[^a-z0-9]+/)) {
+    if (raw.length < 4) continue;
+    if (STOPWORDS.has(raw)) continue;
+    out.add(raw);
+  }
+  return Array.from(out);
+}
 
 // ─── Hashing (stable across runs) ─────────────────────────────────────
 
@@ -127,18 +173,94 @@ function timelinessScore(n: Nomination, now: Date): number {
   return 0;
 }
 
+/**
+ * Score a single criterion 0–100 against the nomination reason. Deterministic.
+ * Uses the criterion's label + description as keyword seeds; the IMPACT_VERBS
+ * list contributes a small universal floor so a strong reason still scores
+ * even when the rubric is sparse.
+ */
+export function scoreCriterion(criterion: CategoryCriterion, reason: string): number {
+  const keywords = extractKeywords(`${criterion.label} ${criterion.description}`);
+  const lower = reason.toLowerCase();
+
+  let keywordHits = 0;
+  for (const k of keywords) {
+    const re = new RegExp(`\\b${k}\\b`, "g");
+    const m = lower.match(re);
+    if (m) keywordHits += m.length;
+  }
+  const keywordScore = keywords.length === 0 ? 30 : Math.min(60, keywordHits * 15);
+
+  let verbHits = 0;
+  for (const v of IMPACT_VERBS) {
+    const re = new RegExp(`\\b${v}\\b`, "g");
+    const m = lower.match(re);
+    if (m) verbHits += m.length;
+  }
+  const verbScore = Math.min(25, verbHits * 5);
+
+  let lengthBonus = 0;
+  if (reason.length >= 300) lengthBonus = 15;
+  else if (reason.length >= 100) lengthBonus = 8;
+
+  return Math.min(100, keywordScore + verbScore + lengthBonus);
+}
+
 export function scoreNomination(
   n: Nomination,
   panel: PanelMember[],
-  now: Date = new Date(),
-): ScoreBreakdown {
+  options: { guidelines?: CategoryGuidelines | null; now?: Date } = {},
+): { breakdown: ScoreBreakdown; criteriaBreakdown: CriterionBreakdown[] } {
+  const now = options.now ?? new Date();
   const managerApproval = managerApprovalScore(n);
   const panelApproval = panelApprovalScore(n, panel);
+  const timeliness = timelinessScore(n, now);
+
+  const guidelines = options.guidelines;
+  if (guidelines && guidelines.criteria.length > 0) {
+    // Phase 1.8 — score against the category's rubric. Criteria budget
+    // (35 pts) replaces the legacy reasonQuality + impactKeywords share.
+    const weightSum = guidelines.criteria.reduce((s, c) => s + c.weight, 0) || 1;
+    const criteriaBreakdown: CriterionBreakdown[] = guidelines.criteria.map((c) => ({
+      criterionId: c.id,
+      label: c.label,
+      score: scoreCriterion(c, n.reason),
+      weight: c.weight,
+    }));
+    const weighted =
+      criteriaBreakdown.reduce((s, c) => s + (c.score * c.weight) / 100, 0) / weightSum * 100;
+    const criteria = Math.round((weighted / 100) * CRITERIA_BUDGET);
+    const total = managerApproval + panelApproval + criteria + timeliness;
+    return {
+      breakdown: {
+        managerApproval,
+        panelApproval,
+        reasonQuality: 0,
+        impactKeywords: 0,
+        criteria,
+        timeliness,
+        total,
+      },
+      criteriaBreakdown,
+    };
+  }
+
+  // Original (pre-1.8) scoring when no rubric is provided.
   const reasonQuality = reasonQualityScore(n.reason);
   const impactKeywords = impactKeywordsScore(n.reason);
-  const timeliness = timelinessScore(n, now);
   const total = managerApproval + panelApproval + reasonQuality + impactKeywords + timeliness;
-  return { managerApproval, panelApproval, reasonQuality, impactKeywords, timeliness, total };
+  return {
+    breakdown: {
+      managerApproval,
+      panelApproval,
+      reasonQuality,
+      impactKeywords,
+      criteria: 0,
+      timeliness,
+      total,
+    },
+    criteriaBreakdown: [],
+  };
 }
 
 // ─── Reasoning generator ──────────────────────────────────────────────
@@ -189,16 +311,33 @@ export function generateReasoning(
   score: number,
   highlights: string[],
   panel: PanelMember[],
+  criteria: CriterionBreakdown[] = [],
 ): string {
   const ratio = panelApprovalRatio(n.id, panel.length);
   const opener = `${n.nomineeName} scored ${score}/100 for this category.`;
   const top = highlights[0] ?? n.reason.slice(0, 140);
   const second = highlights[1];
   const sentiment = panelSentiment(ratio, panel.length);
+
+  // Phase 1.8 — when scoring against a category rubric, point at the
+  // strongest and weakest criteria by name so the panel sees why this
+  // nomination scored where it did.
+  let rubricNote = "";
+  if (criteria.length > 0) {
+    const sorted = [...criteria].sort((a, b) => b.score - a.score);
+    const strongest = sorted[0];
+    const weakest = sorted[sorted.length - 1];
+    if (sorted.length >= 2 && strongest.score - weakest.score >= 20) {
+      rubricNote = ` Strong on ${strongest.label} (${strongest.score}/100) but light on ${weakest.label} (${weakest.score}/100).`;
+    } else {
+      rubricNote = ` Consistent across the rubric — top on ${strongest.label} (${strongest.score}/100).`;
+    }
+  }
+
   return [
     opener,
     second ? `${stripPeriod(top)}. ${stripPeriod(second)}.` : `${stripPeriod(top)}.`,
-    sentiment,
+    sentiment + rubricNote,
   ].join(" ");
 }
 
@@ -208,21 +347,42 @@ function stripPeriod(s: string): string {
 
 // ─── Public entry point ───────────────────────────────────────────────
 
+export type ShortlistOptions = {
+  /** Phase 1.8 — score against this category's rubric. */
+  guidelines?: CategoryGuidelines | null;
+  now?: Date;
+};
+
 export function shortlistNominations(
   nominations: Nomination[],
   account: Account | null,
   panel: PanelMember[],
-  now: Date = new Date(),
+  options: ShortlistOptions | Date = {},
 ): ShortlistEntry[] {
   const _ = account; // reserved for future weighting (e.g., currency-aware bonuses)
+  // Backwards compat: old callers passed `now: Date` as the 4th arg.
+  const opts: ShortlistOptions =
+    options instanceof Date ? { now: options } : options;
+  const guidelines = opts.guidelines ?? null;
+  const now = opts.now ?? new Date();
+
   const eligible = nominations.filter(
     (n) => n.status === "approved" || n.status === "pending-panel",
   );
 
   const scored = eligible.map((n) => {
-    const breakdown = scoreNomination(n, panel, now);
+    const { breakdown, criteriaBreakdown } = scoreNomination(n, panel, {
+      guidelines,
+      now,
+    });
     const highlights = extractHighlights(n.reason);
-    const reasoning = generateReasoning(n, breakdown.total, highlights, panel);
+    const reasoning = generateReasoning(
+      n,
+      breakdown.total,
+      highlights,
+      panel,
+      criteriaBreakdown,
+    );
     return {
       nominationId: n.id,
       score: breakdown.total,
@@ -230,6 +390,7 @@ export function shortlistNominations(
       reasoning,
       highlights,
       breakdown,
+      criteriaBreakdown,
     } as ShortlistEntry;
   });
 
@@ -242,6 +403,53 @@ export function shortlistNominations(
     e.rank = i + 1;
   });
   return scored;
+}
+
+/**
+ * Phase 1.8 — score nominations per category, using each category's own
+ * guidelines and panel. Returns a map keyed by category id. Nominations
+ * without a matching categoryId fall through to the first category as a
+ * fallback so legacy data still shortlists.
+ *
+ * Pass an empty `categories` array to bypass per-category scoring; the
+ * caller can fall back to the unscoped `shortlistNominations()`.
+ */
+export function shortlistByCategory(
+  nominations: Nomination[],
+  account: Account | null,
+  categories: ProgramCategory[],
+  now: Date = new Date(),
+): Map<string, ShortlistEntry[]> {
+  const out = new Map<string, ShortlistEntry[]>();
+  if (categories.length === 0) return out;
+
+  const fallbackId = categories[0].id;
+  const validIds = new Set(categories.map((c) => c.id));
+
+  // Bucket nominations by category id (with fallback) before scoring so the
+  // per-category rubric only sees its own nominees.
+  const buckets = new Map<string, Nomination[]>();
+  for (const c of categories) buckets.set(c.id, []);
+  for (const n of nominations) {
+    const target = n.categoryId && validIds.has(n.categoryId) ? n.categoryId : fallbackId;
+    buckets.get(target)!.push(n);
+  }
+
+  for (const c of categories) {
+    const noms = buckets.get(c.id) ?? [];
+    if (noms.length === 0) {
+      out.set(c.id, []);
+      continue;
+    }
+    out.set(
+      c.id,
+      shortlistNominations(noms, account, c.panel ?? [], {
+        guidelines: c.guidelines ?? null,
+        now,
+      }),
+    );
+  }
+  return out;
 }
 
 // ─── Audit log ────────────────────────────────────────────────────────

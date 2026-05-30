@@ -6,6 +6,23 @@ import { currentEmployee } from "@/lib/recognize-data";
 import { getWallet, type Wallet as WalletShape } from "@/lib/wallet";
 import { isMonetaryActive } from "@/lib/appreciation-policy";
 
+// Compare wallets by value so we can bail out of setState when nothing has
+// actually changed. getWallet() returns a fresh object on every call (it
+// parses JSON), so referential equality alone would force a re-render on
+// every poll tick.
+function walletsEqual(a: WalletShape | null, b: WalletShape | null): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.userId === b.userId &&
+    a.period === b.period &&
+    a.giveBalance === b.giveBalance &&
+    a.giveAllowance === b.giveAllowance &&
+    a.receiveBalance === b.receiveBalance &&
+    a.lifetimeReceived === b.lifetimeReceived
+  );
+}
+
 function nextPeriodResetDate(now: Date = new Date()): Date {
   // 1st of the next month, local time.
   return new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -17,7 +34,11 @@ function formatResetDate(d: Date): string {
 
 export function WalletCard() {
   const account = getAccount();
-  const employee = useMemo(() => currentEmployee(account?.adminEmail), [account]);
+  // adminEmail is a string — stable across renders even though getAccount()
+  // returns a new object reference each call. Memoize the employee lookup
+  // and the monetary flag against it so downstream effects don't churn.
+  const adminEmail = account?.adminEmail ?? null;
+  const employee = useMemo(() => currentEmployee(adminEmail ?? undefined), [adminEmail]);
   const monetary = isMonetaryActive(account);
 
   const [wallet, setWallet] = useState<WalletShape | null>(() =>
@@ -27,7 +48,11 @@ export function WalletCard() {
   useEffect(() => {
     if (!monetary || !employee) return;
     function refresh() {
-      setWallet(getWallet(employee!.id, "employee", account));
+      // Read the latest account from storage on each tick — keeping it out
+      // of the dep array prevents an infinite loop, since getAccount()
+      // hands back a fresh object every call.
+      const next = getWallet(employee!.id, "employee", getAccount());
+      setWallet((prev) => (walletsEqual(prev, next) ? prev : next));
     }
     refresh();
     window.addEventListener("storage", refresh);
@@ -36,7 +61,7 @@ export function WalletCard() {
       window.removeEventListener("storage", refresh);
       window.clearInterval(timer);
     };
-  }, [monetary, employee, account]);
+  }, [monetary, employee]);
 
   if (!monetary) {
     return (

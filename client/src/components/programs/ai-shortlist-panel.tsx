@@ -12,12 +12,14 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, ChevronDown, Trophy } from "lucide-react";
 import {
+  shortlistByCategory,
   shortlistNominations,
   writeShortlistAudit,
   type ShortlistEntry,
 } from "@/lib/ai-shortlister";
 import {
   declareWinners,
+  getAllProgramPanelMembers,
   getNominationsForProgram,
   type Nomination,
   type StoredProgram,
@@ -60,10 +62,29 @@ export function AiShortlistPanel({
       ),
     [allNominations],
   );
-  const shortlist = useMemo<ShortlistEntry[]>(
-    () => shortlistNominations(eligible, account, program.panel ?? []),
-    [eligible, account, program.panel],
+  const programPanel = useMemo(
+    () => getAllProgramPanelMembers(program),
+    [program],
   );
+
+  // Phase 1.8 — score per category against each category's rubric, then
+  // flatten + re-sort for the cross-program top-N view shown here.
+  const shortlist = useMemo<ShortlistEntry[]>(() => {
+    if (program.categories && program.categories.length > 0) {
+      const byCat = shortlistByCategory(eligible, account, program.categories);
+      const flat: ShortlistEntry[] = [];
+      for (const arr of byCat.values()) flat.push(...arr);
+      flat.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.nominationId.localeCompare(b.nominationId);
+      });
+      flat.forEach((e, i) => {
+        e.rank = i + 1;
+      });
+      return flat;
+    }
+    return shortlistNominations(eligible, account, programPanel);
+  }, [eligible, account, program.categories, programPanel]);
 
   const cycleId = useMemo(() => eligible[0]?.cycleId ?? "current", [eligible]);
   useEffect(() => {
@@ -350,6 +371,26 @@ function ShortlistCard({
                 <li key={i}>{h}</li>
               ))}
             </ul>
+          )}
+          {entry.criteriaBreakdown.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {entry.criteriaBreakdown.map((c) => (
+                <span
+                  key={c.criterionId}
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] border ${
+                    c.score >= 70
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                      : c.score >= 40
+                        ? "bg-amber-50 border-amber-200 text-amber-800"
+                        : "bg-stone-50 border-stone-200 text-stone-600"
+                  }`}
+                  title={`Weight ${c.weight}`}
+                >
+                  {c.label}
+                  <span className="tabular-nums">{c.score}</span>
+                </span>
+              ))}
+            </div>
           )}
           <Collapsible open={open} onOpenChange={setOpen}>
             <CollapsibleTrigger asChild>

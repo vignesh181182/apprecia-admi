@@ -7,6 +7,51 @@ export type ProgramStatus =
 
 export type ProgramCadence = "monthly" | "quarterly" | "yearly" | "one-off";
 
+// ─── Category-level model (Phase 1.8) ─────────────────────────────────
+//
+// Guidelines, eligibility, and the panel of judges now live on each award
+// category — not on the program. The program is a container for shared
+// settings (banner, icon, cycle, notifications); everything evaluative
+// belongs to the category. The migration helper at `normalizeProgram()`
+// pushes legacy program-level panel/eligibility down onto every category.
+
+export type CategoryCriterion = {
+  id: string;
+  label: string;
+  /** What "good" looks like for this criterion — feeds AI scoring rationale. */
+  description: string;
+  /** 0–100. Weights across criteria should sum to ~100. */
+  weight: number;
+};
+
+export type CategoryGuidelines = {
+  /** 1–2 sentence what this award is for. */
+  summary: string;
+  /** The rubric the panel and AI score against. */
+  criteria: CategoryCriterion[];
+  /** Longer prose with examples of strong nominations. */
+  whatGoodLooksLike: string;
+  /** Optional — what makes a nomination ineligible. */
+  disqualifiers?: string;
+};
+
+export type CategoryEligibility = {
+  /** Empty = open to all departments. */
+  departments: string[];
+  /** Empty = open to all locations. */
+  locations: string[];
+  /** Empty = open to all roles. */
+  roles: string[];
+  minTenureMonths: number;
+  /** 0 = no exclusion. */
+  excludePastWinnersCycles: number;
+  /** Free-text note shown to nominators on the nominate dialog. */
+  customNote?: string;
+};
+
+/** @deprecated Backwards-compatible alias for code that hasn't been migrated yet. */
+export type ProgramEligibility = CategoryEligibility;
+
 export type ProgramCategory = {
   id: string;
   name: string;
@@ -16,16 +61,18 @@ export type ProgramCategory = {
   winnersCount: number;
   /** 0–10000. Hidden when monetary recognition is disabled. */
   prizePoints: number;
-};
-
-export type ProgramEligibility = {
-  /** Empty = open to all departments. */
-  departments: string[];
-  /** Empty = open to all locations. */
-  locations: string[];
-  minTenureMonths: number;
-  /** 0 = no exclusion. */
-  excludePastWinnersCycles: number;
+  /** Phase 1.8 — the rubric the panel and AI score against. */
+  guidelines?: CategoryGuidelines;
+  /** Phase 1.8 — who can be nominated in this category. */
+  eligibility?: CategoryEligibility;
+  /** Phase 1.8 — judges for this specific category. Exactly one is lead. */
+  panel?: PanelMember[];
+  /**
+   * Phase 1.10 starter — per-category budget allocation. The program's
+   * total `budgetAllocated` is the sum of these. Migration distributes any
+   * legacy program-level budget across categories on first read.
+   */
+  budgetAllocated?: number;
 };
 
 export type ProgramNotifications = {
@@ -105,7 +152,13 @@ export type Program = {
     avatar: string;
     quote: string;
   };
-  /** Panel of judges responsible for selecting winners for this program. */
+  /**
+   * @deprecated Phase 1.8 — Panels live on each category now. This field
+   * is read only by the migration helper, which copies it down onto any
+   * category that lacks its own panel and then clears this. Don't read
+   * from `program.panel` directly — use `getAllProgramPanelMembers(program)`
+   * or iterate `program.categories[].panel`.
+   */
   panel?: PanelMember[];
 
   // ─── Phase 1.6 — HR-configured fields ────────────────────────────────
@@ -123,6 +176,11 @@ export type Program = {
   repeatAutomatically?: boolean;
   /** Award categories the panel selects winners across. */
   categories?: ProgramCategory[];
+  /**
+   * @deprecated Phase 1.8 — Eligibility lives on each category now. Read
+   * only by the migration helper, which copies it down onto any category
+   * that lacks its own eligibility and then clears this.
+   */
   eligibility?: ProgramEligibility;
   budgetPeriod?: ProgramBudgetPeriod;
   notifications?: ProgramNotifications;
@@ -347,6 +405,48 @@ export const PROGRAMS: Program[] = [
       { iconKey: "trophy", title: "How it works",        body: "We celebrate you on the day. Managers can add a personal note." },
       { iconKey: "gift",   title: "What's in it for you?", body: "Tiered points based on your milestone, plus a special anniversary badge." },
     ],
+    categories: [
+      {
+        id: "yos-1",
+        name: "1 Year",
+        emoji: "🎈",
+        description: "First-year anniversary.",
+        winnersCount: 99,
+        prizePoints: 100,
+        guidelines: defaultGuidelinesForName("First year together"),
+        eligibility: { departments: [], locations: [], roles: [], minTenureMonths: 12, excludePastWinnersCycles: 0 },
+      },
+      {
+        id: "yos-3",
+        name: "3 Years",
+        emoji: "🌱",
+        description: "Three years in.",
+        winnersCount: 99,
+        prizePoints: 300,
+        guidelines: defaultGuidelinesForName("Three years in"),
+        eligibility: { departments: [], locations: [], roles: [], minTenureMonths: 36, excludePastWinnersCycles: 0 },
+      },
+      {
+        id: "yos-5",
+        name: "5 Years",
+        emoji: "🌟",
+        description: "Half a decade.",
+        winnersCount: 99,
+        prizePoints: 500,
+        guidelines: defaultGuidelinesForName("Half a decade with the team"),
+        eligibility: { departments: [], locations: [], roles: [], minTenureMonths: 60, excludePastWinnersCycles: 0 },
+      },
+      {
+        id: "yos-10",
+        name: "10 Years",
+        emoji: "🏛️",
+        description: "A decade and counting.",
+        winnersCount: 99,
+        prizePoints: 1000,
+        guidelines: defaultGuidelinesForName("A decade and counting"),
+        eligibility: { departments: [], locations: [], roles: [], minTenureMonths: 120, excludePastWinnersCycles: 0 },
+      },
+    ],
     panel: [
       { id: "p1", name: "Sarah Chen", role: "VP People Operations", department: "People Ops", avatar: "/m/images/user02.png", lead: true, reviewed: 6, totalToReview: 6 },
       { id: "p2", name: "Aisha Patel", role: "People Partner", department: "People Ops", avatar: "/m/images/user06.png", reviewed: 6, totalToReview: 6 },
@@ -388,15 +488,74 @@ export const PROGRAMS: Program[] = [
       { iconKey: "award",  title: "What's in it for you?", body: "Up to 12,000 in points + a Sprint Champion badge." },
     ],
     categories: [
-      { id: "cat-impact", name: "Customer Impact",   emoji: "🎯", description: "Measurable wins for customers.",        winnersCount: 1, prizePoints: 200 },
-      { id: "cat-craft",  name: "Engineering Craft", emoji: "🛠️", description: "Built it well, shipped it cleanly.",     winnersCount: 1, prizePoints: 200 },
-      { id: "cat-team",   name: "Team Player",       emoji: "🤝", description: "Made the team stronger this quarter.",  winnersCount: 1, prizePoints: 200 },
-    ],
-    panel: [
-      { id: "p1", name: "Sarah Chen",      role: "VP People Operations", department: "People Ops",  avatar: "/m/images/user02.png", lead: true, reviewed: 12, totalToReview: 12 },
-      { id: "p2", name: "Marcus Johnson",  role: "CHRO",                 department: "Executive",   avatar: "/m/images/user05.png", reviewed: 12, totalToReview: 12 },
-      { id: "p3", name: "Priya Sharma",    role: "Director of Product",  department: "Product",     avatar: "/m/images/user03.png", reviewed: 12, totalToReview: 12 },
-      { id: "p4", name: "James Wilson",    role: "Engineering Director", department: "Engineering", avatar: "/m/images/user04.png", reviewed: 12, totalToReview: 12 },
+      {
+        id: "cat-impact",
+        name: "Customer Impact",
+        emoji: "🎯",
+        description: "Measurable wins for customers.",
+        winnersCount: 1,
+        prizePoints: 200,
+        guidelines: {
+          summary: "Recognize work that moved a customer metric this quarter.",
+          whatGoodLooksLike: "A nomination that names the customer, the metric, and the size of the lift. Bonus for retention or expansion outcomes.",
+          criteria: [
+            { id: "metric",   label: "Metric moved",      description: "A specific KPI shifted, not a feeling.", weight: 40 },
+            { id: "size",     label: "Size of impact",    description: "How much did it move? Scale matters.",   weight: 30 },
+            { id: "customer", label: "Customer connection", description: "Was the customer in the room?",        weight: 30 },
+          ],
+          disqualifiers: "Internal-only improvements with no customer-facing outcome.",
+        },
+        eligibility: { departments: ["Customer Success", "Product", "Engineering"], locations: [], roles: [], minTenureMonths: 0, excludePastWinnersCycles: 0 },
+        panel: [
+          { id: "p3", name: "Priya Sharma",   role: "Director of Product",  department: "Product",     avatar: "/m/images/user03.png", lead: true, reviewed: 12, totalToReview: 12 },
+          { id: "p4", name: "James Wilson",   role: "Engineering Director", department: "Engineering", avatar: "/m/images/user04.png", reviewed: 12, totalToReview: 12 },
+          { id: "p5", name: "Carla Mendes",   role: "VP Customer Success",  department: "CS",          avatar: "/m/images/user03.png", reviewed: 12, totalToReview: 12 },
+        ],
+      },
+      {
+        id: "cat-craft",
+        name: "Engineering Craft",
+        emoji: "🛠️",
+        description: "Built it well, shipped it cleanly.",
+        winnersCount: 1,
+        prizePoints: 200,
+        guidelines: {
+          summary: "Recognize engineers whose work raised the bar for quality, speed, or reliability.",
+          whatGoodLooksLike: "A nomination that points at the artifact (PR, RFC, system) and what others learned from it.",
+          criteria: [
+            { id: "quality",    label: "Code quality",     description: "Reviewable, tested, maintainable.",       weight: 40 },
+            { id: "leverage",   label: "Leverage",          description: "Did it raise the floor for the team?",    weight: 35 },
+            { id: "ownership",  label: "Ownership",         description: "Followed through past the merge.",        weight: 25 },
+          ],
+        },
+        eligibility: { departments: ["Engineering"], locations: [], roles: [], minTenureMonths: 0, excludePastWinnersCycles: 0 },
+        panel: [
+          { id: "p4", name: "James Wilson",    role: "Engineering Director", department: "Engineering", avatar: "/m/images/user04.png", lead: true, reviewed: 12, totalToReview: 12 },
+          { id: "p7", name: "Daniel Park",     role: "Principal Engineer",   department: "Engineering", avatar: "/m/images/user07.png", reviewed: 12, totalToReview: 12 },
+        ],
+      },
+      {
+        id: "cat-team",
+        name: "Team Player",
+        emoji: "🤝",
+        description: "Made the team stronger this quarter.",
+        winnersCount: 1,
+        prizePoints: 200,
+        guidelines: {
+          summary: "Recognize teammates whose collaboration unblocked others or improved how the team works.",
+          whatGoodLooksLike: "Concrete moments — pairing, mentoring, unblocking, running a difficult retro.",
+          criteria: [
+            { id: "collab",   label: "Collaboration",     description: "Made it easier for others to do their job.", weight: 50 },
+            { id: "spread",   label: "Spread of impact",  description: "Helped one person vs. many.",                weight: 30 },
+            { id: "stretch",  label: "Beyond the role",   description: "Outside their direct lane.",                 weight: 20 },
+          ],
+        },
+        eligibility: { departments: [], locations: [], roles: [], minTenureMonths: 0, excludePastWinnersCycles: 0, customNote: "Open to all teammates — collaboration counts everywhere." },
+        panel: [
+          { id: "p1", name: "Sarah Chen",      role: "VP People Operations", department: "People Ops",  avatar: "/m/images/user02.png", lead: true, reviewed: 12, totalToReview: 12 },
+          { id: "p2", name: "Marcus Johnson",  role: "CHRO",                 department: "Executive",   avatar: "/m/images/user05.png", reviewed: 12, totalToReview: 12 },
+        ],
+      },
     ],
   },
   {
@@ -490,26 +649,201 @@ export const PROGRAMS: Program[] = [
 
 export function getProgram(id: string | undefined): Program | undefined {
   if (!id) return undefined;
-  return PROGRAMS.find((p) => p.id === id);
+  const found = PROGRAMS.find((p) => p.id === id);
+  return found ? normalizeProgram(found) : undefined;
+}
+
+// ─── Category-model normalization (Phase 1.8) ─────────────────────────
+//
+// Migration entry point. Idempotent. Run on every program read so the
+// legacy shape (panel + eligibility at program level, optional categories)
+// converges to the new shape (everything per-category). Subsequent writes
+// hand back the normalized object.
+
+const DEFAULT_CATEGORY_ELIGIBILITY: CategoryEligibility = {
+  departments: [],
+  locations: [],
+  roles: [],
+  minTenureMonths: 0,
+  excludePastWinnersCycles: 0,
+};
+
+function defaultGuidelinesFor(category: Pick<ProgramCategory, "description" | "name">): CategoryGuidelines {
+  return {
+    summary: category.description || `Recognize teammates who exemplify ${category.name}.`,
+    criteria: [
+      {
+        id: "overall-impact",
+        label: "Overall impact",
+        description: "How meaningful and clear is the contribution being recognized?",
+        weight: 100,
+      },
+    ],
+    whatGoodLooksLike: "",
+  };
+}
+
+function defaultGuidelinesForName(summary: string): CategoryGuidelines {
+  return {
+    summary,
+    criteria: [
+      { id: "overall-impact", label: "Overall impact", description: "How meaningful is the milestone being recognized?", weight: 100 },
+    ],
+    whatGoodLooksLike: "",
+  };
+}
+
+function defaultCategoryFor(program: Pick<Program, "id" | "name" | "emoji" | "shortDesc" | "pointsPerWin">): ProgramCategory {
+  return {
+    id: `${program.id}-cat-default`,
+    name: program.name,
+    emoji: program.emoji,
+    description: program.shortDesc,
+    winnersCount: 1,
+    prizePoints: program.pointsPerWin,
+  };
 }
 
 /**
- * 1.7.1 visibility helper. True if the current user can manage this program's
- * post-cycle workflow — either an HR admin or a named member of the program's
- * panel. Falls back to a name match against `account.adminName` because the
- * demo doesn't carry a per-employee identity beyond that.
+ * Phase 1.8 migration. Push any legacy program-level panel/eligibility down
+ * onto each category, backfill empty guidelines, ensure every program has at
+ * least one category, then clear the deprecated program-level fields.
+ *
+ * Phase 1.10 starter — also distributes any legacy program-level budget
+ * across categories that don't yet carry their own allocation, then leaves
+ * the program-level total in place as the rollup.
+ *
+ * Idempotent — safe to call on already-migrated data.
+ */
+export function normalizeProgram<T extends Program>(program: T): T {
+  const fromPanel = program.panel ?? [];
+  const fromEligibility = program.eligibility;
+
+  const baseCategories: ProgramCategory[] =
+    program.categories && program.categories.length > 0
+      ? program.categories
+      : [defaultCategoryFor(program)];
+
+  // Budget distribution: only kicks in when no category has its own allocation.
+  // Otherwise we trust category-level data and recompute the program total.
+  const anyCategoryHasBudget = baseCategories.some(
+    (c) => typeof c.budgetAllocated === "number",
+  );
+  const evenShare =
+    !anyCategoryHasBudget && program.budgetAllocated && baseCategories.length > 0
+      ? Math.floor(program.budgetAllocated / baseCategories.length)
+      : 0;
+
+  const categories = baseCategories.map((c) => {
+    const panel = c.panel && c.panel.length > 0 ? c.panel : fromPanel;
+    const eligibility = c.eligibility ?? fromEligibility ?? { ...DEFAULT_CATEGORY_ELIGIBILITY };
+    const guidelines = c.guidelines ?? defaultGuidelinesFor(c);
+    const budgetAllocated = c.budgetAllocated ?? evenShare;
+    return { ...c, panel, eligibility, guidelines, budgetAllocated };
+  });
+
+  // Recompute the program-level rollup from the (possibly newly distributed)
+  // category budgets so the two stay in sync.
+  const rolledBudget = categories.reduce((s, c) => s + (c.budgetAllocated ?? 0), 0);
+
+  // Strip the deprecated program-level fields so consumers can't accidentally
+  // read them. The migration is the only legitimate reader.
+  const { panel: _drop1, eligibility: _drop2, ...rest } = program;
+  return {
+    ...(rest as T),
+    categories,
+    budgetAllocated: rolledBudget > 0 ? rolledBudget : program.budgetAllocated,
+  } as T;
+}
+
+/**
+ * Union of every category's panel, deduplicated by member id. Used by the
+ * RnR dashboard counters and any view that wants to know "who can judge
+ * anywhere in this program."
+ */
+export function getAllProgramPanelMembers(program: Pick<Program, "categories">): PanelMember[] {
+  const seen = new Map<string, PanelMember>();
+  for (const c of program.categories ?? []) {
+    for (const m of c.panel ?? []) {
+      if (!seen.has(m.id)) seen.set(m.id, m);
+    }
+  }
+  return Array.from(seen.values());
+}
+
+/**
+ * 1.7.1 visibility helper, updated for 1.8. True if the current user can
+ * manage this program's post-cycle workflow — either an HR admin or a
+ * named member of any category's panel. Falls back to a name match
+ * against `account.adminName` because the demo doesn't carry per-employee
+ * identity beyond that.
  */
 export function currentUserCanManageProgram(
   account: import("./account").Account | null,
-  program: Pick<Program, "panel"> | undefined | null,
+  program: Pick<Program, "categories"> | undefined | null,
 ): boolean {
   if (!account || !program) return false;
   if (account.role === "admin") return true;
-  const panel = program.panel ?? [];
+  const panel = getAllProgramPanelMembers(program);
   if (panel.length === 0) return false;
   const name = (account.adminName ?? "").trim().toLowerCase();
   if (!name) return false;
   return panel.some((p) => p.name.trim().toLowerCase() === name);
+}
+
+/**
+ * 1.8 — true if the current user is on this specific category's panel
+ * (or is an HR admin). Used by the panel review page to gate per-category
+ * inboxes.
+ */
+export function currentUserCanJudgeCategory(
+  account: import("./account").Account | null,
+  category: Pick<ProgramCategory, "panel"> | undefined | null,
+): boolean {
+  if (!account || !category) return false;
+  if (account.role === "admin") return true;
+  const panel = category.panel ?? [];
+  if (panel.length === 0) return false;
+  const name = (account.adminName ?? "").trim().toLowerCase();
+  if (!name) return false;
+  return panel.some((p) => p.name.trim().toLowerCase() === name);
+}
+
+/**
+ * 1.8 — does this employee meet a category's eligibility rules? The
+ * `pastWinnerOf` set is the set of category ids this person has won in
+ * recent cycles; pass an empty set if you don't track that yet.
+ */
+export type EligibilityEmployee = {
+  department?: string;
+  location?: string;
+  role?: string;
+  tenureMonths?: number;
+  pastWinnerOf?: Set<string>;
+};
+
+export function isEligible(
+  employee: EligibilityEmployee,
+  category: Pick<ProgramCategory, "id" | "eligibility">,
+): boolean {
+  const rules = category.eligibility;
+  if (!rules) return true;
+  if (rules.departments.length > 0 && employee.department && !rules.departments.includes(employee.department)) {
+    return false;
+  }
+  if (rules.locations.length > 0 && employee.location && !rules.locations.includes(employee.location)) {
+    return false;
+  }
+  if (rules.roles.length > 0 && employee.role && !rules.roles.includes(employee.role)) {
+    return false;
+  }
+  if (rules.minTenureMonths > 0 && (employee.tenureMonths ?? 0) < rules.minTenureMonths) {
+    return false;
+  }
+  if (rules.excludePastWinnersCycles > 0 && employee.pastWinnerOf?.has(category.id)) {
+    return false;
+  }
+  return true;
 }
 
 export function getActivePrograms(): Program[] {
@@ -731,7 +1065,10 @@ function buildActiveNominations(program: Program): Nomination[] {
   if (total === 0) return [];
 
   // Use panel.reviewed/totalToReview as a hint for how far along the cycle is.
-  const panelLead = program.panel?.find((p) => p.lead);
+  // Phase 1.8: panels are per-category, so collapse across categories first.
+  const allPanel: PanelMember[] = (program.categories ?? []).flatMap((c) => c.panel ?? []);
+  const panelLead =
+    allPanel.find((p) => p.lead) ?? (program.panel ?? []).find((p) => p.lead);
   const reviewed = panelLead?.reviewed ?? Math.floor(total * 0.5);
   const reviewProgress = total === 0 ? 0 : reviewed / total;
 
@@ -1028,7 +1365,9 @@ function writeStored(list: StoredProgram[]): void {
 }
 
 function seedStored(): StoredProgram[] {
-  const seed: StoredProgram[] = [...PROGRAMS, ...PAST_PROGRAMS];
+  const seed: StoredProgram[] = [...PROGRAMS, ...PAST_PROGRAMS].map((p) =>
+    normalizeProgram(p as Program) as StoredProgram,
+  );
   writeStored(seed);
   return seed;
 }
@@ -1042,10 +1381,18 @@ export function getStoredPrograms(): StoredProgram[] {
     ...PROGRAMS.filter((p) => !ids.has(p.id)),
     ...PAST_PROGRAMS.filter((p) => !ids.has(p.id)),
   ];
-  if (missing.length === 0) return stored;
-  const next = [...stored, ...missing];
-  writeStored(next);
-  return next;
+  // Always normalize on read so legacy data (panel/eligibility at program
+  // level) converges to the category-level shape. Persist if anything
+  // actually changed so subsequent reads skip the work.
+  const merged: StoredProgram[] = missing.length === 0 ? stored : [...stored, ...missing];
+  let mutated = missing.length > 0;
+  const normalized = merged.map((p) => {
+    const next = normalizeProgram(p as Program) as StoredProgram;
+    if (next !== p) mutated = true;
+    return next;
+  });
+  if (mutated) writeStored(normalized);
+  return normalized;
 }
 
 export function getProgramById(id: string): StoredProgram | undefined {
@@ -1054,9 +1401,10 @@ export function getProgramById(id: string): StoredProgram | undefined {
 
 export function saveProgram(program: StoredProgram): void {
   const all = getStoredPrograms();
+  const next = normalizeProgram(program as Program) as StoredProgram;
   const idx = all.findIndex((p) => p.id === program.id);
-  if (idx === -1) all.push(program);
-  else all[idx] = program;
+  if (idx === -1) all.push(next);
+  else all[idx] = next;
   writeStored(all);
 }
 

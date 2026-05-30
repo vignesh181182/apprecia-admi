@@ -774,10 +774,12 @@ export function getRnRStats(
   const programsAtRisk: RnRRiskRow[] = activePrograms
     .filter((p) => p.daysLeft >= 0 && p.daysLeft <= 14)
     .map((p) => {
-      const expected = Math.max(
-        PARTICIPATION_TARGET_DEFAULT,
-        p.panel?.[0]?.totalToReview ?? 0,
-      );
+      // Phase 1.8: panels are per-category. Take the deepest review queue
+      // across categories as the expected target.
+      const maxCategoryTarget = (p.categories ?? [])
+        .flatMap((c) => c.panel ?? [])
+        .reduce((max, m) => Math.max(max, m.totalToReview), 0);
+      const expected = Math.max(PARTICIPATION_TARGET_DEFAULT, maxCategoryTarget);
       const pct = expected === 0 ? 0 : Math.round((p.nominations / expected) * 100);
       return {
         programId: p.id,

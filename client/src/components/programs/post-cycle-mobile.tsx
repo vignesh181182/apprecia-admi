@@ -24,12 +24,14 @@ import { cn } from "@/lib/utils";
 import { getAccount, isAdmin } from "@/lib/account";
 import {
   currentUserCanManageProgram,
+  getAllProgramPanelMembers,
   getNominationsForProgram,
   type Nomination,
   type ProgramCategory,
   type StoredProgram,
 } from "@/lib/programs-data";
 import {
+  shortlistByCategory,
   shortlistNominations,
   type ShortlistEntry,
 } from "@/lib/ai-shortlister";
@@ -112,14 +114,9 @@ function AiShortlistMobile({
     [nominations],
   );
 
-  const shortlist = useMemo<ShortlistEntry[]>(
-    () =>
-      shortlistRun
-        ? shortlistNominations(eligible, account, program.panel ?? [])
-        : [],
-    // Cache per program + cycle end + nomination count, per spec.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shortlistRun, program.id, program.endDate, eligible.length],
+  const programPanel = useMemo(
+    () => getAllProgramPanelMembers(program),
+    [program],
   );
 
   const nominationById = useMemo(
@@ -127,32 +124,42 @@ function AiShortlistMobile({
     [nominations],
   );
 
-  const categories: ProgramCategory[] =
-    program.categories && program.categories.length > 0
-      ? program.categories
-      : [
-          {
-            id: "all",
-            name: "All nominations",
-            emoji: program.emoji ?? "✨",
-            description: "",
-            winnersCount: Math.max(1, Math.min(3, shortlist.length)),
-            prizePoints: program.pointsPerWin ?? 0,
-          },
-        ];
+  // Phase 1.8 — score per category against each category's own rubric.
+  // Falls back to the unscoped scorer when the program has no categories.
+  const categories: ProgramCategory[] = useMemo(
+    () =>
+      program.categories && program.categories.length > 0
+        ? program.categories
+        : [
+            {
+              id: "all",
+              name: "All nominations",
+              emoji: program.emoji ?? "✨",
+              description: "",
+              winnersCount: 1,
+              prizePoints: program.pointsPerWin ?? 0,
+            },
+          ],
+    [program.categories, program.emoji, program.pointsPerWin],
+  );
 
   const byCategory = useMemo(() => {
-    const m = new Map<string, ShortlistEntry[]>();
-    for (const c of categories) m.set(c.id, []);
-    const fallbackId = categories[0].id;
-    for (const e of shortlist) {
-      const nom = nominationById.get(e.nominationId);
-      const catId =
-        nom?.categoryId && m.has(nom.categoryId) ? nom.categoryId : fallbackId;
-      m.get(catId)!.push(e);
+    if (!shortlistRun) return new Map<string, ShortlistEntry[]>();
+    if (program.categories && program.categories.length > 0) {
+      return shortlistByCategory(eligible, account, program.categories);
     }
-    return m;
-  }, [categories, shortlist, nominationById]);
+    // No categories on the program — score everything against the (legacy)
+    // program-level panel so the demo still works.
+    const flat = shortlistNominations(eligible, account, programPanel);
+    return new Map([[categories[0].id, flat]]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shortlistRun, program.id, program.endDate, eligible.length, programPanel.length]);
+
+  const shortlist = useMemo<ShortlistEntry[]>(() => {
+    const flat: ShortlistEntry[] = [];
+    for (const arr of byCategory.values()) flat.push(...arr);
+    return flat;
+  }, [byCategory]);
 
   const [openEntryId, setOpenEntryId] = useState<string | null>(null);
   const openEntry = openEntryId
@@ -316,7 +323,7 @@ function AiShortlistMobile({
             <ShortlistDetail
               entry={openEntry}
               nomination={openNomination}
-              panelSize={(program.panel ?? []).length}
+              panelSize={programPanel.length}
             />
           )}
         </SheetContent>
