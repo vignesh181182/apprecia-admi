@@ -1,7 +1,5 @@
 import {
   Award,
-  Calendar,
-  ChevronRight,
   Edit3,
   Quote,
 } from "lucide-react";
@@ -28,8 +26,9 @@ export function DetailsTab({
 }) {
   return (
     <div className={cn("space-y-4", variant === "web" && "pt-3")}>
-      <RewardTeammateCard program={program} />
       <AboutCard program={program} />
+      <RewardTeammateCard program={program} />
+      <NominateButton />
       {program.lastWinner && <LastWinnerCard winner={program.lastWinner} />}
     </div>
   );
@@ -49,7 +48,7 @@ function RewardTeammateCard({ program }: { program: Program }) {
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="font-mobile text-base font-semibold text-stone-900 leading-tight">
-            Reward your teammate
+            Nominate a teammate
           </h3>
           <p className="text-sm text-stone-700 mt-1 leading-snug">
             Recognize a peer who's earned it for this program. They'll be added to the
@@ -83,13 +82,7 @@ function RewardTeammateCard({ program }: { program: Program }) {
                   <p className="text-sm font-mobile font-semibold text-stone-900 truncate">
                     {person.name}
                   </p>
-                  <p className="text-xs text-stone-500 truncate">
-                    {person.role} ·{" "}
-                    <span className="text-stone-700 font-mobile font-semibold">
-                      {person.points.toLocaleString()}
-                    </span>{" "}
-                    pts
-                  </p>
+                  <p className="text-xs text-stone-500 truncate">{person.role}</p>
                 </div>
                 <RecognizeDialog
                   kind="rnr"
@@ -109,38 +102,24 @@ function RewardTeammateCard({ program }: { program: Program }) {
         </div>
       )}
 
-      <div className="px-5 py-3.5 flex items-center justify-between gap-3 border-t border-stone-100 bg-stone-50/50">
-        <div className="text-xs text-stone-600 flex items-center gap-2.5 flex-wrap">
-          <span className="inline-flex items-center gap-1">
-            <Award className="w-3.5 h-3.5 text-amber-700" />
-            <span className="font-mobile font-semibold text-stone-900">
-              {program.pointsPerWin}
-            </span>{" "}
-            pts
-          </span>
-          <span className="w-1 h-1 rounded-full bg-stone-300 shrink-0" />
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-amber-700" />
-            <span className="font-mobile font-semibold text-stone-900">
-              {program.daysLeft}
-            </span>{" "}
-            days left
-          </span>
-        </div>
-        <RecognizeDialog
-          kind="rnr"
-          trigger={
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-xs font-mobile font-semibold text-[#a87a3a] hover:text-[#8e6630] transition-colors shrink-0"
-            >
-              {featured.length > 0 ? "Nominate someone else" : "Start a nomination"}
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          }
-        />
-      </div>
     </div>
+  );
+}
+
+function NominateButton() {
+  return (
+    <RecognizeDialog
+      kind="rnr"
+      trigger={
+        <button
+          type="button"
+          className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white font-mobile font-semibold transition-colors shadow-sm"
+        >
+          <Edit3 className="w-4 h-4" />
+          Nominate
+        </button>
+      }
+    />
   );
 }
 

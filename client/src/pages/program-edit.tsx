@@ -20,6 +20,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { RichTextarea } from "@/components/ui/rich-textarea";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -39,6 +47,7 @@ import {
   Check,
   ArrowLeft,
   ArrowRight,
+  Pencil,
 } from "lucide-react";
 import { BannerArt } from "@/components/programs/banner-art";
 import { getAccount } from "@/lib/account";
@@ -47,12 +56,14 @@ import {
   generateProgramId,
   getProgramById,
   saveProgram,
+  type CategoryCriterion,
+  type CategoryEligibility,
+  type CategoryGuidelines,
   type PanelMember,
   type Program,
   type ProgramBudgetPeriod,
   type ProgramCadence,
   type ProgramCategory,
-  type ProgramEligibility,
   type ProgramNotifications,
   type ProgramStatus,
   type StoredProgram,
@@ -82,9 +93,8 @@ type FormState = {
   startDate: string;
   endDate: string;
   repeatAutomatically: boolean;
+  /** Phase 1.8 — each category owns its own guidelines, eligibility, and panel. */
   categories: ProgramCategory[];
-  eligibility: ProgramEligibility;
-  panelMembers: PanelMember[];
   budgetAllocated: number;
   budgetPeriod: ProgramBudgetPeriod;
   notifications: ProgramNotifications;
@@ -98,9 +108,10 @@ const DEFAULT_NOTIFICATIONS: ProgramNotifications = {
   announceWinnersToSlack: false,
 };
 
-const DEFAULT_ELIGIBILITY: ProgramEligibility = {
+const DEFAULT_ELIGIBILITY: CategoryEligibility = {
   departments: [],
   locations: [],
+  roles: [],
   minTenureMonths: 0,
   excludePastWinnersCycles: 0,
 };
@@ -116,6 +127,30 @@ function defaultEndDateFor(cadence: ProgramCadence, start: string): string {
   return end.toISOString().slice(0, 10);
 }
 
+function newCriterion(): CategoryCriterion {
+  return {
+    id: "crit-" + Math.random().toString(36).slice(2, 8),
+    label: "",
+    description: "",
+    weight: 0,
+  };
+}
+
+function defaultGuidelines(): CategoryGuidelines {
+  return {
+    summary: "",
+    whatGoodLooksLike: "",
+    criteria: [
+      {
+        id: "crit-overall",
+        label: "Overall impact",
+        description: "How meaningful and clear is the contribution being recognized?",
+        weight: 100,
+      },
+    ],
+  };
+}
+
 function newCategoryRow(): ProgramCategory {
   return {
     id: "cat-" + Math.random().toString(36).slice(2, 8),
@@ -124,6 +159,11 @@ function newCategoryRow(): ProgramCategory {
     description: "",
     winnersCount: 1,
     prizePoints: 1000,
+    // budgetAllocated is derived from winnersCount × prizePoints × pointRate
+    // at save time — no need to seed a separate value.
+    guidelines: defaultGuidelines(),
+    eligibility: { ...DEFAULT_ELIGIBILITY },
+    panel: [],
   };
 }
 
@@ -148,11 +188,18 @@ function makeBlankForm(): FormState {
         description: "Standout contributor for this cycle.",
       },
     ],
-    eligibility: { ...DEFAULT_ELIGIBILITY },
-    panelMembers: [],
     budgetAllocated: 10000,
     budgetPeriod: "current-cycle",
     notifications: { ...DEFAULT_NOTIFICATIONS },
+  };
+}
+
+function ensureCategoryDefaults(c: ProgramCategory): ProgramCategory {
+  return {
+    ...c,
+    guidelines: c.guidelines ?? defaultGuidelines(),
+    eligibility: c.eligibility ?? { ...DEFAULT_ELIGIBILITY },
+    panel: c.panel ?? [],
   };
 }
 
@@ -170,6 +217,21 @@ function fromExisting(program: StoredProgram): FormState {
       ? isoFromDaysLeft(program.daysLeft)
       : defaultEndDateFor(program.cadence ?? "monthly", startGuess));
 
+  // Phase 1.8: programs coming in are normalized, but defend against any
+  // category missing guidelines/eligibility/panel (e.g. brand-new draft).
+  const categories =
+    program.categories && program.categories.length > 0
+      ? program.categories.map(ensureCategoryDefaults)
+      : [
+          ensureCategoryDefaults({
+            ...newCategoryRow(),
+            name: "Winner",
+            description: program.shortDesc ?? "",
+            winnersCount: 1,
+            prizePoints: program.pointsPerWin ?? 1000,
+          }),
+        ];
+
   return {
     id: program.id,
     isNew: false,
@@ -183,20 +245,7 @@ function fromExisting(program: StoredProgram): FormState {
     startDate: startGuess,
     endDate: endGuess,
     repeatAutomatically: program.repeatAutomatically ?? true,
-    categories:
-      program.categories && program.categories.length > 0
-        ? program.categories
-        : [
-            {
-              ...newCategoryRow(),
-              name: "Winner",
-              description: program.shortDesc ?? "",
-              winnersCount: 1,
-              prizePoints: program.pointsPerWin ?? 1000,
-            },
-          ],
-    eligibility: program.eligibility ?? { ...DEFAULT_ELIGIBILITY },
-    panelMembers: program.panel ?? [],
+    categories,
     budgetAllocated: program.budgetAllocated,
     budgetPeriod: program.budgetPeriod ?? "current-cycle",
     notifications: program.notifications ?? { ...DEFAULT_NOTIFICATIONS },
@@ -217,15 +266,35 @@ type ValidationErrors = {
 function validatePublish(form: FormState): ValidationErrors {
   const errors: ValidationErrors = {};
   if (!form.name.trim()) errors.name = "Program name is required.";
-  if (form.categories.length === 0) errors.categories = "Add at least one category.";
-  if (form.categories.some((c) => !c.name.trim())) {
-    errors.categories = "All categories need a name.";
-  }
-  if (!form.panelMembers.some((p) => p.lead)) {
-    errors.panel = "Mark exactly one panel member as Lead.";
-  }
-  if (form.panelMembers.length === 0) {
-    errors.panel = "Add at least one panel member.";
+  if (form.categories.length === 0) {
+    errors.categories = "Add at least one category.";
+  } else {
+    // Phase 1.8 — each category must be self-sufficient.
+    for (const c of form.categories) {
+      if (!c.name.trim()) {
+        errors.categories = "Every category needs a name.";
+        break;
+      }
+      const panel = c.panel ?? [];
+      if (panel.length === 0) {
+        errors.categories = `Add a panel to "${c.name}".`;
+        break;
+      }
+      const leads = panel.filter((p) => p.lead).length;
+      if (leads !== 1) {
+        errors.categories = `Mark exactly one panel lead for "${c.name}".`;
+        break;
+      }
+      const criteria = c.guidelines?.criteria ?? [];
+      if (criteria.length === 0 || criteria.some((cr) => !cr.label.trim())) {
+        errors.categories = `Add at least one named criterion to "${c.name}".`;
+        break;
+      }
+      if (c.winnersCount < 1) {
+        errors.categories = `"${c.name}" needs at least 1 winner.`;
+        break;
+      }
+    }
   }
   if (form.endDate && form.startDate && new Date(form.endDate) < new Date(form.startDate)) {
     errors.endDate = "End date must be on or after the start date.";
@@ -242,11 +311,11 @@ function validateDraft(form: FormState): ValidationErrors {
 // ─── Wizard config ─────────────────────────────────────────────────────
 
 const WIZARD_STEPS: { id: string; label: string; hint: string }[] = [
-  { id: "basics",     label: "Basics",       hint: "Name, banner, icon" },
-  { id: "cycle",      label: "Cycle",        hint: "Cadence and dates" },
-  { id: "categories", label: "Categories",   hint: "Awards & winners" },
-  { id: "panel",      label: "Panel",        hint: "Reviewers & eligibility" },
-  { id: "publish",    label: "Budget",       hint: "Budget, alerts, review" },
+  { id: "basics",        label: "Basics",                hint: "Name, banner, icon" },
+  { id: "cycle",         label: "Cycle",                 hint: "Cadence and dates" },
+  { id: "categories",    label: "Categories",            hint: "Awards, panels & rubric" },
+  { id: "notifications", label: "Notification settings", hint: "Who gets notified & when" },
+  { id: "publish",       label: "Summary",               hint: "Review & publish" },
 ];
 
 // ─── Page ──────────────────────────────────────────────────────────────
@@ -257,6 +326,10 @@ export default function ProgramEdit() {
   const account = getAccount();
   const monetaryEnabled = !!account?.appreciationPolicy?.monetaryEnabled;
   const currency = account?.currency ?? "₹";
+  // 1 point = `pointRate` currency units. Reads the conversion configured in
+  // Appreciation Policy (e.g. 100 pts = ₹50 → 0.5). Falls back to 1:1.
+  const pv = account?.appreciationPolicy?.pointValue;
+  const pointRate = pv && pv.points > 0 ? pv.amount / pv.points : 1;
   const slackConnected = account?.integrations.slack === "connected";
   const { toast } = useToast();
 
@@ -290,7 +363,18 @@ export default function ProgramEdit() {
     const now = new Date().toISOString();
     const banner = bannerById(form.bannerId);
     const totalWinners = form.categories.reduce((s, c) => s + c.winnersCount, 0);
-    const pointsPerWin = totalWinners === 0 ? 0 : Math.floor(form.budgetAllocated / totalWinners);
+    // Phase 1.10 starter — spend is derived from each category's points and the
+    // appreciation-policy point value. Persist per-category and program totals
+    // so dashboards/rollups don't need to recompute the conversion.
+    const normalizedCategories = form.categories.map((c) => ({
+      ...c,
+      budgetAllocated: categoryMoneyTotal(c, pointRate),
+    }));
+    const rolledBudget = normalizedCategories.reduce(
+      (s, c) => s + (c.budgetAllocated ?? 0),
+      0,
+    );
+    const pointsPerWin = totalWinners === 0 ? 0 : Math.floor(rolledBudget / totalWinners);
 
     const next: StoredProgram = {
       id: form.id,
@@ -314,18 +398,16 @@ export default function ProgramEdit() {
           )
         : 0,
       nominations: 0,
-      budgetAllocated: form.budgetAllocated,
+      budgetAllocated: rolledBudget,
       budgetUsed: 0,
       highlights: [],
       cadence: form.cadence,
       startDate: form.startDate,
       endDate: form.endDate,
       repeatAutomatically: form.repeatAutomatically,
-      categories: form.categories,
-      eligibility: form.eligibility,
+      categories: normalizedCategories,
       budgetPeriod: form.budgetPeriod,
       notifications: form.notifications,
-      panel: form.panelMembers,
       createdAt: form.createdAt ?? now,
       updatedAt: now,
       publishedAt: status === "active" || status === "scheduled" ? now : undefined,
@@ -391,10 +473,15 @@ export default function ProgramEdit() {
     (s, c) => s + c.winnersCount,
     0,
   );
+  // Phase 1.10 starter — spend is derived from each category's winners × prizePoints × rate.
+  const totalBudgetRollup = form.categories.reduce(
+    (s, c) => s + categoryMoneyTotal(c, pointRate),
+    0,
+  );
   const perWinnerPreview =
     totalWinnersAcrossCategories === 0
       ? 0
-      : Math.floor(form.budgetAllocated / totalWinnersAcrossCategories);
+      : Math.floor(totalBudgetRollup / totalWinnersAcrossCategories);
 
   const stepGate = (target: number): ValidationErrors => {
     const errs: ValidationErrors = {};
@@ -407,9 +494,6 @@ export default function ProgramEdit() {
       (form.categories.length === 0 || form.categories.some((c) => !c.name.trim()))
     ) {
       errs.categories = "Each category needs a name.";
-    }
-    if (target > 3 && (form.panelMembers.length === 0 || !form.panelMembers.some((p) => p.lead))) {
-      errs.panel = "Add a panel and mark exactly one Lead.";
     }
     return errs;
   };
@@ -500,42 +584,39 @@ export default function ProgramEdit() {
           {step === 1 && <CycleSection form={form} patch={patch} errors={errors} />}
 
           {step === 2 && (
-            <CategoriesSection
-              form={form}
-              patch={patch}
-              errors={errors}
-              monetaryEnabled={monetaryEnabled}
-              currency={currency}
-            />
-          )}
-
-          {step === 3 && (
             <>
-              <PanelSection form={form} patch={patch} errors={errors} />
-              <EligibilitySection form={form} patch={patch} />
-            </>
-          )}
-
-          {step === 4 && (
-            <>
+              <CategoriesSection
+                form={form}
+                patch={patch}
+                errors={errors}
+                monetaryEnabled={monetaryEnabled}
+                currency={currency}
+                pointRate={pointRate}
+              />
               <BudgetSection
                 form={form}
                 patch={patch}
                 currency={currency}
                 perWinnerPreview={perWinnerPreview}
               />
-              <NotificationsSection
-                form={form}
-                patch={patch}
-                slackConnected={slackConnected}
-              />
-              <ReviewCard
-                form={form}
-                currency={currency}
-                perWinnerPreview={perWinnerPreview}
-                onJump={goToStep}
-              />
             </>
+          )}
+
+          {step === 3 && (
+            <NotificationsSection
+              form={form}
+              patch={patch}
+              slackConnected={slackConnected}
+            />
+          )}
+
+          {step === 4 && (
+            <ReviewCard
+              form={form}
+              currency={currency}
+              perWinnerPreview={perWinnerPreview}
+              onJump={goToStep}
+            />
           )}
           </div>
         </div>
@@ -927,30 +1008,66 @@ function CycleSection({
 }
 
 // Categories
+type CategorySheetState =
+  | null
+  | { mode: "new"; draft: ProgramCategory }
+  | { mode: "edit"; draft: ProgramCategory; index: number };
+
+// ─── Derived totals (points & money) ──────────────────────────────────
+//
+// Each category's spend is `winnersCount × prizePoints` in points. Multiply
+// by `pointRate` (configured under Appreciation Policy → pointValue) to get
+// the monetary value. The program's budget is the sum across categories.
+
+function categoryPointsTotal(c: ProgramCategory): number {
+  return c.winnersCount * c.prizePoints;
+}
+
+function categoryMoneyTotal(c: ProgramCategory, rate: number): number {
+  return Math.round(categoryPointsTotal(c) * rate);
+}
+
 function CategoriesSection({
   form,
   patch,
   errors,
   monetaryEnabled,
   currency,
+  pointRate,
 }: {
   form: FormState;
   patch: (p: Partial<FormState>) => void;
   errors: ValidationErrors;
   monetaryEnabled: boolean;
   currency: string;
+  pointRate: number;
 }) {
-  function update(idx: number, p: Partial<ProgramCategory>) {
-    const next = form.categories.map((c, i) => (i === idx ? { ...c, ...p } : c));
-    patch({ categories: next });
-  }
+  const [sheet, setSheet] = useState<CategorySheetState>(null);
+
+  const totalPoints = form.categories.reduce(
+    (s, c) => s + categoryPointsTotal(c),
+    0,
+  );
+  const totalMoney = form.categories.reduce(
+    (s, c) => s + categoryMoneyTotal(c, pointRate),
+    0,
+  );
+  const totalWinners = form.categories.reduce((s, c) => s + c.winnersCount, 0);
+
   function remove(idx: number) {
     if (form.categories.length <= 1) return;
     patch({ categories: form.categories.filter((_, i) => i !== idx) });
   }
-  function add() {
+  function openAdd() {
     if (form.categories.length >= 8) return;
-    patch({ categories: [...form.categories, newCategoryRow()] });
+    setSheet({ mode: "new", draft: ensureCategoryDefaults(newCategoryRow()) });
+  }
+  function openEdit(idx: number) {
+    setSheet({
+      mode: "edit",
+      index: idx,
+      draft: ensureCategoryDefaults({ ...form.categories[idx] }),
+    });
   }
   function addPreset(presetId: string) {
     if (form.categories.length >= 8) return;
@@ -959,319 +1076,1066 @@ function CategoriesSection({
     patch({
       categories: [
         ...form.categories,
-        {
+        ensureCategoryDefaults({
           id: "cat-" + Math.random().toString(36).slice(2, 8),
           name: preset.name,
           emoji: preset.emoji,
           description: preset.description,
           winnersCount: preset.winnersCount,
           prizePoints: monetaryEnabled ? preset.prizePoints : 0,
-        },
+        }),
       ],
     });
   }
+  function saveSheet(next: ProgramCategory) {
+    if (!sheet) return;
+    if (sheet.mode === "new") {
+      patch({ categories: [...form.categories, next] });
+    } else {
+      patch({
+        categories: form.categories.map((c, i) => (i === sheet.index ? next : c)),
+      });
+    }
+    setSheet(null);
+  }
 
   return (
-    <SectionCard
-      title="Award categories"
-      description="What can someone be recognized for in this program? Min 1, max 8."
-      rightSlot={
+    <>
+      <SectionCard
+        title="Award categories"
+        description="Each category owns its own rubric, eligibility, panel of judges, and budget. Min 1, max 8."
+        rightSlot={
+          <div className="flex items-center gap-3">
+            {monetaryEnabled && (
+              <div className="text-right">
+                <p className="text-[11px] uppercase tracking-wide text-stone-500">
+                  Total spend
+                </p>
+                <p className="text-sm font-semibold text-stone-900 tabular-nums leading-tight">
+                  {totalPoints.toLocaleString()} pts
+                </p>
+                <p className="text-xs text-stone-600 tabular-nums leading-tight">
+                  ≈ {currency}
+                  {totalMoney.toLocaleString()}
+                </p>
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={openAdd}
+              disabled={form.categories.length >= 8}
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add category
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORY_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => addPreset(p.id)}
+              disabled={form.categories.length >= 8}
+              className="text-xs px-2 py-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 disabled:opacity-50"
+            >
+              {p.emoji} {p.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {form.categories.map((cat, i) => (
+            <CategoryRow
+              key={cat.id}
+              category={cat}
+              currency={currency}
+              monetaryEnabled={monetaryEnabled}
+              pointRate={pointRate}
+              canRemove={form.categories.length > 1}
+              onEdit={() => openEdit(i)}
+              onRemove={() => remove(i)}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-stone-500 pt-1">
+          <span>
+            {form.categories.length} categor{form.categories.length === 1 ? "y" : "ies"} ·{" "}
+            {totalWinners} winner{totalWinners === 1 ? "" : "s"} total
+          </span>
+          {monetaryEnabled && (
+            <span className="tabular-nums">
+              Program spend:{" "}
+              <span className="text-stone-900 font-medium">
+                {totalPoints.toLocaleString()} pts
+              </span>{" "}
+              ({currency}
+              {totalMoney.toLocaleString()})
+            </span>
+          )}
+        </div>
+
+        <FieldError message={errors.categories} />
+      </SectionCard>
+
+      <SectionCard
+        title="Program spend"
+        description="Auto-computed from each category's winners × points. Edit allocations inside each category."
+      >
+        <div className="rounded-md border border-stone-200 bg-stone-50 p-4 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-stone-500">
+                Total points
+              </p>
+              <p className="text-2xl font-semibold text-stone-900 tabular-nums leading-tight">
+                {totalPoints.toLocaleString()} pts
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wide text-stone-500">
+                Monetary value
+              </p>
+              <p className="text-2xl font-semibold text-stone-900 tabular-nums leading-tight">
+                {currency}
+                {totalMoney.toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <ul className="divide-y divide-stone-200 border-t border-stone-200">
+            {form.categories.map((c) => {
+              const pts = categoryPointsTotal(c);
+              const money = categoryMoneyTotal(c, pointRate);
+              return (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between py-2 text-xs"
+                >
+                  <span className="flex items-center gap-2 min-w-0">
+                    <span className="shrink-0">{c.emoji}</span>
+                    <span className="truncate text-stone-700">
+                      {c.name || "(unnamed)"}
+                    </span>
+                    <span className="text-stone-400 shrink-0">
+                      {c.winnersCount}×{c.prizePoints}
+                    </span>
+                  </span>
+                  <span className="tabular-nums shrink-0 text-right">
+                    <span className="text-stone-900 font-medium">
+                      {pts.toLocaleString()} pts
+                    </span>
+                    <span className="text-stone-500">
+                      {" "}({currency}
+                      {money.toLocaleString()})
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p className="text-[11px] text-stone-500 border-t border-stone-200 pt-2">
+            Conversion:{" "}
+            {pointRate === 1
+              ? `1 pt = ${currency}1`
+              : `${currency}${pointRate.toLocaleString(undefined, { maximumFractionDigits: 4 })} per point`}{" "}
+            (configured in Settings → Appreciation Policy).
+          </p>
+        </div>
+      </SectionCard>
+
+      <Sheet
+        open={sheet !== null}
+        onOpenChange={(open) => {
+          if (!open) setSheet(null);
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-xl md:!max-w-[52rem] p-0 overflow-hidden flex flex-col"
+        >
+          {sheet && (
+            <CategoryEditorSheet
+              key={sheet.mode === "edit" ? sheet.draft.id : "new"}
+              initial={sheet.draft}
+              mode={sheet.mode}
+              currency={currency}
+              monetaryEnabled={monetaryEnabled}
+              pointRate={pointRate}
+              otherCategories={
+                sheet.mode === "edit"
+                  ? form.categories.filter((_, j) => j !== sheet.index)
+                  : form.categories
+              }
+              onCancel={() => setSheet(null)}
+              onSave={saveSheet}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+
+function CategoryRow({
+  category,
+  currency,
+  monetaryEnabled,
+  pointRate,
+  canRemove,
+  onEdit,
+  onRemove,
+}: {
+  category: ProgramCategory;
+  currency: string;
+  monetaryEnabled: boolean;
+  pointRate: number;
+  canRemove: boolean;
+  onEdit: () => void;
+  onRemove: () => void;
+}) {
+  const panelSize = (category.panel ?? []).length;
+  const lead = (category.panel ?? []).find((p) => p.lead);
+  const criteriaCount = (category.guidelines?.criteria ?? []).length;
+  const points = categoryPointsTotal(category);
+  const money = categoryMoneyTotal(category, pointRate);
+  const restricted =
+    (category.eligibility?.departments.length ?? 0) > 0 ||
+    (category.eligibility?.locations.length ?? 0) > 0 ||
+    (category.eligibility?.roles.length ?? 0) > 0 ||
+    (category.eligibility?.minTenureMonths ?? 0) > 0;
+
+  return (
+    <div className="group flex items-start gap-3 p-3 border border-stone-200 rounded-lg bg-white hover:border-stone-300 transition-colors">
+      <span className="text-2xl leading-none mt-0.5 shrink-0">
+        {category.emoji || "🏆"}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <p className="text-sm font-semibold text-stone-900 truncate">
+            {category.name || "(unnamed category)"}
+          </p>
+          {restricted && (
+            <span className="text-[10px] uppercase tracking-wide font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+              Restricted
+            </span>
+          )}
+        </div>
+        {category.description && (
+          <p className="text-xs text-stone-500 truncate mt-0.5">
+            {category.description}
+          </p>
+        )}
+        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-xs text-stone-600">
+          <SummaryPill>
+            {category.winnersCount} winner{category.winnersCount === 1 ? "" : "s"}
+          </SummaryPill>
+          <SummaryPill>
+            {panelSize} judge{panelSize === 1 ? "" : "s"}
+            {lead && <span className="text-stone-400"> · lead {lead.name}</span>}
+          </SummaryPill>
+          <SummaryPill>
+            {criteriaCount} criter{criteriaCount === 1 ? "ion" : "ia"}
+          </SummaryPill>
+          <SummaryPill>
+            <span className="text-stone-400">Prize:</span>{" "}
+            {currency}
+            {Math.round(category.prizePoints * pointRate).toLocaleString()}
+            {" · "}
+            {category.prizePoints.toLocaleString()} pts / winner
+          </SummaryPill>
+        </div>
+        {monetaryEnabled && (
+          <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-stone-100">
+            <span className="text-[11px] uppercase tracking-wide text-stone-500">
+              Total spend
+            </span>
+            <span className="text-xs tabular-nums text-stone-900 font-medium">
+              {points.toLocaleString()} pts{" "}
+              <span className="text-stone-500 font-normal">
+                ({currency}
+                {money.toLocaleString()})
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="sm"
-          onClick={add}
-          disabled={form.categories.length >= 8}
+          onClick={onEdit}
+          className="h-8 w-8 p-0 text-stone-500 hover:text-stone-900"
+          title="Edit category"
         >
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add category
+          <Pencil className="w-4 h-4" />
         </Button>
-      }
-    >
-      <div className="flex flex-wrap gap-1.5">
-        {CATEGORY_PRESETS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => addPreset(p.id)}
-            disabled={form.categories.length >= 8}
-            className="text-xs px-2 py-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 disabled:opacity-50"
-          >
-            {p.emoji} {p.name}
-          </button>
-        ))}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          disabled={!canRemove}
+          className="h-8 w-8 p-0 text-stone-400 hover:text-red-600"
+          title={canRemove ? "Remove category" : "Programs need at least one category"}
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
       </div>
+    </div>
+  );
+}
 
-      <div className="space-y-3">
-        {form.categories.map((cat, i) => (
-          <div key={cat.id} className="border border-stone-200 rounded-md p-3 space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start">
+function SummaryPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      {children}
+    </span>
+  );
+}
+
+const CATEGORY_STEPS: { id: string; label: string }[] = [
+  { id: "basics", label: "Basics" },
+  { id: "guidelines", label: "Guidelines" },
+  { id: "eligibility", label: "Eligibility" },
+  { id: "rewards", label: "Rewards" },
+  { id: "panel", label: "Panel of judges" },
+];
+
+function CategoryEditorSheet({
+  initial,
+  mode,
+  currency,
+  monetaryEnabled,
+  pointRate,
+  otherCategories,
+  onCancel,
+  onSave,
+}: {
+  initial: ProgramCategory;
+  mode: "new" | "edit";
+  currency: string;
+  monetaryEnabled: boolean;
+  pointRate: number;
+  otherCategories: ProgramCategory[];
+  onCancel: () => void;
+  onSave: (next: ProgramCategory) => void;
+}) {
+  const [draft, setDraft] = useState<ProgramCategory>(initial);
+  // Mini-wizard state. Edit mode unlocks every step from the start so
+  // admins can jump to whichever section they want to tweak.
+  const [step, setStep] = useState(0);
+  const [farthest, setFarthest] = useState(mode === "edit" ? CATEGORY_STEPS.length - 1 : 0);
+  const [showStepError, setShowStepError] = useState(false);
+
+  function updateDraft(p: Partial<ProgramCategory>) {
+    setDraft((prev) => ({ ...prev, ...p }));
+  }
+
+  function copyPanelFrom(srcId: string) {
+    const src = otherCategories.find((c) => c.id === srcId);
+    if (!src) return;
+    updateDraft({ panel: [...(src.panel ?? [])] });
+  }
+
+  const panel = draft.panel ?? [];
+  const guidelines = draft.guidelines ?? defaultGuidelines();
+  const eligibility = draft.eligibility ?? { ...DEFAULT_ELIGIBILITY };
+  const criteriaCount = guidelines.criteria.length;
+  const weightTotal = guidelines.criteria.reduce((s, c) => s + c.weight, 0);
+  const weightOff = Math.abs(weightTotal - 100) > 5;
+
+  function stepValidationError(idx: number): string | null {
+    if (idx === 0) {
+      if (!draft.name.trim()) return "Category name is required.";
+      if (draft.winnersCount < 1) return "Winners must be at least 1.";
+    } else if (idx === 1) {
+      const criteria = draft.guidelines?.criteria ?? [];
+      if (criteria.length === 0) return "Add at least one criterion.";
+      if (criteria.some((cr) => !cr.label.trim())) {
+        return "Every criterion needs a label.";
+      }
+    } else if (idx === 4) {
+      if (panel.length === 0) return "Add at least one panel member.";
+      const leads = panel.filter((p) => p.lead).length;
+      if (leads !== 1) return "Mark exactly one panel member as Lead.";
+    }
+    return null;
+  }
+
+  function goToStep(target: number) {
+    if (target === step) return;
+    if (target < step) {
+      setStep(target);
+      setShowStepError(false);
+      return;
+    }
+    // Forward jump — only allow if we've already been there OR the current
+    // step is valid.
+    if (target <= farthest) {
+      setStep(target);
+      setShowStepError(false);
+      return;
+    }
+    if (stepValidationError(step)) {
+      setShowStepError(true);
+      return;
+    }
+    setStep(target);
+    setFarthest((f) => Math.max(f, target));
+    setShowStepError(false);
+  }
+
+  function nextStep() {
+    goToStep(Math.min(CATEGORY_STEPS.length - 1, step + 1));
+  }
+  function prevStep() {
+    setStep((s) => Math.max(0, s - 1));
+    setShowStepError(false);
+  }
+
+  function handleSave() {
+    // Find the first invalid step and jump there.
+    for (let i = 0; i < CATEGORY_STEPS.length; i++) {
+      const err = stepValidationError(i);
+      if (err) {
+        setStep(i);
+        setShowStepError(true);
+        return;
+      }
+    }
+    // Phase 1.10 starter — budget is derived from points × rate. Persist the
+    // computed value so dashboards / rollups don't need the conversion rate.
+    const derivedBudget = categoryMoneyTotal(draft, pointRate);
+    onSave({ ...draft, budgetAllocated: derivedBudget });
+  }
+
+  const currentError = showStepError ? stepValidationError(step) : null;
+  const isFirstStep = step === 0;
+  const isLastStep = step === CATEGORY_STEPS.length - 1;
+  const draftPoints = categoryPointsTotal(draft);
+  const draftMoney = categoryMoneyTotal(draft, pointRate);
+
+  return (
+    <>
+      <SheetHeader className="px-6 pt-6 pb-4 border-b border-stone-200">
+        <SheetTitle>
+          {mode === "new" ? "Add category" : "Edit category"}
+        </SheetTitle>
+        <SheetDescription>
+          Configure who can be nominated, what the panel scores against, and how prize budget is allocated.
+        </SheetDescription>
+      </SheetHeader>
+
+      <CategoryStepper
+        steps={CATEGORY_STEPS}
+        current={step}
+        farthest={farthest}
+        onJump={goToStep}
+      />
+
+      <div className="flex-1 overflow-y-auto">
+        {step === 0 && (
+          <div className="px-6 py-5 space-y-5">
+            <p className="text-xs text-stone-500 -mt-1">
+              Name the award and set how many winners take it home.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
               <Input
-                value={cat.emoji}
-                onChange={(e) => update(i, { emoji: e.target.value.slice(0, 4) })}
+                value={draft.emoji}
+                onChange={(e) => updateDraft({ emoji: e.target.value.slice(0, 4) })}
                 placeholder="🏆"
                 maxLength={4}
                 className="md:col-span-1 h-9 text-sm text-center"
               />
               <Input
-                value={cat.name}
-                onChange={(e) => update(i, { name: e.target.value.slice(0, 50) })}
+                value={draft.name}
+                onChange={(e) => updateDraft({ name: e.target.value.slice(0, 50) })}
                 placeholder="Category name"
                 maxLength={50}
-                className="md:col-span-4 h-9 text-sm"
+                className="md:col-span-11 h-9 text-sm"
+                autoFocus={mode === "new"}
               />
               <Input
-                value={cat.description}
-                onChange={(e) => update(i, { description: e.target.value.slice(0, 120) })}
-                placeholder="Short description"
+                value={draft.description}
+                onChange={(e) =>
+                  updateDraft({ description: e.target.value.slice(0, 120) })
+                }
+                placeholder="Short description (shown to nominators)"
                 maxLength={120}
-                className={monetaryEnabled ? "md:col-span-4 h-9 text-sm" : "md:col-span-6 h-9 text-sm"}
+                className="md:col-span-12 h-9 text-sm"
               />
-              <div className="md:col-span-1">
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-stone-600">Winners</Label>
                 <Input
                   type="number"
                   min={1}
                   max={10}
-                  value={cat.winnersCount}
+                  value={draft.winnersCount}
                   onChange={(e) =>
-                    update(i, { winnersCount: clamp(Number(e.target.value || 1), 1, 10) })
+                    updateDraft({
+                      winnersCount: clamp(Number(e.target.value || 1), 1, 10),
+                    })
                   }
                   className="h-9 text-sm"
-                  title="Winners"
                 />
               </div>
-              {monetaryEnabled && (
-                <div className="md:col-span-1">
-                  <Input
-                    type="number"
-                    min={0}
-                    max={10000}
-                    value={cat.prizePoints}
-                    onChange={(e) =>
-                      update(i, { prizePoints: clamp(Number(e.target.value || 0), 0, 10000) })
-                    }
-                    className="h-9 text-sm"
-                    title="Prize points per winner"
-                  />
-                </div>
-              )}
-              <div className="md:col-span-1 flex justify-end">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => remove(i)}
-                  disabled={form.categories.length <= 1}
-                  className="h-9 w-9 p-0 text-stone-400 hover:text-red-600"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
             </div>
-            <p className="text-xs text-stone-500">
-              {cat.winnersCount} winner{cat.winnersCount === 1 ? "" : "s"}
-              {monetaryEnabled
-                ? ` · ${currency}${cat.prizePoints.toLocaleString()} per winner`
-                : " · recognition only"}
-            </p>
           </div>
-        ))}
-      </div>
-      <FieldError message={errors.categories} />
-    </SectionCard>
-  );
-}
+        )}
 
-function clamp(n: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, n));
-}
+        {step === 1 && (
+          <div className="px-6 py-5">
+            <p className="text-xs text-stone-500 mb-3">
+              The rubric the panel and AI score against.
+            </p>
+            <GuidelinesEditor
+              guidelines={guidelines}
+              onChange={(g) => updateDraft({ guidelines: g })}
+              weightOff={weightOff}
+              weightTotal={weightTotal}
+              criteriaCount={criteriaCount}
+            />
+          </div>
+        )}
 
-// Eligibility
-function EligibilitySection({
-  form,
-  patch,
-}: {
-  form: FormState;
-  patch: (p: Partial<FormState>) => void;
-}) {
-  const [open, setOpen] = useState(true);
-  const allDepartments = useMemo(() => listDepartments(EMPLOYEES), []);
+        {step === 2 && (
+          <div className="px-6 py-5">
+            <p className="text-xs text-stone-500 mb-3">
+              Who can be nominated in this category. Leave fields empty for "open to all."
+            </p>
+            <CategoryEligibilityEditor
+              eligibility={eligibility}
+              onChange={(e) => updateDraft({ eligibility: e })}
+            />
+          </div>
+        )}
 
-  function toggleArr(arr: string[], v: string): string[] {
-    return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
-  }
-  function update(p: Partial<ProgramEligibility>) {
-    patch({ eligibility: { ...form.eligibility, ...p } });
-  }
-
-  return (
-    <Card className="border border-stone-200">
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger asChild>
-          <button className="w-full p-5 flex items-center justify-between text-left">
-            <div>
-              <h2 className="text-sm font-semibold text-stone-900">Eligibility</h2>
-              <p className="text-xs text-stone-500 mt-0.5">
-                {form.eligibility.departments.length === 0 && form.eligibility.locations.length === 0
-                  ? "Open to all employees"
-                  : `${form.eligibility.departments.length || "All"} departments · ${form.eligibility.locations.length || "All"} locations`}
-              </p>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform ${open ? "rotate-180" : ""}`} />
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="px-5 pb-5 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <ChipPicker
-                label="Departments"
-                placeholder="Open to all"
-                options={allDepartments}
-                selected={form.eligibility.departments}
-                onToggle={(v) => update({ departments: toggleArr(form.eligibility.departments, v) })}
-              />
-              <ChipPicker
-                label="Locations"
-                placeholder="Open to all"
-                options={PROGRAM_LOCATIONS}
-                selected={form.eligibility.locations}
-                onToggle={(v) => update({ locations: toggleArr(form.eligibility.locations, v) })}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Min tenure (months)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={form.eligibility.minTenureMonths}
-                  onChange={(e) =>
-                    update({ minTenureMonths: Math.max(0, Number(e.target.value || 0)) })
-                  }
-                  className="h-9 text-sm"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">
-                  Exclude winners from last N cycles
+        {step === 3 && (
+          <div className="px-6 py-5 space-y-5">
+            <p className="text-xs text-stone-500 -mt-1">
+              Set the prize points each winner receives in this category.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs text-stone-600">
+                  Prize points / winner
                 </Label>
                 <Input
                   type="number"
                   min={0}
-                  value={form.eligibility.excludePastWinnersCycles}
+                  max={10000}
+                  value={draft.prizePoints}
                   onChange={(e) =>
-                    update({ excludePastWinnersCycles: Math.max(0, Number(e.target.value || 0)) })
+                    updateDraft({
+                      prizePoints: clamp(Number(e.target.value || 0), 0, 10000),
+                    })
                   }
                   className="h-9 text-sm"
                 />
-                <p className="text-xs text-stone-400">0 = no exclusion</p>
               </div>
             </div>
+            <CategorySpendSummary
+              category={draft}
+              currency={currency}
+              pointRate={pointRate}
+              monetaryEnabled={monetaryEnabled}
+            />
           </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
+        )}
+
+        {step === 4 && (
+          <div className="px-6 py-5">
+            <p className="text-xs text-stone-500 mb-3">
+              Reviewers for this category. Exactly one Lead.
+            </p>
+            <CategoryPanelEditor
+              panel={panel}
+              otherCategories={otherCategories}
+              onChange={(p) => updateDraft({ panel: p })}
+              onCopyPanelFrom={copyPanelFrom}
+            />
+          </div>
+        )}
+      </div>
+
+      {currentError && (
+        <div className="px-6 py-2.5 bg-red-50 border-t border-red-200 flex items-start gap-2 text-sm text-red-800">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{currentError}</span>
+        </div>
+      )}
+
+      {monetaryEnabled && (
+        <div className="px-6 py-2.5 border-t border-stone-200 bg-stone-50 flex items-baseline justify-between">
+          <span className="text-[11px] uppercase tracking-wide text-stone-500">
+            Category spend
+          </span>
+          <span className="text-sm tabular-nums">
+            <span className="font-semibold text-stone-900">
+              {draftPoints.toLocaleString()} pts
+            </span>
+            <span className="text-stone-500">
+              {" "}
+              ({currency}
+              {draftMoney.toLocaleString()})
+            </span>
+          </span>
+        </div>
+      )}
+
+      <footer className="px-6 py-3 border-t border-stone-200 flex items-center justify-between gap-2 bg-white">
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-stone-500 mr-2 hidden sm:inline">
+            Step {step + 1} of {CATEGORY_STEPS.length}
+          </span>
+          {!isFirstStep && (
+            <Button type="button" variant="outline" size="sm" onClick={prevStep}>
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back
+            </Button>
+          )}
+          {isLastStep ? (
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSave}
+              className="bg-stone-900 hover:bg-stone-700 text-white"
+            >
+              {mode === "new" ? "Add category" : "Save changes"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              onClick={nextStep}
+              className="bg-stone-900 hover:bg-stone-700 text-white"
+            >
+              Next <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
+          )}
+        </div>
+      </footer>
+    </>
   );
 }
 
-function ChipPicker({
-  label,
-  placeholder,
-  options,
-  selected,
-  onToggle,
+function validateCategory(c: ProgramCategory): string | null {
+  if (!c.name.trim()) return "Category name is required.";
+  const panel = c.panel ?? [];
+  if (panel.length === 0) return "Add at least one panel member.";
+  const leads = panel.filter((p) => p.lead).length;
+  if (leads !== 1) return "Mark exactly one panel member as Lead.";
+  const criteria = c.guidelines?.criteria ?? [];
+  if (criteria.length === 0) return "Add at least one criterion.";
+  if (criteria.some((cr) => !cr.label.trim())) {
+    return "Every criterion needs a label.";
+  }
+  if (c.winnersCount < 1) return "Winners must be at least 1.";
+  return null;
+}
+
+function CategorySpendSummary({
+  category,
+  currency,
+  pointRate,
+  monetaryEnabled = true,
 }: {
-  label: string;
-  placeholder: string;
-  options: string[];
-  selected: string[];
-  onToggle: (v: string) => void;
+  category: ProgramCategory;
+  currency: string;
+  pointRate: number;
+  monetaryEnabled?: boolean;
 }) {
+  const points = categoryPointsTotal(category);
+  const money = categoryMoneyTotal(category, pointRate);
+  const perWinnerMoney = Math.round(category.prizePoints * pointRate);
+  const rateNote =
+    pointRate === 1
+      ? `1 pt = ${currency}1`
+      : `${currency}${pointRate.toLocaleString(undefined, { maximumFractionDigits: 4 })} per point`;
+
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-stone-700">{label}</Label>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((o) => {
-          const on = selected.includes(o);
-          return (
-            <button
-              key={o}
-              type="button"
-              onClick={() => onToggle(o)}
-              className={`text-xs px-2.5 py-1 rounded-full border transition ${
-                on
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
-              }`}
-            >
-              {o}
-            </button>
-          );
-        })}
+    <div className="rounded-md border border-stone-200 bg-stone-50 p-4 space-y-3">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-stone-500">
+            Per winner
+          </p>
+          <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight">
+            {category.prizePoints.toLocaleString()} pts
+          </p>
+          {monetaryEnabled && (
+            <p className="text-xs text-stone-600 tabular-nums mt-0.5">
+              ≈ {currency}
+              {perWinnerMoney.toLocaleString()}
+            </p>
+          )}
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] uppercase tracking-wide text-stone-500">
+            Category budget
+          </p>
+          <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight">
+            {points.toLocaleString()} pts
+          </p>
+          {monetaryEnabled && (
+            <p className="text-xs text-stone-600 tabular-nums mt-0.5">
+              ≈ {currency}
+              {money.toLocaleString()}
+            </p>
+          )}
+        </div>
       </div>
-      {selected.length === 0 && (
-        <p className="text-xs text-stone-400 italic">{placeholder}</p>
+      <p className="text-xs text-stone-600 leading-relaxed border-t border-stone-200 pt-2">
+        {category.winnersCount} winner{category.winnersCount === 1 ? "" : "s"} ×{" "}
+        {category.prizePoints.toLocaleString()} pts each ={" "}
+        <span className="text-stone-900 font-medium tabular-nums">
+          {points.toLocaleString()} pts
+        </span>
+        {monetaryEnabled && (
+          <>
+            {" "}
+            ≈{" "}
+            <span className="text-stone-900 font-medium tabular-nums">
+              {currency}
+              {money.toLocaleString()}
+            </span>
+          </>
+        )}
+      </p>
+      {monetaryEnabled && (
+        <p className="text-[11px] text-stone-500">
+          Conversion: {rateNote} (configured in Settings → Appreciation Policy).
+        </p>
       )}
     </div>
   );
 }
 
-// Panel of judges
-function PanelSection({
-  form,
-  patch,
-  errors,
+function CategorySubSection({
+  title,
+  hint,
+  children,
 }: {
-  form: FormState;
-  patch: (p: Partial<FormState>) => void;
-  errors: ValidationErrors;
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
 }) {
-  function add(emp: Employee) {
-    if (form.panelMembers.some((m) => m.id === emp.id)) return;
-    if (form.panelMembers.length >= 12) return;
+  return (
+    <div className="space-y-2">
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+          {title}
+        </h3>
+        {hint && <p className="text-xs text-stone-500 mt-0.5">{hint}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function GuidelinesEditor({
+  guidelines,
+  onChange,
+  weightOff,
+  weightTotal,
+  criteriaCount,
+}: {
+  guidelines: CategoryGuidelines;
+  onChange: (g: CategoryGuidelines) => void;
+  weightOff: boolean;
+  weightTotal: number;
+  criteriaCount: number;
+}) {
+  function patch(p: Partial<CategoryGuidelines>) {
+    onChange({ ...guidelines, ...p });
+  }
+  function updateCriterion(idx: number, p: Partial<CategoryCriterion>) {
+    const next = guidelines.criteria.map((c, i) => (i === idx ? { ...c, ...p } : c));
+    patch({ criteria: next });
+  }
+  function removeCriterion(idx: number) {
+    if (guidelines.criteria.length <= 1) return;
+    patch({ criteria: guidelines.criteria.filter((_, i) => i !== idx) });
+  }
+  function addCriterion() {
+    if (guidelines.criteria.length >= 6) return;
+    patch({ criteria: [...guidelines.criteria, newCriterion()] });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs text-stone-600">What good looks like</Label>
+        <RichTextarea
+          value={guidelines.whatGoodLooksLike}
+          onChange={(v) => patch({ whatGoodLooksLike: v })}
+          placeholder="Describe in detail what a strong nomination looks like — concrete moments, outcomes, scale. Use **bold** and *italic* to highlight expectations."
+          maxLength={2000}
+          rows={8}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-stone-600">Criteria ({criteriaCount}/6)</Label>
+          <span className={`text-xs ${weightOff ? "text-amber-700" : "text-stone-500"}`}>
+            Weights total: {weightTotal}
+            {weightOff ? " (should be ~100)" : ""}
+          </span>
+        </div>
+        {guidelines.criteria.map((c, i) => (
+          <div
+            key={c.id}
+            className="grid grid-cols-1 md:grid-cols-12 gap-2 items-start"
+          >
+            <Input
+              value={c.label}
+              onChange={(e) => updateCriterion(i, { label: e.target.value.slice(0, 60) })}
+              placeholder="e.g. Customer impact"
+              className="md:col-span-3 h-9 text-sm"
+            />
+            <Input
+              value={c.description}
+              onChange={(e) =>
+                updateCriterion(i, { description: e.target.value.slice(0, 200) })
+              }
+              placeholder="What to look for"
+              className="md:col-span-6 h-9 text-sm"
+            />
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={c.weight}
+              onChange={(e) =>
+                updateCriterion(i, { weight: clamp(Number(e.target.value || 0), 0, 100) })
+              }
+              className="md:col-span-2 h-9 text-sm tabular-nums text-center"
+              title="Weight"
+            />
+            <div className="md:col-span-1 flex justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeCriterion(i)}
+                disabled={guidelines.criteria.length <= 1}
+                className="h-9 w-9 p-0 text-stone-400 hover:text-red-600"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addCriterion}
+          disabled={guidelines.criteria.length >= 6}
+        >
+          <Plus className="w-3.5 h-3.5 mr-1" /> Add criterion
+        </Button>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs text-stone-600">Disqualifiers (optional)</Label>
+        <Textarea
+          value={guidelines.disqualifiers ?? ""}
+          onChange={(e) =>
+            patch({ disqualifiers: e.target.value.slice(0, 400) || undefined })
+          }
+          placeholder="What makes a nomination ineligible?"
+          maxLength={400}
+          className="text-sm"
+          rows={2}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CategoryEligibilityEditor({
+  eligibility,
+  onChange,
+}: {
+  eligibility: CategoryEligibility;
+  onChange: (e: CategoryEligibility) => void;
+}) {
+  const allDepartments = useMemo(() => listDepartments(EMPLOYEES), []);
+  function patchE(p: Partial<CategoryEligibility>) {
+    onChange({ ...eligibility, ...p });
+  }
+  function toggleArr(arr: string[], v: string): string[] {
+    return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ChipPicker
+          label="Departments"
+          placeholder="Open to all"
+          options={allDepartments}
+          selected={eligibility.departments}
+          onToggle={(v) => patchE({ departments: toggleArr(eligibility.departments, v) })}
+        />
+        <ChipPicker
+          label="Locations"
+          placeholder="Open to all"
+          options={PROGRAM_LOCATIONS}
+          selected={eligibility.locations}
+          onToggle={(v) => patchE({ locations: toggleArr(eligibility.locations, v) })}
+        />
+      </div>
+      <ChipPicker
+        label="Roles"
+        placeholder="Open to all roles"
+        options={["employee", "manager", "admin"]}
+        selected={eligibility.roles}
+        onToggle={(v) => patchE({ roles: toggleArr(eligibility.roles, v) })}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-stone-600">Min tenure (months)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={eligibility.minTenureMonths}
+            onChange={(e) =>
+              patchE({ minTenureMonths: Math.max(0, Number(e.target.value || 0)) })
+            }
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-stone-600">
+            Exclude winners from last N cycles
+          </Label>
+          <Input
+            type="number"
+            min={0}
+            value={eligibility.excludePastWinnersCycles}
+            onChange={(e) =>
+              patchE({
+                excludePastWinnersCycles: Math.max(0, Number(e.target.value || 0)),
+              })
+            }
+            className="h-9 text-sm"
+          />
+          <p className="text-xs text-stone-400">0 = no exclusion</p>
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs text-stone-600">
+          Custom eligibility note (shown to nominators)
+        </Label>
+        <Input
+          value={eligibility.customNote ?? ""}
+          onChange={(e) =>
+            patchE({ customNote: e.target.value.slice(0, 200) || undefined })
+          }
+          placeholder="Optional — e.g. 'Excludes the executive team.'"
+          maxLength={200}
+          className="h-9 text-sm"
+        />
+      </div>
+    </div>
+  );
+}
+
+function CategoryPanelEditor({
+  panel,
+  otherCategories,
+  onChange,
+  onCopyPanelFrom,
+}: {
+  panel: PanelMember[];
+  otherCategories: ProgramCategory[];
+  onChange: (p: PanelMember[]) => void;
+  onCopyPanelFrom: (srcId: string) => void;
+}) {
+  function addEmployee(emp: Employee) {
+    if (panel.some((m) => m.id === emp.id)) return;
+    if (panel.length >= 12) return;
     const next: PanelMember = {
       id: emp.id,
       name: emp.name,
       role: emp.role,
       department: emp.businessUnitName ?? "—",
       avatar: emp.avatar,
-      lead: form.panelMembers.length === 0,
+      lead: panel.length === 0,
       reviewed: 0,
       totalToReview: 0,
     };
-    patch({ panelMembers: [...form.panelMembers, next] });
+    onChange([...panel, next]);
   }
   function remove(id: string) {
-    const next = form.panelMembers.filter((m) => m.id !== id);
+    const next = panel.filter((m) => m.id !== id);
     if (next.length > 0 && !next.some((n) => n.lead)) {
       next[0] = { ...next[0], lead: true };
     }
-    patch({ panelMembers: next });
+    onChange(next);
   }
   function setLead(id: string) {
-    patch({
-      panelMembers: form.panelMembers.map((m) => ({ ...m, lead: m.id === id })),
-    });
+    onChange(panel.map((m) => ({ ...m, lead: m.id === id })));
   }
 
-  return (
-    <SectionCard
-      title="Panel of judges"
-      description="Reviewers select winners after manager approval. Min 1, max 12. Exactly one Lead."
-      rightSlot={<EmployeePicker excludeIds={form.panelMembers.map((m) => m.id)} onPick={add} />}
-    >
-      <Card className="border border-stone-100 bg-stone-50/50 p-3">
-        <p className="text-xs text-stone-600">
-          Panel members review nominations after manager approval and select the winners. The Lead
-          gets the AI-shortlister and final say on ties.
-        </p>
-      </Card>
+  const copySources = otherCategories.filter((c) => (c.panel ?? []).length > 0);
 
-      {form.panelMembers.length === 0 ? (
-        <p className="text-xs text-stone-500 italic">No panel members added yet.</p>
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <EmployeePicker excludeIds={panel.map((m) => m.id)} onPick={addEmployee} />
+        {copySources.length > 0 && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button type="button" variant="outline" size="sm">
+                Copy panel from…
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-2">
+              <p className="text-xs text-stone-500 px-2 pb-1">
+                Reuse another category's judges
+              </p>
+              {copySources.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => onCopyPanelFrom(c.id)}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-50 text-left"
+                >
+                  <span className="text-sm">{c.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm truncate">{c.name || "(unnamed)"}</p>
+                    <p className="text-xs text-stone-500">
+                      {(c.panel ?? []).length} judges
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+
+      {panel.length === 0 ? (
+        <p className="text-xs text-stone-500 italic">No judges added yet.</p>
       ) : (
         <div className="space-y-1.5">
-          {form.panelMembers.map((m) => (
+          {panel.map((m) => (
             <div
               key={m.id}
               className="flex items-center gap-3 p-2.5 border border-stone-200 rounded-md"
@@ -1313,8 +2177,53 @@ function PanelSection({
           ))}
         </div>
       )}
-      <FieldError message={errors.panel} />
-    </SectionCard>
+    </div>
+  );
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, n));
+}
+
+function ChipPicker({
+  label,
+  placeholder,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  placeholder: string;
+  options: string[];
+  selected: string[];
+  onToggle: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-stone-700">{label}</Label>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((o) => {
+          const on = selected.includes(o);
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onToggle(o)}
+              className={`text-xs px-2.5 py-1 rounded-full border transition ${
+                on
+                  ? "bg-stone-900 text-white border-stone-900"
+                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+              }`}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+      {selected.length === 0 && (
+        <p className="text-xs text-stone-400 italic">{placeholder}</p>
+      )}
+    </div>
   );
 }
 
@@ -1393,7 +2302,8 @@ function EmployeePicker({
   );
 }
 
-// Budget
+// Budget — period + program-level per-winner average. The spend rollup lives
+// inside the Categories step now (Phase 1.10).
 function BudgetSection({
   form,
   patch,
@@ -1407,45 +2317,35 @@ function BudgetSection({
 }) {
   return (
     <SectionCard
-      title="Budget"
-      description="How much is allocated to this program."
+      title="Budget period"
+      description="Choose how often each category's points budget refreshes."
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">
-            Total allocated ({currency})
-          </Label>
-          <Input
-            type="number"
-            min={0}
-            value={form.budgetAllocated}
-            onChange={(e) => patch({ budgetAllocated: Math.max(0, Number(e.target.value || 0)) })}
-            className="h-9 text-sm"
-          />
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-stone-700">Period</Label>
+        <div className="flex gap-2">
+          {(["current-cycle", "annual"] as const).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => patch({ budgetPeriod: p })}
+              className={`px-3 py-1.5 rounded-md border text-sm transition capitalize ${
+                form.budgetPeriod === p
+                  ? "bg-stone-900 text-white border-stone-900"
+                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+              }`}
+            >
+              {p.replace("-", " ")}
+            </button>
+          ))}
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Period</Label>
-          <div className="flex gap-2">
-            {(["current-cycle", "annual"] as const).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => patch({ budgetPeriod: p })}
-                className={`flex-1 px-3 py-1.5 rounded-md border text-sm transition capitalize ${
-                  form.budgetPeriod === p
-                    ? "bg-stone-900 text-white border-stone-900"
-                    : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
-                }`}
-              >
-                {p.replace("-", " ")}
-              </button>
-            ))}
-          </div>
-        </div>
+        <p className="text-xs text-stone-500">
+          Determines whether each category's points refresh per cycle or per year.
+        </p>
       </div>
+
       <p className="text-xs text-stone-500 italic">
-        Budget per winner: {currency}
-        {perWinnerPreview.toLocaleString()} (split across all categories &amp; winners)
+        Avg per winner across the program: {currency}
+        {perWinnerPreview.toLocaleString()}.
       </p>
     </SectionCard>
   );
@@ -1524,6 +2424,71 @@ function NotificationToggle({
 
 // ─── Stepper ──────────────────────────────────────────────────────────
 
+/**
+ * Compact stepper for the Add/Edit category sheet. Renders inline at the
+ * top of the sheet — clickable steps with light gating (the page-level
+ * Stepper handles the outer 4-step program wizard separately).
+ */
+function CategoryStepper({
+  steps,
+  current,
+  farthest,
+  onJump,
+}: {
+  steps: { id: string; label: string }[];
+  current: number;
+  farthest: number;
+  onJump: (i: number) => void;
+}) {
+  return (
+    <div className="px-6 py-3 border-b border-stone-200 bg-white">
+      <div className="flex items-center flex-nowrap gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        {steps.map((s, i) => {
+          const reached = i <= farthest;
+          const active = i === current;
+          const completed = i < current || (reached && !active && i < farthest);
+          return (
+            <div key={s.id} className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => onJump(i)}
+                disabled={!reached && !active}
+                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md transition shrink-0 ${
+                  active
+                    ? "bg-stone-900 text-white"
+                    : reached
+                      ? "text-stone-700 hover:bg-stone-50"
+                      : "text-stone-400 cursor-not-allowed"
+                }`}
+              >
+                <span
+                  className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-medium shrink-0 ${
+                    active
+                      ? "bg-white text-stone-900"
+                      : completed
+                        ? "bg-green-500 text-white"
+                        : reached
+                          ? "bg-stone-200 text-stone-700"
+                          : "bg-stone-100 text-stone-400"
+                  }`}
+                >
+                  {completed ? <Check className="w-3 h-3" /> : i + 1}
+                </span>
+                <span className="text-xs font-medium whitespace-nowrap">
+                  {s.label}
+                </span>
+              </button>
+              {i < steps.length - 1 && (
+                <span className="w-4 h-px bg-stone-200 shrink-0" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Stepper({
   currentStep,
   farthestStep,
@@ -1597,7 +2562,22 @@ function ReviewCard({
   const fmt = (d: string) =>
     d ? new Date(d).toLocaleDateString("default", { month: "short", day: "numeric", year: "numeric" }) : "—";
   const totalWinners = form.categories.reduce((s, c) => s + c.winnersCount, 0);
-  const lead = form.panelMembers.find((p) => p.lead);
+  // Phase 1.8 — panel is per-category; show the union and the lead of the first category as a hint.
+  const allPanel = form.categories.flatMap((c) => c.panel ?? []);
+  const uniquePanel = Array.from(new Map(allPanel.map((m) => [m.id, m])).values());
+  const firstLead = form.categories
+    .map((c) => (c.panel ?? []).find((p) => p.lead))
+    .find((p): p is PanelMember => !!p);
+  const anyEligibilityRestricted = form.categories.some((c) => {
+    const e = c.eligibility;
+    if (!e) return false;
+    return (
+      e.departments.length > 0 ||
+      e.locations.length > 0 ||
+      e.roles.length > 0 ||
+      e.minTenureMonths > 0
+    );
+  });
 
   return (
     <Card className="border border-stone-200">
@@ -1642,28 +2622,31 @@ function ReviewCard({
             </div>
           </ReviewRow>
 
-          <ReviewRow label="Panel" onEdit={() => onJump(3)}>
-            {form.panelMembers.length === 0
+          <ReviewRow label="Panels" onEdit={() => onJump(2)}>
+            {uniquePanel.length === 0
               ? "No panel set yet"
-              : `${form.panelMembers.length} member${form.panelMembers.length === 1 ? "" : "s"}`}
-            {lead && <> · Lead: <span className="text-stone-900 font-medium">{lead.name}</span></>}
+              : `${uniquePanel.length} unique judge${uniquePanel.length === 1 ? "" : "s"} across categories`}
+            {firstLead && (
+              <> · Lead example: <span className="text-stone-900 font-medium">{firstLead.name}</span></>
+            )}
           </ReviewRow>
 
-          <ReviewRow label="Eligibility" onEdit={() => onJump(3)}>
-            {form.eligibility.departments.length === 0 && form.eligibility.locations.length === 0
-              ? "Open to all employees"
-              : `${form.eligibility.departments.length || "All"} dept · ${form.eligibility.locations.length || "All"} loc`}
-            {form.eligibility.minTenureMonths > 0 && ` · ${form.eligibility.minTenureMonths}mo min tenure`}
+          <ReviewRow label="Eligibility" onEdit={() => onJump(2)}>
+            {anyEligibilityRestricted
+              ? "Per-category restrictions set — open each category to review"
+              : "Open to all employees"}
           </ReviewRow>
 
-          <ReviewRow label="Budget" onEdit={() => onJump(4)}>
+          <ReviewRow label="Budget" onEdit={() => onJump(2)}>
             {currency}
-            {form.budgetAllocated.toLocaleString()} ({form.budgetPeriod.replace("-", " ")}) ·{" "}
-            {currency}
+            {form.categories
+              .reduce((s, c) => s + (c.budgetAllocated ?? 0), 0)
+              .toLocaleString()}{" "}
+            ({form.budgetPeriod.replace("-", " ")}) · {currency}
             {perWinnerPreview.toLocaleString()} / winner
           </ReviewRow>
 
-          <ReviewRow label="Notifications" onEdit={() => onJump(4)}>
+          <ReviewRow label="Notifications" onEdit={() => onJump(3)}>
             {[
               form.notifications.notifyNominees && "nominees",
               form.notifications.notifyAllOnLaunch && "all on launch",

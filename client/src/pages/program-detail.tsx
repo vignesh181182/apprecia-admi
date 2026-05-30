@@ -24,6 +24,7 @@ import { ScoreDistributionCard } from "@/components/programs/score-distribution-
 import { AiShortlistPanel } from "@/components/programs/ai-shortlist-panel";
 import { WinnerActionStubs } from "@/components/programs/winner-action-stubs";
 import {
+  getAllProgramPanelMembers,
   getNominationsForProgram,
   getProgramById,
   type Nomination,
@@ -283,8 +284,8 @@ function ShortlistSection({
     const eligible = getNominationsForProgram(program.id).filter(
       (n) => n.status === "approved" || n.status === "pending-panel",
     );
-    return shortlistNominations(eligible, account, program.panel ?? []);
-  }, [shortlistRun, program.id, program.panel, account]);
+    return shortlistNominations(eligible, account, getAllProgramPanelMembers(program));
+  }, [shortlistRun, program, account]);
 
   if (!shortlistRun) {
     return (

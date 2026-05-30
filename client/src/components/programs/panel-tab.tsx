@@ -1,6 +1,10 @@
 import { Check, Crown, UserCheck, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Program } from "@/lib/programs-data";
+import {
+  getAllProgramPanelMembers,
+  type PanelMember,
+  type Program,
+} from "@/lib/programs-data";
 
 export function PanelTab({
   program,
@@ -9,7 +13,8 @@ export function PanelTab({
   program: Program;
   variant?: "mobile" | "web";
 }) {
-  const panel = program.panel ?? [];
+  // Phase 1.8: panels live per-category. Show the union across categories.
+  const panel = getAllProgramPanelMembers(program);
 
   if (panel.length === 0) {
     return (
@@ -105,7 +110,7 @@ export function PanelTab({
 function PanelMemberCard({
   member,
 }: {
-  member: NonNullable<Program["panel"]>[number];
+  member: PanelMember;
 }) {
   const pct =
     member.totalToReview > 0

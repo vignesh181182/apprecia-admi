@@ -1,16 +1,32 @@
 import { Link } from "react-router-dom";
-import { Calendar, Users, ArrowRight, Trophy, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Calendar, Users, ArrowRight, Edit3 } from "lucide-react";
 import { getAccount } from "@/lib/account";
-import { getActivePrograms, getEndingSoon, type Program } from "@/lib/programs-data";
+import { getActivePrograms, type Program, type ProgramCategory } from "@/lib/programs-data";
 import { TOP_WINNERS } from "@/lib/rnr-insights-data";
+
+type CategoryEntry = { program: Program; category: ProgramCategory };
+
+function flattenAwardCategories(programs: Program[]): CategoryEntry[] {
+  const out: CategoryEntry[] = [];
+  for (const program of programs) {
+    const cats = program.categories ?? [];
+    // Skip the synthesized default category that normalizeProgram adds for
+    // programs that didn't declare their own — those are represented well
+    // enough by the program card itself.
+    const real = cats.filter((c) => c.id !== `${program.id}-cat-default`);
+    for (const category of real) {
+      out.push({ program, category });
+    }
+  }
+  return out;
+}
 
 export function RnRHome() {
   const account = getAccount();
   const firstName = account?.adminName?.split(" ")[0] || "there";
   const active = getActivePrograms();
   const featuredActive = active.slice(0, 6);
-  const endingSoon = getEndingSoon();
+  const awardCategories = flattenAwardCategories(active);
 
   return (
     <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6 space-y-5 md:space-y-6">
@@ -23,18 +39,22 @@ export function RnRHome() {
         </p>
       </header>
 
-      {endingSoon.length > 0 && (
+      {awardCategories.length > 0 && (
         <section>
           <header className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="font-mobile font-semibold text-stone-900">Ending soon</h2>
-              <p className="text-xs text-stone-500 mt-0.5">Don't miss the deadline.</p>
+              <h2 className="font-mobile font-semibold text-stone-900">Award categories</h2>
+              <p className="text-xs text-stone-500 mt-0.5">Pick a category and nominate a teammate.</p>
             </div>
           </header>
-          <div className="space-y-3">
-            {endingSoon.map((p) => (
-              <EndingSoonCard key={p.id} program={p} />
-            ))}
+          <div className="overflow-x-auto -mx-5 px-5 md:mx-0 md:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <ul className="flex gap-3 md:grid md:grid-cols-2 md:gap-4">
+              {awardCategories.map(({ program, category }) => (
+                <li key={`${program.id}-${category.id}`} className="shrink-0 w-72 md:w-auto">
+                  <AwardCategoryCard program={program} category={category} />
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
@@ -85,39 +105,48 @@ export function RnRHome() {
   );
 }
 
-function EndingSoonCard({ program }: { program: Program }) {
-  const urgency = program.daysLeft <= 2 ? "high" : program.daysLeft <= 5 ? "medium" : "low";
+function AwardCategoryCard({ program, category }: { program: Program; category: ProgramCategory }) {
+  const description = category.guidelines?.summary || category.description;
   return (
     <Link
       to={`/m/programs/${program.id}`}
-      className="block rounded-2xl border border-stone-200 bg-white p-4 hover:border-stone-300 transition-colors"
+      className="group flex flex-col h-full rounded-2xl overflow-hidden border border-stone-200 bg-white hover:border-stone-300 hover:shadow-sm transition-all"
     >
-      <div className="flex items-center gap-3">
-        <span
-          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
-          style={{ background: program.themeBg }}
-        >
-          {program.emoji}
+      <div
+        className="px-4 pt-4 pb-3 flex items-start gap-3"
+        style={{ background: program.themeBg }}
+      >
+        <span className="w-11 h-11 rounded-xl bg-white/70 flex items-center justify-center text-xl shrink-0 shadow-sm">
+          {category.emoji}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-mobile font-semibold text-stone-900 truncate">{program.name}</p>
-          <p className="text-xs text-stone-600 mt-0.5 truncate">{program.shortDesc}</p>
+          <p className="font-mobile font-semibold text-stone-900 leading-snug line-clamp-2">
+            {category.name}
+          </p>
+          <p className="text-[11px] text-stone-700 mt-0.5 truncate">{program.name}</p>
         </div>
-        <div className="shrink-0 flex flex-col items-end">
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-mobile font-semibold",
-              urgency === "high" ? "bg-rose-50 text-rose-700 border border-rose-100" : urgency === "medium" ? "bg-amber-50 text-amber-700 border border-amber-100" : "bg-stone-100 text-stone-700",
-            )}
-          >
-            <Calendar className="w-3 h-3" />
-            {program.daysLeft} days
-          </span>
-          <span className="text-[11px] text-stone-500 mt-1 inline-flex items-center gap-1">
-            <Users className="w-3 h-3" />
-            {program.nominations} nominations
-          </span>
-        </div>
+        <span className="inline-flex items-center gap-1 rounded-full bg-white/70 backdrop-blur px-2 py-0.5 text-[11px] font-mobile font-semibold text-stone-800 shrink-0">
+          <Calendar className="w-3 h-3" />
+          {program.daysLeft}d
+        </span>
+      </div>
+
+      {description && (
+        <p className="px-4 pt-3 text-xs text-stone-600 leading-relaxed line-clamp-2">
+          {description}
+        </p>
+      )}
+
+      <div className="px-4 py-3 mt-auto flex items-center justify-between gap-2 border-t border-stone-100">
+        <span className="text-[11px] text-stone-500 inline-flex items-center gap-1">
+          <Users className="w-3 h-3 text-stone-400" />
+          {program.nominations} nominations
+        </span>
+        <span className="inline-flex items-center gap-1 text-xs font-mobile font-semibold text-[#a87a3a] group-hover:gap-1.5 transition-all">
+          <Edit3 className="w-3 h-3" />
+          Nominate
+          <ArrowRight className="w-3 h-3" />
+        </span>
       </div>
     </Link>
   );

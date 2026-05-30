@@ -11,9 +11,11 @@ import { Menu, LogOut } from "lucide-react";
 import { useState } from "react";
 import HRDashboard from "@/pages/hr-dashboard";
 import Recognitions from "@/pages/recognitions";
+import Approvals from "@/pages/approvals";
 import Employees from "@/pages/employees";
 import Rewards from "@/pages/rewards";
 import Programs from "@/pages/programs";
+import Categories from "@/pages/categories";
 import ProgramEdit from "@/pages/program-edit";
 import ProgramDetailAdmin from "@/pages/program-detail";
 import WinnerSelection from "@/pages/winner-selection";
@@ -223,7 +225,7 @@ function Router() {
 
       <Route path="/" element={<Protected><HRDashboard /></Protected>} />
       <Route path="/recognitions" element={<Protected title="Recognitions" description="All recognitions created across your organization"><Recognitions showCreate={true} /></Protected>} />
-      <Route path="/approvals" element={<Protected title="Approval" description="Review and approve pending recognition submissions"><Recognitions showCreate={false} defaultStatusFilter="Pending" approvalMode={true} /></Protected>} />
+      <Route path="/approvals" element={<Protected title="Approval" description="Review pending submissions and manage who can approve appreciations"><Approvals /></Protected>} />
       <Route path="/employees" element={<Protected title="Employees" description="Browse your workforce and track recognition activity"><Employees /></Protected>} />
       <Route path="/programs" element={<Protected title="Programs" description="Create and manage recognition programs and campaigns"><Programs /></Protected>} />
       <Route path="/programs/new" element={<Protected><ProgramEdit /></Protected>} />
@@ -234,7 +236,7 @@ function Router() {
       <Route path="/badges" element={<Protected title="Badges & Tags" description="Manage recognition tags and achievement badge taxonomy"><BadgesAndTags /></Protected>} />
       <Route path="/appreciation-settings" element={<Protected title="Appreciation Badges" description="Achievement badges employees can earn"><BadgesAndTags lockedSection="badges" /></Protected>} />
       <Route path="/appreciation-policy" element={<Protected title="Appreciation Policy" description="Approval rules, point value, and recognition window"><AppreciationPolicyPage /></Protected>} />
-      <Route path="/recognition-tags" element={<ProtectedRnR title="Recognition Tags" description="Quick-select reasons employees pick when sending appreciation"><BadgesAndTags lockedSection="tags" /></ProtectedRnR>} />
+      <Route path="/categories" element={<ProtectedRnR title="Categories" description="All award categories across your recognition programs"><Categories /></ProtectedRnR>} />
       <Route path="/check-ins" element={<Protected title="Weekly Check-ins" description="Track employee weekly updates and manager responses"><CheckIns /></Protected>} />
       <Route path="/one-on-ones" element={<Protected title="1-on-1s" description="Structured manager-employee meeting agendas and notes"><OneOnOnes /></Protected>} />
       <Route path="/surveys" element={<Protected title="Engagement Surveys" description="Pulse, lifecycle, and custom employee surveys"><Surveys /></Protected>} />
@@ -245,7 +247,7 @@ function Router() {
       <Route path="/notifications" element={<Protected title="Notifications" description="System alerts, budget warnings, and pending action items"><HRNotifications /></Protected>} />
 
       <Route path="/rewards" element={<ProtectedRnR title="Rewards Catalog" description="Manage redeemable rewards available to employees"><Rewards /></ProtectedRnR>} />
-      <Route path="/redemptions" element={<ProtectedRnR title="Redemptions" description="Review and fulfill employee reward redemption requests"><Redemptions /></ProtectedRnR>} />
+      <Route path="/redemptions" element={<ProtectedRnR title="Redemptions" description="Insights into what employees redeem, how much they spend, and who's redeeming most"><Redemptions /></ProtectedRnR>} />
       <Route path="/budget" element={<ProtectedRnR title="Points & Budget" description="Org-wide point budget, allocations, allowances, and ledger"><Budget /></ProtectedRnR>} />
 
       <Route path="/m" element={<MobileGuard><MobileHome /></MobileGuard>} />

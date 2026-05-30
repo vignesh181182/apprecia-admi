@@ -1,27 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -30,36 +10,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { redemptionsData, type Redemption, type RedemptionStatus } from "@/lib/hr-data";
-import { Search, Check, X, Package, Star, Ban } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { redemptionsData, type Redemption } from "@/lib/hr-data";
+import { Ban, Package, Star, Wallet, Users, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAccount } from "@/lib/account";
 import { isMonetaryActive } from "@/lib/appreciation-policy";
 
-// TODO: Connects to wallet redemptions in Phase 4.1. Until then the table
-// is backed by the mocked redemptionsData from hr-data.
+type Range = "30d" | "90d" | "all";
 
-const statusColors: Record<RedemptionStatus, string> = {
-  Pending: "bg-yellow-100 text-yellow-700",
-  Fulfilled: "bg-green-100 text-green-700",
-  Rejected: "bg-red-100 text-red-700",
-};
+const RANGES: { id: Range; label: string; days: number | null }[] = [
+  { id: "30d", label: "Last 30 days", days: 30 },
+  { id: "90d", label: "Last 90 days", days: 90 },
+  { id: "all", label: "All time", days: null },
+];
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function Redemptions() {
-  const { toast } = useToast();
-  const [items, setItems] = useState<Redemption[]>(redemptionsData);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [account, setAccount] = useState(getAccount());
+  const [range, setRange] = useState<Range>("90d");
 
-  // Re-read the account when localStorage changes (e.g. policy toggled in
-  // another tab) and whenever the window regains focus, so the disabled
-  // banner flips immediately once monetary recognition is turned back on.
   useEffect(() => {
     function refresh() {
       setAccount(getAccount());
@@ -80,10 +56,15 @@ export default function Redemptions() {
             <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
               <Ban className="w-5 h-5 text-stone-500" />
             </div>
-            <p className="text-base font-semibold text-stone-900">Redemptions are disabled</p>
+            <p className="text-base font-semibold text-stone-900">
+              Redemptions are disabled
+            </p>
             <p className="text-sm text-stone-600 max-w-md">
               Monetary recognition is currently off at the org level. Re-enable it in{" "}
-              <Link to="/appreciation-policy" className="text-stone-900 underline underline-offset-2 font-medium">
+              <Link
+                to="/appreciation-policy"
+                className="text-stone-900 underline underline-offset-2 font-medium"
+              >
                 Appreciation → Appreciation Policy
               </Link>{" "}
               to start accepting employee redemptions.
@@ -94,173 +75,490 @@ export default function Redemptions() {
     );
   }
 
-  const filtered = items.filter((r) => {
-    const matchSearch =
-      r.employeeName.toLowerCase().includes(search.toLowerCase()) ||
-      r.rewardName.toLowerCase().includes(search.toLowerCase()) ||
-      r.department.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "all" || r.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+  const currency = account?.currency ?? "₹";
+  const pv = account?.appreciationPolicy?.pointValue;
+  const pointRate = pv && pv.points > 0 ? pv.amount / pv.points : 1;
 
-  function fulfill(id: string) {
-    setItems((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, status: "Fulfilled" as RedemptionStatus, fulfilledAt: new Date().toISOString() } : r
-      )
+  const inRange = useMemo<Redemption[]>(() => {
+    const days = RANGES.find((r) => r.id === range)?.days ?? null;
+    if (days === null) return redemptionsData;
+    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    return redemptionsData.filter(
+      (r) => new Date(r.requestedAt).getTime() >= cutoff,
     );
-    toast({ title: "Redemption fulfilled", description: "The employee has been notified." });
-  }
+  }, [range]);
 
-  function reject(id: string) {
-    setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status: "Rejected" as RedemptionStatus } : r)));
-    toast({ title: "Redemption rejected", description: "Points have been refunded to the employee." });
-  }
+  // Phase 1.10 — every row in the marketplace ledger is a completed purchase.
+  // No approval workflow exists, so we don't differentiate status anywhere.
+  const purchases = inRange;
+  const totalPts = purchases.reduce((s, r) => s + r.points, 0);
+  const totalMoney = Math.round(totalPts * pointRate);
+  const uniqueRedeemers = new Set(purchases.map((r) => r.employeeId)).size;
+  const avgPts =
+    purchases.length > 0 ? Math.round(totalPts / purchases.length) : 0;
+  const avgPerPerson =
+    uniqueRedeemers === 0 ? 0 : purchases.length / uniqueRedeemers;
+  const uniqueProducts = new Set(purchases.map((r) => r.rewardId)).size;
 
-  const pendingCount = items.filter((r) => r.status === "Pending").length;
-  const totalPtsRedeemed = items.filter((r) => r.status === "Fulfilled").reduce((s, r) => s + r.points, 0);
+  const kpis = [
+    {
+      label: "Total redemptions",
+      value: purchases.length.toLocaleString(),
+      icon: Package,
+      sub: `${uniqueProducts} distinct product${uniqueProducts === 1 ? "" : "s"}`,
+    },
+    {
+      label: "Points redeemed",
+      value: totalPts.toLocaleString(),
+      icon: Star,
+      sub: `Avg ${avgPts.toLocaleString()} pts / redemption`,
+    },
+    {
+      label: "Money redeemed",
+      value: `${currency}${totalMoney.toLocaleString()}`,
+      icon: Wallet,
+      sub:
+        pointRate === 1
+          ? `1 pt = ${currency}1`
+          : `${currency}${pointRate.toLocaleString(undefined, { maximumFractionDigits: 4 })} per pt`,
+    },
+    {
+      label: "Active redeemers",
+      value: uniqueRedeemers.toLocaleString(),
+      icon: Users,
+      sub: `${avgPerPerson.toFixed(1)} redemptions / person`,
+    },
+    {
+      label: "Avg basket",
+      value: `${currency}${Math.round(avgPts * pointRate).toLocaleString()}`,
+      icon: ShoppingBag,
+      sub: `${avgPts.toLocaleString()} pts per order`,
+    },
+  ];
+
+  // Top products — group redemptions by rewardId.
+  const productMap = new Map<
+    string,
+    { name: string; category: string; count: number; points: number }
+  >();
+  for (const r of purchases) {
+    const entry = productMap.get(r.rewardId) ?? {
+      name: r.rewardName,
+      category: r.rewardCategory,
+      count: 0,
+      points: 0,
+    };
+    entry.count += 1;
+    entry.points += r.points;
+    productMap.set(r.rewardId, entry);
+  }
+  const topProducts = Array.from(productMap.entries())
+    .map(([id, v]) => ({ id, ...v, money: Math.round(v.points * pointRate) }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
+  // Top redeemers — group redemptions by employeeId.
+  const redeemerMap = new Map<
+    string,
+    {
+      name: string;
+      avatar: string;
+      department: string;
+      count: number;
+      points: number;
+    }
+  >();
+  for (const r of purchases) {
+    const entry = redeemerMap.get(r.employeeId) ?? {
+      name: r.employeeName,
+      avatar: r.employeeAvatar,
+      department: r.department,
+      count: 0,
+      points: 0,
+    };
+    entry.count += 1;
+    entry.points += r.points;
+    redeemerMap.set(r.employeeId, entry);
+  }
+  const topRedeemers = Array.from(redeemerMap.entries())
+    .map(([id, v]) => ({ id, ...v, money: Math.round(v.points * pointRate) }))
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 8);
+
+  // Category breakdown.
+  const categoryMap = new Map<string, { count: number; points: number }>();
+  for (const r of purchases) {
+    const e = categoryMap.get(r.rewardCategory) ?? { count: 0, points: 0 };
+    e.count += 1;
+    e.points += r.points;
+    categoryMap.set(r.rewardCategory, e);
+  }
+  const categoryBreakdown = Array.from(categoryMap.entries())
+    .map(([name, v]) => ({
+      name,
+      ...v,
+      money: Math.round(v.points * pointRate),
+    }))
+    .sort((a, b) => b.points - a.points);
+  const maxCategoryPts = Math.max(1, ...categoryBreakdown.map((c) => c.points));
+
+  // Department breakdown.
+  const deptMap = new Map<string, { count: number; points: number }>();
+  for (const r of purchases) {
+    const e = deptMap.get(r.department) ?? { count: 0, points: 0 };
+    e.count += 1;
+    e.points += r.points;
+    deptMap.set(r.department, e);
+  }
+  const deptBreakdown = Array.from(deptMap.entries())
+    .map(([name, v]) => ({
+      name,
+      ...v,
+      money: Math.round(v.points * pointRate),
+    }))
+    .sort((a, b) => b.points - a.points);
+  const maxDeptPts = Math.max(1, ...deptBreakdown.map((d) => d.points));
+
+  // Recent activity (last 5 purchases).
+  const recent = [...purchases]
+    .sort(
+      (a, b) =>
+        new Date(b.fulfilledAt ?? b.requestedAt).getTime() -
+        new Date(a.fulfilledAt ?? a.requestedAt).getTime(),
+    )
+    .slice(0, 5);
 
   return (
-    <div className="p-6 space-y-4">
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { label: "Pending", value: pendingCount, icon: Package, accent: pendingCount > 0 ? "text-yellow-600" : "text-stone-900" },
-          { label: "Fulfilled", value: items.filter((r) => r.status === "Fulfilled").length, icon: Check, accent: "text-green-600" },
-          { label: "Pts Redeemed", value: totalPtsRedeemed.toLocaleString(), icon: Star, accent: "text-stone-900" },
-        ].map(({ label, value, icon: Icon, accent }) => (
+    <div className="p-6 space-y-5">
+      {/* Range filter */}
+      <div className="flex flex-wrap gap-2">
+        {RANGES.map((r) => (
+          <button
+            key={r.id}
+            onClick={() => setRange(r.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              range === r.id
+                ? "bg-stone-900 text-white border-stone-900"
+                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+            }`}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {kpis.map(({ label, value, icon: Icon, sub }) => (
           <Card key={label} className="border border-stone-200">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center">
+            <CardContent className="p-4 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
                 <Icon className="w-5 h-5 text-stone-600" />
               </div>
-              <div>
-                <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-                <p className={`text-2xl font-bold ${accent}`}>{value}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">
+                  {label}
+                </p>
+                <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight mt-0.5">
+                  {value}
+                </p>
+                <p className="text-xs text-stone-500 mt-0.5 truncate">{sub}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-          <Input
-            placeholder="Search by employee or reward…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm border-stone-200"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-40 text-sm border-stone-200">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Fulfilled">Fulfilled</SelectItem>
-            <SelectItem value="Rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Top products + Top redeemers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="border border-stone-200">
+          <CardContent className="p-0">
+            <div className="px-4 py-3 border-b border-stone-200">
+              <p className="text-sm font-semibold text-stone-900">
+                Most redeemed products
+              </p>
+              <p className="text-xs text-stone-500">
+                Ranked by number of redemptions
+              </p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-stone-50 hover:bg-stone-50">
+                  <TableHead className="text-xs">Product</TableHead>
+                  <TableHead className="text-xs text-right">Redeemed</TableHead>
+                  <TableHead className="text-xs text-right">Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topProducts.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-sm text-stone-500 py-8"
+                    >
+                      No redemptions in this range.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  topProducts.map((p, i) => (
+                    <TableRow key={p.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs tabular-nums text-stone-400 w-4">
+                            {i + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm text-stone-900 truncate">
+                              {p.name}
+                            </p>
+                            <p className="text-xs text-stone-500 truncate">
+                              {p.category}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right text-sm tabular-nums">
+                        {p.count}×
+                      </TableCell>
+                      <TableCell className="text-right text-sm tabular-nums">
+                        <span className="text-stone-900 font-medium">
+                          {currency}
+                          {p.money.toLocaleString()}
+                        </span>
+                        <span className="text-stone-500">
+                          {" · "}
+                          {p.points.toLocaleString()} pts
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-stone-200">
+          <CardContent className="p-0">
+            <div className="px-4 py-3 border-b border-stone-200">
+              <p className="text-sm font-semibold text-stone-900">
+                Top redeemers
+              </p>
+              <p className="text-xs text-stone-500">
+                Ranked by total points redeemed
+              </p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-stone-50 hover:bg-stone-50">
+                  <TableHead className="text-xs">Employee</TableHead>
+                  <TableHead className="text-xs text-right">Count</TableHead>
+                  <TableHead className="text-xs text-right">Spent</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topRedeemers.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-sm text-stone-500 py-8"
+                    >
+                      No redemptions in this range.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  topRedeemers.map((emp, i) => (
+                    <TableRow key={emp.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-xs tabular-nums text-stone-400 w-4">
+                            {i + 1}
+                          </span>
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage src={emp.avatar} />
+                            <AvatarFallback className="text-xs">
+                              {emp.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="text-sm text-stone-900 truncate">
+                              {emp.name}
+                            </p>
+                            <p className="text-xs text-stone-500 truncate">
+                              {emp.department}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right text-sm tabular-nums text-stone-700">
+                        {emp.count}
+                      </TableCell>
+                      <TableCell className="text-right text-sm tabular-nums">
+                        <span className="text-stone-900 font-medium">
+                          {currency}
+                          {emp.money.toLocaleString()}
+                        </span>
+                        <span className="text-stone-500">
+                          {" · "}
+                          {emp.points.toLocaleString()} pts
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-stone-200 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">Employee</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Reward</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Category</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Points</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Requested</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Fulfilled</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((red) => (
-              <TableRow key={red.id} className="hover:bg-stone-50">
-                <TableCell>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar className="h-7 w-7">
-                      <AvatarImage src={red.employeeAvatar} />
-                      <AvatarFallback className="text-xs">{red.employeeName.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-xs font-medium text-stone-900">{red.employeeName}</p>
-                      <p className="text-xs text-stone-500">{red.department}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-xs text-stone-900 font-medium max-w-32 truncate">{red.rewardName}</TableCell>
-                <TableCell className="text-xs text-stone-600">{red.rewardCategory}</TableCell>
-                <TableCell>
-                  <span className="text-xs font-semibold text-stone-900 flex items-center gap-0.5">
-                    <Star className="w-3 h-3 text-yellow-500" />
-                    {red.points.toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell className="text-xs text-stone-600">{formatDate(red.requestedAt)}</TableCell>
-                <TableCell className="text-xs text-stone-600">
-                  {red.fulfilledAt ? formatDate(red.fulfilledAt) : "—"}
-                </TableCell>
-                <TableCell>
-                  <Badge className={`text-xs ${statusColors[red.status]}`} variant="secondary">
-                    {red.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  {red.status === "Pending" && (
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 gap-1"
-                        onClick={() => fulfill(red.id)}
-                      >
-                        <Check className="w-3.5 h-3.5" /> Fulfill
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-600 hover:bg-red-50">
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Reject this redemption?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {red.employeeName}'s request for "{red.rewardName}" will be declined and {red.points} points will be refunded.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => reject(red.id)} className="bg-red-600 hover:bg-red-700">
-                              Reject & Refund
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center text-sm text-stone-500 py-10">
-                  No redemptions found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+      {/* Category + Department breakdowns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <BreakdownCard
+          title="By reward category"
+          rows={categoryBreakdown}
+          maxPts={maxCategoryPts}
+          currency={currency}
+        />
+        <BreakdownCard
+          title="By department"
+          rows={deptBreakdown}
+          maxPts={maxDeptPts}
+          currency={currency}
+        />
       </div>
+
+      {/* Recent activity */}
+      <Card className="border border-stone-200">
+        <CardContent className="p-0">
+          <div className="px-4 py-3 border-b border-stone-200">
+            <p className="text-sm font-semibold text-stone-900">
+              Recent redemptions
+            </p>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-stone-50 hover:bg-stone-50">
+                <TableHead className="text-xs">Employee</TableHead>
+                <TableHead className="text-xs">Reward</TableHead>
+                <TableHead className="text-xs">Category</TableHead>
+                <TableHead className="text-xs text-right">Value</TableHead>
+                <TableHead className="text-xs">Redeemed</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recent.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center text-sm text-stone-500 py-6"
+                  >
+                    No redemptions in this range.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                recent.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={r.employeeAvatar} />
+                          <AvatarFallback className="text-[10px]">
+                            {r.employeeName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-xs text-stone-900 truncate">
+                          {r.employeeName}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-stone-700 truncate max-w-[180px]">
+                      {r.rewardName}
+                    </TableCell>
+                    <TableCell className="text-xs text-stone-600">
+                      {r.rewardCategory}
+                    </TableCell>
+                    <TableCell className="text-right text-xs tabular-nums">
+                      <span className="text-stone-900 font-medium">
+                        {currency}
+                        {Math.round(r.points * pointRate).toLocaleString()}
+                      </span>
+                      <span className="text-stone-500">
+                        {" · "}
+                        {r.points.toLocaleString()}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-stone-600">
+                      {formatDate(r.fulfilledAt ?? r.requestedAt)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
+function BreakdownCard({
+  title,
+  rows,
+  maxPts,
+  currency,
+}: {
+  title: string;
+  rows: { name: string; count: number; points: number; money: number }[];
+  maxPts: number;
+  currency: string;
+}) {
+  return (
+    <Card className="border border-stone-200">
+      <CardContent className="p-4 space-y-3">
+        <p className="text-sm font-semibold text-stone-900">{title}</p>
+        {rows.length === 0 ? (
+          <p className="text-sm text-stone-500 py-4 text-center">
+            No data in this range.
+          </p>
+        ) : (
+          <div className="space-y-2.5">
+            {rows.map((row) => {
+              const pct = Math.round((row.points / maxPts) * 100);
+              return (
+                <div key={row.name}>
+                  <div className="flex items-baseline justify-between text-xs mb-1">
+                    <span className="text-stone-700 truncate">{row.name}</span>
+                    <span className="tabular-nums shrink-0">
+                      <span className="text-stone-900 font-medium">
+                        {currency}
+                        {row.money.toLocaleString()}
+                      </span>
+                      <span className="text-stone-500">
+                        {" · "}
+                        {row.count}×
+                      </span>
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-stone-700 rounded-full"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+

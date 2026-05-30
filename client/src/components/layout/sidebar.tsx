@@ -44,7 +44,7 @@ const navGroups: NavGroup[] = [
       { title: "Analytics",         href: "/?tab=rnr",         icon: BarChart2    },
       { title: "Programs",          href: "/programs",         icon: Trophy      },
       { title: "Redemptions",       href: "/redemptions",      icon: ShoppingCart },
-      { title: "Recognition Tags",  href: "/recognition-tags", icon: Tag          },
+      { title: "Categories",        href: "/categories",       icon: Tag          },
     ],
   },
   {
@@ -52,7 +52,7 @@ const navGroups: NavGroup[] = [
     items: [
       { title: "Employees",       href: "/employees",     icon: Users               },
       { title: "Rewards Catalog", href: "/rewards",       icon: Gift                },
-      { title: "Points & Budget", href: "/budget",        icon: Wallet              },
+      // { title: "Points & Budget", href: "/budget",        icon: Wallet              },
       { title: "Notifications",   href: "/notifications", icon: Bell,     badge: 3  },
       { title: "Settings",        href: "/settings",      icon: Settings            },
     ],

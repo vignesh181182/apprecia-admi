@@ -42,6 +42,41 @@ export function ShortlistDetail({
           </section>
         )}
 
+        {entry.criteriaBreakdown.length > 0 && (
+          <section>
+            <p className="font-mobile font-semibold text-stone-900 mb-2">
+              Scored against the rubric
+            </p>
+            <ul className="space-y-2">
+              {entry.criteriaBreakdown.map((c) => (
+                <li key={c.criterionId}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-stone-700">
+                      {c.label}{" "}
+                      <span className="text-stone-400">· weight {c.weight}</span>
+                    </span>
+                    <span className="tabular-nums text-stone-900 font-medium">
+                      {c.score}/100
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${
+                        c.score >= 70
+                          ? "bg-emerald-500"
+                          : c.score >= 40
+                            ? "bg-amber-500"
+                            : "bg-stone-400"
+                      }`}
+                      style={{ width: `${c.score}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {nomination.managerName && (
           <section>
             <p className="font-mobile font-semibold text-stone-900 mb-1">
