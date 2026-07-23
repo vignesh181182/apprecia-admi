@@ -9,7 +9,7 @@ function highlight(text: string, query: string) {
   return (
     <>
       {text.slice(0, i)}
-      <span className="font-semibold text-stone-900">{text.slice(i, i + query.length)}</span>
+      <span className="font-semibold text-foreground">{text.slice(i, i + query.length)}</span>
       {text.slice(i + query.length)}
     </>
   );
@@ -33,20 +33,20 @@ export function PersonPicker({
   return (
     <div className="space-y-3">
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search"
-          className="w-full h-11 pl-10 pr-4 rounded-full bg-white border border-stone-200 focus:border-stone-300 focus:outline-none text-sm text-stone-800 placeholder:text-stone-400 transition-colors"
+          className="w-full h-11 pl-10 pr-4 rounded-full bg-white border border-border focus:border-border focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-colors"
         />
       </div>
 
       {results.length === 0 ? (
-        <p className="text-sm text-stone-500 text-center py-8">No teammates match "{query}".</p>
+        <p className="text-sm text-muted-foreground text-center py-8">No teammates match "{query}".</p>
       ) : (
-        <ul className="divide-y divide-stone-100">
+        <ul className="divide-y divide-border">
           {results.map((p) => {
             const selected = p.id === selectedId;
             return (
@@ -55,15 +55,15 @@ export function PersonPicker({
                   type="button"
                   onClick={() => onSelect(p)}
                   className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${
-                    selected ? "bg-amber-50" : "hover:bg-stone-50"
+                    selected ? "bg-amber-50" : "hover:bg-muted"
                   }`}
                 >
                   <img src={p.avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-[#a87a3a] font-mobile font-semibold truncate">
+                    <p className="text-sm text-primary font-mobile font-semibold truncate">
                       {highlight(p.name, query)}
                     </p>
-                    <p className="text-xs text-stone-600 truncate">{p.role}</p>
+                    <p className="text-xs text-muted-foreground truncate">{p.role}</p>
                   </div>
                 </button>
               </li>

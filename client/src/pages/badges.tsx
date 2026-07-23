@@ -91,7 +91,7 @@ type TagItem = {
 const TAG_COLOR_STYLES: Record<TagColor, { bg: string; icon: string; ring: string }> = {
   blue:   { bg: "bg-blue-100",   icon: "text-blue-700",   ring: "ring-blue-400" },
   amber:  { bg: "bg-amber-100",  icon: "text-amber-700",  ring: "ring-amber-400" },
-  stone:  { bg: "bg-stone-200",  icon: "text-stone-700",  ring: "ring-stone-400" },
+  stone:  { bg: "bg-muted",  icon: "text-muted-foreground",  ring: "ring-stone-400" },
   purple: { bg: "bg-purple-100", icon: "text-purple-700", ring: "ring-purple-400" },
   rose:   { bg: "bg-rose-100",   icon: "text-rose-700",   ring: "ring-rose-400" },
   green:  { bg: "bg-green-100",  icon: "text-green-700",  ring: "ring-green-400" },
@@ -126,7 +126,7 @@ const CATEGORY_CONFIG: Record<string, { color: string; bg: string; icon: React.E
   "Collaboration & Culture":   { color: "text-green-700",   bg: "bg-green-100",   icon: Users      },
   "Growth & Learning":         { color: "text-emerald-700", bg: "bg-emerald-100", icon: TrendingUp },
   "Creativity & Expression":   { color: "text-pink-700",    bg: "bg-pink-100",    icon: Sparkles   },
-  "Reliability & Trust":       { color: "text-slate-700",   bg: "bg-slate-100",   icon: Shield     },
+  "Reliability & Trust":       { color: "text-muted-foreground",   bg: "bg-muted",   icon: Shield     },
   "Wellbeing & Human":         { color: "text-rose-700",    bg: "bg-rose-100",    icon: Heart      },
   "Managers / Leaders":        { color: "text-purple-700",  bg: "bg-purple-100",  icon: Briefcase  },
   "Celebrations & Lightweight":{ color: "text-orange-700",  bg: "bg-orange-100",  icon: Gift       },
@@ -157,13 +157,13 @@ function ViewToggle({
       onValueChange={(v) => {
         if (v === "cards" || v === "list") onChange(v);
       }}
-      className="bg-white border border-stone-200 rounded-lg p-0.5 shrink-0"
+      className="bg-white border border-border rounded-lg p-0.5 shrink-0"
     >
       <ToggleGroupItem
         value="cards"
         aria-label="Card view"
         data-testid="badges-view-cards"
-        className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+        className="h-8 px-2.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
       >
         <LayoutGrid className="w-4 h-4" />
       </ToggleGroupItem>
@@ -171,7 +171,7 @@ function ViewToggle({
         value="list"
         aria-label="List view"
         data-testid="badges-view-list"
-        className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+        className="h-8 px-2.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
       >
         <List className="w-4 h-4" />
       </ToggleGroupItem>
@@ -270,16 +270,16 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
       <Tabs defaultValue={lockedSection ?? "tags"}>
         {!lockedSection && (
           <div className="mb-4">
-            <TabsList className="bg-stone-100 h-9">
+            <TabsList className="bg-muted h-9">
               <TabsTrigger value="tags" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <Tag className="w-3.5 h-3.5 mr-1.5" />
                 Recognition Tags
-                <span className="ml-1.5 text-stone-400 font-normal">({tags.length})</span>
+                <span className="ml-1.5 text-muted-foreground font-normal">({tags.length})</span>
               </TabsTrigger>
               <TabsTrigger value="badges" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <Award className="w-3.5 h-3.5 mr-1.5" />
                 Achievement Badges
-                <span className="ml-1.5 text-stone-400 font-normal">({badges.length})</span>
+                <span className="ml-1.5 text-muted-foreground font-normal">({badges.length})</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -294,10 +294,10 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
               { label: "Active",        value: activeTagCount },
               { label: "Total Pts Range", value: `${Math.min(...tags.map(t=>t.points))}–${Math.max(...tags.map(t=>t.points))}` },
             ].map(({ label, value }) => (
-              <Card key={label} className="border border-stone-200">
+              <Card key={label} className="border border-border">
                 <CardContent className="p-4">
-                  <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{label}</p>
-                  <p className="text-2xl font-bold text-stone-900">{value}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">{label}</p>
+                  <p className="text-2xl font-bold text-foreground">{value}</p>
                 </CardContent>
               </Card>
             ))}
@@ -306,19 +306,19 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
           {/* Toolbar */}
           <div className="flex items-center justify-between gap-3">
             <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search tags…"
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
-                className="pl-9 h-9 text-sm border-stone-200"
+                className="pl-9 h-9 text-sm border-border"
               />
             </div>
             <div className="flex items-center gap-2">
               <ViewToggle value={viewMode} onChange={setViewMode} />
               <Sheet open={tagSheetOpen} onOpenChange={(o) => { setTagSheetOpen(o); if (!o) setEditTag(null); }}>
                 <SheetTrigger asChild>
-                  <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9">
                     <Plus className="w-4 h-4" /> Add Tag
                   </Button>
                 </SheetTrigger>
@@ -346,7 +346,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
               const Icon = TAG_ICONS[tag.icon] ?? Star;
               const tagStyle = TAG_COLOR_STYLES[tag.color] ?? TAG_COLOR_STYLES.stone;
               return (
-                <Card key={tag.id} className={`border border-stone-200 transition-all ${!tag.isActive ? "opacity-50" : "hover:shadow-sm"}`}>
+                <Card key={tag.id} className={`border border-border transition-all ${!tag.isActive ? "opacity-50" : "hover:shadow-sm"}`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-3">
@@ -354,34 +354,34 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                           <Icon className={`w-5 h-5 ${tagStyle.icon}`} />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-stone-900">{tag.name}</p>
-                          <p className="text-xs text-stone-500">{tag.description}</p>
+                          <p className="text-sm font-semibold text-foreground">{tag.name}</p>
+                          <p className="text-xs text-muted-foreground">{tag.description}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
                       <div className="flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 text-yellow-500" />
-                        <span className="text-sm font-bold text-stone-900">{tag.points} pts</span>
+                        <Star className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-sm font-bold text-foreground">{tag.points} pts</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={tag.isActive}
                           onCheckedChange={() => toggleTag(tag.id)}
-                          className="scale-75 data-[state=checked]:bg-stone-900"
+                          className="scale-75 data-[state=checked]:bg-primary"
                         />
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                           onClick={() => { setEditTag(tag); setTagSheetOpen(true); }}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                               <Trash2 className="w-3.5 h-3.5" />
                             </Button>
                           </AlertDialogTrigger>
@@ -396,7 +396,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => deleteTag(tag.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                                className="bg-destructive hover:bg-destructive text-white"
                               >
                                 Delete
                               </AlertDialogAction>
@@ -411,7 +411,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
             })}
 
             {filteredTags.length === 0 && (
-              <div className="col-span-full text-center py-12 text-stone-400 text-sm">
+              <div className="col-span-full text-center py-12 text-muted-foreground text-sm">
                 No tags match your search.
               </div>
             )}
@@ -420,14 +420,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
 
           {/* Tag List */}
           {viewMode === "list" && (
-            <Card className="border border-stone-200 overflow-hidden">
+            <Card className="border border-border overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-stone-50 hover:bg-stone-50">
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Tag</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Points</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Active</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+                  <TableRow className="bg-muted hover:bg-muted">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Tag</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground text-right">Points</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Active</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -437,7 +437,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                     return (
                       <TableRow
                         key={tag.id}
-                        className={`hover:bg-stone-50 ${!tag.isActive ? "opacity-50" : ""}`}
+                        className={`hover:bg-muted ${!tag.isActive ? "opacity-50" : ""}`}
                         data-testid={`tags-row-${tag.id}`}
                       >
                         <TableCell className="min-w-[280px]">
@@ -446,14 +446,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                               <Icon className={`w-4 h-4 ${tagStyle.icon}`} />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-stone-900 truncate">{tag.name}</p>
-                              <p className="text-xs text-stone-500 truncate max-w-[320px]">{tag.description}</p>
+                              <p className="text-sm font-semibold text-foreground truncate">{tag.name}</p>
+                              <p className="text-xs text-muted-foreground truncate max-w-[320px]">{tag.description}</p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className="inline-flex items-center gap-1 text-sm font-bold text-stone-900">
-                            <Star className="w-3.5 h-3.5 text-yellow-500" />
+                          <span className="inline-flex items-center gap-1 text-sm font-bold text-foreground">
+                            <Star className="w-3.5 h-3.5 text-primary" />
                             {tag.points}
                           </span>
                         </TableCell>
@@ -461,7 +461,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                           <Switch
                             checked={tag.isActive}
                             onCheckedChange={() => toggleTag(tag.id)}
-                            className="scale-75 data-[state=checked]:bg-stone-900"
+                            className="scale-75 data-[state=checked]:bg-primary"
                           />
                         </TableCell>
                         <TableCell className="text-right">
@@ -469,14 +469,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                               onClick={() => { setEditTag(tag); setTagSheetOpen(true); }}
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -491,7 +491,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => deleteTag(tag.id)}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                    className="bg-destructive hover:bg-destructive text-white"
                                   >
                                     Delete
                                   </AlertDialogAction>
@@ -505,7 +505,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                   })}
                   {filteredTags.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-12 text-stone-400 text-sm">
+                      <TableCell colSpan={4} className="text-center py-12 text-muted-foreground text-sm">
                         No tags match your search.
                       </TableCell>
                     </TableRow>
@@ -525,10 +525,10 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
               { label: "Active",            value: activeBadgeCount },
               { label: "Categories",        value: BADGE_CATEGORIES.length },
             ].map(({ label, value }) => (
-              <Card key={label} className="border border-stone-200">
+              <Card key={label} className="border border-border">
                 <CardContent className="p-4">
-                  <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{label}</p>
-                  <p className="text-2xl font-bold text-stone-900">{value}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">{label}</p>
+                  <p className="text-2xl font-bold text-foreground">{value}</p>
                 </CardContent>
               </Card>
             ))}
@@ -538,17 +538,17 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
               <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search badges…"
                   value={badgeSearch}
                   onChange={(e) => setBadgeSearch(e.target.value)}
-                  className="pl-9 h-9 text-sm border-stone-200"
+                  className="pl-9 h-9 text-sm border-border"
                 />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="h-9 w-56 text-sm border-stone-200" data-testid="badges-category-filter">
-                  <Filter className="w-4 h-4 mr-2 text-stone-400" />
+                <SelectTrigger className="h-9 w-56 text-sm border-border" data-testid="badges-category-filter">
+                  <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -568,7 +568,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
               <ViewToggle value={viewMode} onChange={setViewMode} />
               <Sheet open={badgeSheetOpen} onOpenChange={(o) => { setBadgeSheetOpen(o); if (!o) setEditBadge(null); }}>
                 <SheetTrigger asChild>
-                  <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9">
                     <Plus className="w-4 h-4" /> Add Badge
                   </Button>
                 </SheetTrigger>
@@ -599,11 +599,11 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                 <div key={category}>
                   {/* Category header */}
                   <div className="flex items-center gap-2 mb-3">
-                    <div className={`w-6 h-6 rounded-md flex items-center justify-center ${cfg?.bg ?? "bg-stone-100"}`}>
-                      <Icon className={`w-3.5 h-3.5 ${cfg?.color ?? "text-stone-600"}`} />
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center ${cfg?.bg ?? "bg-muted"}`}>
+                      <Icon className={`w-3.5 h-3.5 ${cfg?.color ?? "text-muted-foreground"}`} />
                     </div>
-                    <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide">{category}</p>
-                    <span className="text-xs text-stone-400">· {items.length} badges</span>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{category}</p>
+                    <span className="text-xs text-muted-foreground">· {items.length} badges</span>
                   </div>
 
                   {/* Badge rows */}
@@ -611,26 +611,26 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                     {items.map((badge) => (
                       <Card
                         key={badge.id}
-                        className={`border border-stone-200 transition-all ${!badge.isActive ? "opacity-50" : "hover:shadow-sm"}`}
+                        className={`border border-border transition-all ${!badge.isActive ? "opacity-50" : "hover:shadow-sm"}`}
                       >
                         <CardContent className="p-3">
                           <div className="flex items-center gap-3">
                             {/* Category dot */}
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg?.bg ?? "bg-stone-100"}`}>
-                              <Icon className={`w-4 h-4 ${cfg?.color ?? "text-stone-600"}`} />
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg?.bg ?? "bg-muted"}`}>
+                              <Icon className={`w-4 h-4 ${cfg?.color ?? "text-muted-foreground"}`} />
                             </div>
 
                             {/* Text */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <p className="text-sm font-semibold text-stone-900 truncate">{badge.name}</p>
+                                <p className="text-sm font-semibold text-foreground truncate">{badge.name}</p>
                                 {!badge.isActive && (
-                                  <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-400 shrink-0">
+                                  <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground shrink-0">
                                     Inactive
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-stone-500 truncate">{badge.description}</p>
+                              <p className="text-xs text-muted-foreground truncate">{badge.description}</p>
                             </div>
 
                             {/* Actions */}
@@ -638,19 +638,19 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                               <Switch
                                 checked={badge.isActive}
                                 onCheckedChange={() => toggleBadge(badge.id)}
-                                className="scale-75 data-[state=checked]:bg-stone-900"
+                                className="scale-75 data-[state=checked]:bg-primary"
                               />
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                                 onClick={() => { setEditBadge(badge); setBadgeSheetOpen(true); }}
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </Button>
                                 </AlertDialogTrigger>
@@ -665,7 +665,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={() => deleteBadge(badge.id)}
-                                      className="bg-red-600 hover:bg-red-700 text-white"
+                                      className="bg-destructive hover:bg-destructive text-white"
                                     >
                                       Delete
                                     </AlertDialogAction>
@@ -683,7 +683,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
             })}
 
             {filteredBadges.length === 0 && (
-              <div className="text-center py-16 text-stone-400 text-sm">
+              <div className="text-center py-16 text-muted-foreground text-sm">
                 No badges match your search or filter.
               </div>
             )}
@@ -692,14 +692,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
 
           {/* Badge List */}
           {viewMode === "list" && (
-            <Card className="border border-stone-200 overflow-hidden">
+            <Card className="border border-border overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-stone-50 hover:bg-stone-50">
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Badge</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Category</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500">Active</TableHead>
-                    <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+                  <TableRow className="bg-muted hover:bg-muted">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Badge</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Category</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Active</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -709,29 +709,29 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                     return (
                       <TableRow
                         key={badge.id}
-                        className={`hover:bg-stone-50 ${!badge.isActive ? "opacity-50" : ""}`}
+                        className={`hover:bg-muted ${!badge.isActive ? "opacity-50" : ""}`}
                         data-testid={`badges-row-${badge.id}`}
                       >
                         <TableCell className="min-w-[280px]">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg?.bg ?? "bg-stone-100"}`}>
-                              <Icon className={`w-4 h-4 ${cfg?.color ?? "text-stone-600"}`} />
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cfg?.bg ?? "bg-muted"}`}>
+                              <Icon className={`w-4 h-4 ${cfg?.color ?? "text-muted-foreground"}`} />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
-                                <p className="text-sm font-semibold text-stone-900 truncate">{badge.name}</p>
+                                <p className="text-sm font-semibold text-foreground truncate">{badge.name}</p>
                                 {!badge.isActive && (
-                                  <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-400 shrink-0">
+                                  <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground shrink-0">
                                     Inactive
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-stone-500 truncate max-w-[320px]">{badge.description}</p>
+                              <p className="text-xs text-muted-foreground truncate max-w-[320px]">{badge.description}</p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${cfg?.bg ?? "bg-stone-100"} ${cfg?.color ?? "text-stone-700"}`}>
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${cfg?.bg ?? "bg-muted"} ${cfg?.color ?? "text-muted-foreground"}`}>
                             <Icon className="w-3 h-3" />
                             {badge.category}
                           </span>
@@ -740,7 +740,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                           <Switch
                             checked={badge.isActive}
                             onCheckedChange={() => toggleBadge(badge.id)}
-                            className="scale-75 data-[state=checked]:bg-stone-900"
+                            className="scale-75 data-[state=checked]:bg-primary"
                           />
                         </TableCell>
                         <TableCell className="text-right">
@@ -748,14 +748,14 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                               onClick={() => { setEditBadge(badge); setBadgeSheetOpen(true); }}
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-400 hover:text-red-600">
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -770,7 +770,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => deleteBadge(badge.id)}
-                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                    className="bg-destructive hover:bg-destructive text-white"
                                   >
                                     Delete
                                   </AlertDialogAction>
@@ -784,7 +784,7 @@ export default function BadgesAndTags({ lockedSection }: { lockedSection?: Locke
                   })}
                   {filteredBadges.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-16 text-stone-400 text-sm">
+                      <TableCell colSpan={4} className="text-center py-16 text-muted-foreground text-sm">
                         No badges match your search or filter.
                       </TableCell>
                     </TableRow>
@@ -829,43 +829,43 @@ function TagForm({
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
       {/* Live preview */}
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-200">
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border">
         <div className={`w-10 h-10 rounded-xl ${previewStyle.bg} flex items-center justify-center`}>
           <PreviewIcon className={`w-5 h-5 ${previewStyle.icon}`} />
         </div>
         <div>
-          <p className="text-sm font-semibold text-stone-900">{name || "Tag name"}</p>
-          <p className="text-xs text-stone-500">{points} pts · {isActive ? "Active" : "Inactive"}</p>
+          <p className="text-sm font-semibold text-foreground">{name || "Tag name"}</p>
+          <p className="text-xs text-muted-foreground">{points} pts · {isActive ? "Active" : "Inactive"}</p>
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Tag Name</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Tag Name</Label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Great Work"
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
           required
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Description</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Description</Label>
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Short description shown in the app…"
-          className="text-sm border-stone-200 resize-none"
+          className="text-sm border-border resize-none"
           rows={2}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Icon</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Icon</Label>
           <Select value={icon} onValueChange={setIcon}>
-            <SelectTrigger className="h-9 text-sm border-stone-200">
+            <SelectTrigger className="h-9 text-sm border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -876,20 +876,20 @@ function TagForm({
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Points</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Points</Label>
           <Input
             type="number"
             value={points}
             onChange={(e) => setPoints(e.target.value)}
             min={1}
             max={500}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Color</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Color</Label>
         <div className="flex gap-2 flex-wrap">
           {TAG_COLOR_ORDER.map((c) => {
             const s = TAG_COLOR_STYLES[c];
@@ -908,23 +908,23 @@ function TagForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg border border-stone-200">
+      <div className="flex items-center justify-between p-3 rounded-lg border border-border">
         <div>
-          <p className="text-sm font-medium text-stone-900">Active</p>
-          <p className="text-xs text-stone-500">Visible in mobile app</p>
+          <p className="text-sm font-medium text-foreground">Active</p>
+          <p className="text-xs text-muted-foreground">Visible in mobile app</p>
         </div>
         <Switch
           checked={isActive}
           onCheckedChange={setIsActive}
-          className="data-[state=checked]:bg-stone-900"
+          className="data-[state=checked]:bg-primary"
         />
       </div>
 
-      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
-        <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-stone-200" onClick={onCancel}>
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-border shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
+        <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-border" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1 h-9 bg-stone-900 hover:bg-stone-700 text-white text-sm">
+        <Button type="submit" className="flex-1 h-9 bg-primary hover:bg-primary/90 text-primary-foreground text-sm">
           {tag ? "Save Changes" : "Create Tag"}
         </Button>
       </div>
@@ -960,42 +960,42 @@ function BadgeForm({
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
       {/* Live preview */}
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-200">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cfg?.bg ?? "bg-stone-100"}`}>
-          <CatIcon className={`w-4 h-4 ${cfg?.color ?? "text-stone-600"}`} />
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border">
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cfg?.bg ?? "bg-muted"}`}>
+          <CatIcon className={`w-4 h-4 ${cfg?.color ?? "text-muted-foreground"}`} />
         </div>
         <div>
-          <p className="text-sm font-semibold text-stone-900">{name || "Badge name"}</p>
-          <p className="text-xs text-stone-500">{category}</p>
+          <p className="text-sm font-semibold text-foreground">{name || "Badge name"}</p>
+          <p className="text-xs text-muted-foreground">{category}</p>
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Badge Name</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Badge Name</Label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Game Changer"
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
           required
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Description</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Description</Label>
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What did the employee do to earn this?"
-          className="text-sm border-stone-200 resize-none"
+          className="text-sm border-border resize-none"
           rows={2}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Category</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Category</Label>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -1006,23 +1006,23 @@ function BadgeForm({
         </Select>
       </div>
 
-      <div className="flex items-center justify-between p-3 rounded-lg border border-stone-200">
+      <div className="flex items-center justify-between p-3 rounded-lg border border-border">
         <div>
-          <p className="text-sm font-medium text-stone-900">Active</p>
-          <p className="text-xs text-stone-500">Employees can earn this badge</p>
+          <p className="text-sm font-medium text-foreground">Active</p>
+          <p className="text-xs text-muted-foreground">Employees can earn this badge</p>
         </div>
         <Switch
           checked={isActive}
           onCheckedChange={setIsActive}
-          className="data-[state=checked]:bg-stone-900"
+          className="data-[state=checked]:bg-primary"
         />
       </div>
 
-      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
-        <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-stone-200" onClick={onCancel}>
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-border shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)] flex gap-2">
+        <Button type="button" variant="outline" className="flex-1 h-9 text-sm border-border" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1 h-9 bg-stone-900 hover:bg-stone-700 text-white text-sm">
+        <Button type="submit" className="flex-1 h-9 bg-primary hover:bg-primary/90 text-primary-foreground text-sm">
           {badge ? "Save Changes" : "Create Badge"}
         </Button>
       </div>

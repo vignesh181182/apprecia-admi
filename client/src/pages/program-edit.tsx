@@ -47,6 +47,8 @@ import {
   Check,
   ArrowLeft,
   ArrowRight,
+  FileText,
+  Link as LinkIcon,
   Pencil,
 } from "lucide-react";
 import { BannerArt } from "@/components/programs/banner-art";
@@ -64,6 +66,7 @@ import {
   type ProgramBudgetPeriod,
   type ProgramCadence,
   type ProgramCategory,
+  type ProgramDocument,
   type ProgramNotifications,
   type ProgramStatus,
   type StoredProgram,
@@ -88,6 +91,7 @@ type FormState = {
   description: string;
   bannerId: string;
   customBannerDataUrl?: string;
+  guidelinesDoc?: ProgramDocument;
   iconEmoji: string;
   cadence: ProgramCadence;
   startDate: string;
@@ -240,6 +244,7 @@ function fromExisting(program: StoredProgram): FormState {
     description: program.description ?? program.shortDesc ?? "",
     bannerId: program.bannerId ?? BANNER_PRESETS[0].id,
     customBannerDataUrl: program.customBannerDataUrl,
+    guidelinesDoc: program.guidelinesDoc,
     iconEmoji: program.iconEmoji ?? program.emoji ?? "🏆",
     cadence: program.cadence ?? "monthly",
     startDate: startGuess,
@@ -386,6 +391,7 @@ export default function ProgramEdit() {
       themeBg: banner?.background ?? BANNER_PRESETS[0].background,
       bannerId: form.bannerId,
       customBannerDataUrl: form.customBannerDataUrl,
+      guidelinesDoc: form.guidelinesDoc,
       status,
       pointsPerWin,
       daysLeft: form.endDate
@@ -531,7 +537,7 @@ export default function ProgramEdit() {
         <div className="max-w-4xl mx-auto">
           {/* Sticky top — header + stepper. -top-4/-top-6 absorbs <main>'s padding so
               the bar reaches the viewport top with no peek-through. */}
-          <div className="sticky -top-4 lg:-top-6 z-20 bg-white pt-4 lg:pt-6 pb-4 space-y-4 -mx-4 lg:-mx-6 px-4 lg:px-6 border-b border-stone-200">
+          <div className="sticky -top-4 lg:-top-6 z-20 bg-white pt-4 lg:pt-6 pb-4 space-y-4 -mx-4 lg:-mx-6 px-4 lg:px-6 border-b border-border">
             <div className="max-w-4xl mx-auto space-y-4">
               {/* Header */}
               <div className="flex items-center gap-3">
@@ -544,23 +550,23 @@ export default function ProgramEdit() {
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div className="flex-1">
-                  <h1 className="text-xl font-semibold text-stone-900">
+                  <h1 className="text-xl font-semibold text-foreground">
                     {form.isNew ? "New program" : "Edit program"}
                   </h1>
-                  <p className="text-sm text-stone-500 mt-0.5">
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     Step {step + 1} of {WIZARD_STEPS.length} · {WIZARD_STEPS[step].label} —{" "}
-                    <span className="text-stone-400">{WIZARD_STEPS[step].hint}</span>
+                    <span className="text-muted-foreground">{WIZARD_STEPS[step].hint}</span>
                   </p>
                 </div>
                 <Badge
                   className={
                     form.status === "active"
-                      ? "bg-green-100 text-green-800 hover:bg-green-100"
+                      ? "bg-success/15 text-success hover:bg-success/15"
                       : form.status === "scheduled"
-                        ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                        ? "bg-info/15 text-info hover:bg-info/15"
                         : form.status === "ended"
-                          ? "bg-stone-100 text-stone-700 hover:bg-stone-100"
-                          : "bg-amber-100 text-amber-800 hover:bg-amber-100"
+                          ? "bg-muted text-muted-foreground hover:bg-muted"
+                          : "bg-primary/15 text-primary hover:bg-primary/15"
                   }
                 >
                   {form.status}
@@ -625,8 +631,8 @@ export default function ProgramEdit() {
       {/* Sticky footer — stays inside the program card, pinned to viewport bottom.
           -bottom-6 (-24px) compensates for <main>'s p-6 so the footer reaches viewport edge.
           max-w-4xl mx-auto aligns the footer with the centered page content. */}
-      <div className="sticky -bottom-6 z-30 max-w-4xl mx-auto border-t border-stone-200 bg-white p-3 flex items-center gap-3">
-        <p className="text-xs text-stone-500 ml-2">
+      <div className="sticky -bottom-6 z-30 max-w-4xl mx-auto border-t border-border bg-white p-3 flex items-center gap-3">
+        <p className="text-xs text-muted-foreground ml-2">
           {lastSavedAt
             ? `Last saved ${timeAgoShort(lastSavedAt)}`
             : dirty
@@ -660,7 +666,7 @@ export default function ProgramEdit() {
               size="sm"
               onClick={handlePublish}
               data-testid="program-publish"
-              className="bg-stone-900 hover:bg-stone-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Publish
             </Button>
@@ -669,7 +675,7 @@ export default function ProgramEdit() {
               size="sm"
               onClick={nextStep}
               data-testid="program-next"
-              className="bg-stone-900 hover:bg-stone-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Next <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
@@ -732,13 +738,13 @@ function SectionCard({
   rightSlot?: React.ReactNode;
 }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-stone-900">{title}</h2>
+            <h2 className="text-sm font-semibold text-foreground">{title}</h2>
             {description && (
-              <p className="text-xs text-stone-500 mt-0.5">{description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
             )}
           </div>
           {rightSlot}
@@ -752,7 +758,7 @@ function SectionCard({
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+    <p className="text-xs text-destructive mt-1 flex items-center gap-1">
       <AlertCircle className="w-3 h-3" />
       {message}
     </p>
@@ -769,6 +775,8 @@ function BasicsSection({
   patch: (p: Partial<FormState>) => void;
   errors: ValidationErrors;
 }) {
+  const [guidelinesUrl, setGuidelinesUrl] = useState("");
+
   function onUploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -783,14 +791,57 @@ function BasicsSection({
     reader.readAsDataURL(file);
   }
 
+  function addGuidelinesLink() {
+    const raw = guidelinesUrl.trim();
+    if (!raw) return;
+    const href = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    let name: string;
+    try {
+      const parsed = new URL(href);
+      const last = decodeURIComponent(parsed.pathname.split("/").filter(Boolean).pop() ?? "");
+      // Only use the path segment when it reads like a filename — share links
+      // (e.g. Drive's trailing "/view") would otherwise produce a useless label.
+      name = /\.[a-z0-9]{2,5}$/i.test(last) ? last : parsed.hostname;
+    } catch {
+      alert("That doesn't look like a valid link.");
+      return;
+    }
+    patch({ guidelinesDoc: { name, type: "link", url: href } });
+    setGuidelinesUrl("");
+  }
+
+  function onUploadGuidelines(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Stored as a data URL in localStorage (no backend), so keep it small —
+    // base64 inflates ~33% and every program shares the same ~5MB quota.
+    if (file.size > 1024 * 1024) {
+      alert("Guidelines document must be under 1MB.");
+      e.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      patch({
+        guidelinesDoc: {
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          url: reader.result as string,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
   return (
     <SectionCard
       title="Basics"
       description="Show employees what this program is about at a glance."
     >
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">
-          Program name <span className="text-red-500">*</span>
+        <Label className="text-xs font-medium text-muted-foreground">
+          Program name <span className="text-destructive">*</span>
         </Label>
         <Input
           value={form.name}
@@ -800,12 +851,12 @@ function BasicsSection({
           className="h-9 text-sm"
           data-testid="program-name"
         />
-        <p className="text-xs text-stone-400">{form.name.length}/80</p>
+        <p className="text-xs text-muted-foreground">{form.name.length}/80</p>
         <FieldError message={errors.name} />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Description</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Description</Label>
         <Textarea
           value={form.description}
           onChange={(e) => patch({ description: e.target.value.slice(0, 500) })}
@@ -815,11 +866,11 @@ function BasicsSection({
           className="text-sm resize-none"
           data-testid="program-description"
         />
-        <p className="text-xs text-stone-400">{form.description.length}/500</p>
+        <p className="text-xs text-muted-foreground">{form.description.length}/500</p>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-medium text-stone-700">Banner</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Banner</Label>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
           {BANNER_PRESETS.map((b) => {
             const selected = form.bannerId === b.id && !form.customBannerDataUrl;
@@ -829,7 +880,7 @@ function BasicsSection({
                 type="button"
                 onClick={() => patch({ bannerId: b.id, customBannerDataUrl: undefined })}
                 className={`aspect-video rounded-lg border-2 transition relative overflow-hidden ${
-                  selected ? "border-stone-900 ring-2 ring-stone-900/20" : "border-stone-200 hover:border-stone-400"
+                  selected ? "border-stone-900 ring-2 ring-stone-900/20" : "border-border hover:border-stone-400"
                 }`}
                 title={b.label}
               >
@@ -847,7 +898,7 @@ function BasicsSection({
             className={`aspect-video rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition relative overflow-hidden ${
               form.customBannerDataUrl
                 ? "border-stone-900 ring-2 ring-stone-900/20"
-                : "border-dashed border-stone-300 hover:border-stone-500 text-stone-500"
+                : "border-dashed border-border hover:border-stone-500 text-muted-foreground"
             }`}
           >
             {form.customBannerDataUrl ? (
@@ -869,11 +920,78 @@ function BasicsSection({
             />
           </label>
         </div>
-        <p className="text-xs text-stone-400">Custom upload max 50KB (data URL).</p>
+        <p className="text-xs text-muted-foreground">Custom upload max 50KB (data URL).</p>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-medium text-stone-700">Icon</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Guidelines document</Label>
+        {form.guidelinesDoc ? (
+          <div className="flex items-center gap-2 rounded-lg border border-border p-2.5">
+            {form.guidelinesDoc.type === "link" ? (
+              <LinkIcon className="w-4 h-4 text-primary shrink-0" />
+            ) : (
+              <FileText className="w-4 h-4 text-primary shrink-0" />
+            )}
+            <span className="text-sm text-foreground truncate flex-1" title={form.guidelinesDoc.url}>
+              {form.guidelinesDoc.name}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+              onClick={() => patch({ guidelinesDoc: undefined })}
+            >
+              Remove
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <label className="flex items-center justify-center gap-2 h-16 rounded-lg border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground cursor-pointer transition">
+              <Plus className="w-4 h-4" />
+              <span className="text-xs">Upload PDF or Word doc</span>
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className="hidden"
+                onChange={onUploadGuidelines}
+              />
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground shrink-0">or link</span>
+              <Input
+                value={guidelinesUrl}
+                onChange={(e) => setGuidelinesUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addGuidelinesLink();
+                  }
+                }}
+                placeholder="https://drive.google.com/…"
+                className="h-9 text-sm"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0"
+                disabled={!guidelinesUrl.trim()}
+                onClick={addGuidelinesLink}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Shown as a “View guidelines” link on the program’s About card. Upload max 1MB —
+          for larger files, link to a hosted copy instead.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Icon</Label>
         <div className="flex flex-wrap gap-1.5">
           {ICON_PRESETS.map((emoji) => {
             const selected = form.iconEmoji === emoji;
@@ -884,8 +1002,8 @@ function BasicsSection({
                 onClick={() => patch({ iconEmoji: emoji })}
                 className={`w-9 h-9 rounded-md border text-lg leading-none transition ${
                   selected
-                    ? "border-stone-900 bg-stone-50 ring-1 ring-stone-900/20"
-                    : "border-stone-200 hover:border-stone-400"
+                    ? "border-stone-900 bg-muted ring-1 ring-stone-900/20"
+                    : "border-border hover:border-stone-400"
                 }`}
               >
                 {emoji}
@@ -941,7 +1059,7 @@ function CycleSection({
       description="When the program opens, closes, and whether it auto-repeats."
     >
       <div className="space-y-2">
-        <Label className="text-xs font-medium text-stone-700">Cadence</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Cadence</Label>
         <div className="flex flex-wrap gap-2">
           {(["monthly", "quarterly", "yearly", "one-off"] as const).map((c) => (
             <button
@@ -950,8 +1068,8 @@ function CycleSection({
               onClick={() => onCadence(c)}
               className={`px-3 py-1.5 rounded-md border text-sm transition capitalize ${
                 form.cadence === c
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-white text-muted-foreground border-border hover:border-stone-400"
               }`}
             >
               {c.replace("-", " ")}
@@ -962,8 +1080,8 @@ function CycleSection({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">
-            Start date <span className="text-red-500">*</span>
+          <Label className="text-xs font-medium text-muted-foreground">
+            Start date <span className="text-destructive">*</span>
           </Label>
           <Input
             type="date"
@@ -973,8 +1091,8 @@ function CycleSection({
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">
-            End date <span className="text-red-500">*</span>
+          <Label className="text-xs font-medium text-muted-foreground">
+            End date <span className="text-destructive">*</span>
           </Label>
           <Input
             type="date"
@@ -987,10 +1105,10 @@ function CycleSection({
       </div>
 
       {form.cadence !== "one-off" && (
-        <label className="flex items-center justify-between p-3 rounded-md border border-stone-200">
+        <label className="flex items-center justify-between p-3 rounded-md border border-border">
           <div>
-            <p className="text-sm font-medium text-stone-900">Repeat automatically</p>
-            <p className="text-xs text-stone-500">Spin up the next cycle when this one ends.</p>
+            <p className="text-sm font-medium text-foreground">Repeat automatically</p>
+            <p className="text-xs text-muted-foreground">Spin up the next cycle when this one ends.</p>
           </div>
           <Switch
             checked={form.repeatAutomatically}
@@ -999,7 +1117,7 @@ function CycleSection({
         </label>
       )}
 
-      <p className="text-xs text-stone-500 italic">
+      <p className="text-xs text-muted-foreground italic">
         Runs from {fmt(form.startDate)} to {fmt(form.endDate)} —{" "}
         {form.cadence === "one-off" ? "one-off" : `${cyclesPerYear} cycles per year`}
       </p>
@@ -1108,13 +1226,13 @@ function CategoriesSection({
           <div className="flex items-center gap-3">
             {monetaryEnabled && (
               <div className="text-right">
-                <p className="text-[11px] uppercase tracking-wide text-stone-500">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   Total spend
                 </p>
-                <p className="text-sm font-semibold text-stone-900 tabular-nums leading-tight">
+                <p className="text-sm font-semibold text-foreground tabular-nums leading-tight">
                   {totalPoints.toLocaleString()} pts
                 </p>
-                <p className="text-xs text-stone-600 tabular-nums leading-tight">
+                <p className="text-xs text-muted-foreground tabular-nums leading-tight">
                   ≈ {currency}
                   {totalMoney.toLocaleString()}
                 </p>
@@ -1139,7 +1257,7 @@ function CategoriesSection({
               type="button"
               onClick={() => addPreset(p.id)}
               disabled={form.categories.length >= 8}
-              className="text-xs px-2 py-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 disabled:opacity-50"
+              className="text-xs px-2 py-1 rounded-full border border-border bg-muted hover:bg-muted disabled:opacity-50"
             >
               {p.emoji} {p.name}
             </button>
@@ -1161,7 +1279,7 @@ function CategoriesSection({
           ))}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-stone-500 pt-1">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
           <span>
             {form.categories.length} categor{form.categories.length === 1 ? "y" : "ies"} ·{" "}
             {totalWinners} winner{totalWinners === 1 ? "" : "s"} total
@@ -1169,7 +1287,7 @@ function CategoriesSection({
           {monetaryEnabled && (
             <span className="tabular-nums">
               Program spend:{" "}
-              <span className="text-stone-900 font-medium">
+              <span className="text-foreground font-medium">
                 {totalPoints.toLocaleString()} pts
               </span>{" "}
               ({currency}
@@ -1185,28 +1303,28 @@ function CategoriesSection({
         title="Program spend"
         description="Auto-computed from each category's winners × points. Edit allocations inside each category."
       >
-        <div className="rounded-md border border-stone-200 bg-stone-50 p-4 space-y-3">
+        <div className="rounded-md border border-border bg-muted p-4 space-y-3">
           <div className="flex items-baseline justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-wide text-stone-500">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 Total points
               </p>
-              <p className="text-2xl font-semibold text-stone-900 tabular-nums leading-tight">
+              <p className="text-2xl font-semibold text-foreground tabular-nums leading-tight">
                 {totalPoints.toLocaleString()} pts
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[11px] uppercase tracking-wide text-stone-500">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 Monetary value
               </p>
-              <p className="text-2xl font-semibold text-stone-900 tabular-nums leading-tight">
+              <p className="text-2xl font-semibold text-foreground tabular-nums leading-tight">
                 {currency}
                 {totalMoney.toLocaleString()}
               </p>
             </div>
           </div>
 
-          <ul className="divide-y divide-stone-200 border-t border-stone-200">
+          <ul className="divide-y divide-border border-t border-border">
             {form.categories.map((c) => {
               const pts = categoryPointsTotal(c);
               const money = categoryMoneyTotal(c, pointRate);
@@ -1217,18 +1335,18 @@ function CategoriesSection({
                 >
                   <span className="flex items-center gap-2 min-w-0">
                     <span className="shrink-0">{c.emoji}</span>
-                    <span className="truncate text-stone-700">
+                    <span className="truncate text-muted-foreground">
                       {c.name || "(unnamed)"}
                     </span>
-                    <span className="text-stone-400 shrink-0">
+                    <span className="text-muted-foreground shrink-0">
                       {c.winnersCount}×{c.prizePoints}
                     </span>
                   </span>
                   <span className="tabular-nums shrink-0 text-right">
-                    <span className="text-stone-900 font-medium">
+                    <span className="text-foreground font-medium">
                       {pts.toLocaleString()} pts
                     </span>
-                    <span className="text-stone-500">
+                    <span className="text-muted-foreground">
                       {" "}({currency}
                       {money.toLocaleString()})
                     </span>
@@ -1238,7 +1356,7 @@ function CategoriesSection({
             })}
           </ul>
 
-          <p className="text-[11px] text-stone-500 border-t border-stone-200 pt-2">
+          <p className="text-[11px] text-muted-foreground border-t border-border pt-2">
             Conversion:{" "}
             {pointRate === 1
               ? `1 pt = ${currency}1`
@@ -1310,39 +1428,39 @@ function CategoryRow({
     (category.eligibility?.minTenureMonths ?? 0) > 0;
 
   return (
-    <div className="group flex items-start gap-3 p-3 border border-stone-200 rounded-lg bg-white hover:border-stone-300 transition-colors">
+    <div className="group flex items-start gap-3 p-3 border border-border rounded-lg bg-white hover:border-border transition-colors">
       <span className="text-2xl leading-none mt-0.5 shrink-0">
         {category.emoji || "🏆"}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
-          <p className="text-sm font-semibold text-stone-900 truncate">
+          <p className="text-sm font-semibold text-foreground truncate">
             {category.name || "(unnamed category)"}
           </p>
           {restricted && (
-            <span className="text-[10px] uppercase tracking-wide font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-1.5 py-0.5">
+            <span className="text-[10px] uppercase tracking-wide font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-1.5 py-0.5">
               Restricted
             </span>
           )}
         </div>
         {category.description && (
-          <p className="text-xs text-stone-500 truncate mt-0.5">
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
             {category.description}
           </p>
         )}
-        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-xs text-stone-600">
+        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground">
           <SummaryPill>
             {category.winnersCount} winner{category.winnersCount === 1 ? "" : "s"}
           </SummaryPill>
           <SummaryPill>
             {panelSize} judge{panelSize === 1 ? "" : "s"}
-            {lead && <span className="text-stone-400"> · lead {lead.name}</span>}
+            {lead && <span className="text-muted-foreground"> · lead {lead.name}</span>}
           </SummaryPill>
           <SummaryPill>
             {criteriaCount} criter{criteriaCount === 1 ? "ion" : "ia"}
           </SummaryPill>
           <SummaryPill>
-            <span className="text-stone-400">Prize:</span>{" "}
+            <span className="text-muted-foreground">Prize:</span>{" "}
             {currency}
             {Math.round(category.prizePoints * pointRate).toLocaleString()}
             {" · "}
@@ -1350,13 +1468,13 @@ function CategoryRow({
           </SummaryPill>
         </div>
         {monetaryEnabled && (
-          <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-stone-100">
-            <span className="text-[11px] uppercase tracking-wide text-stone-500">
+          <div className="flex items-baseline justify-between mt-2 pt-2 border-t border-border">
+            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
               Total spend
             </span>
-            <span className="text-xs tabular-nums text-stone-900 font-medium">
+            <span className="text-xs tabular-nums text-foreground font-medium">
               {points.toLocaleString()} pts{" "}
-              <span className="text-stone-500 font-normal">
+              <span className="text-muted-foreground font-normal">
                 ({currency}
                 {money.toLocaleString()})
               </span>
@@ -1370,7 +1488,7 @@ function CategoryRow({
           variant="ghost"
           size="sm"
           onClick={onEdit}
-          className="h-8 w-8 p-0 text-stone-500 hover:text-stone-900"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
           title="Edit category"
         >
           <Pencil className="w-4 h-4" />
@@ -1381,7 +1499,7 @@ function CategoryRow({
           size="sm"
           onClick={onRemove}
           disabled={!canRemove}
-          className="h-8 w-8 p-0 text-stone-400 hover:text-red-600"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
           title={canRemove ? "Remove category" : "Programs need at least one category"}
         >
           <Trash2 className="w-4 h-4" />
@@ -1523,7 +1641,7 @@ function CategoryEditorSheet({
 
   return (
     <>
-      <SheetHeader className="px-6 pt-6 pb-4 border-b border-stone-200">
+      <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
         <SheetTitle>
           {mode === "new" ? "Add category" : "Edit category"}
         </SheetTitle>
@@ -1542,7 +1660,7 @@ function CategoryEditorSheet({
       <div className="flex-1 overflow-y-auto">
         {step === 0 && (
           <div className="px-6 py-5 space-y-5">
-            <p className="text-xs text-stone-500 -mt-1">
+            <p className="text-xs text-muted-foreground -mt-1">
               Name the award and set how many winners take it home.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-2">
@@ -1573,7 +1691,7 @@ function CategoryEditorSheet({
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-stone-600">Winners</Label>
+                <Label className="text-xs text-muted-foreground">Winners</Label>
                 <Input
                   type="number"
                   min={1}
@@ -1593,7 +1711,7 @@ function CategoryEditorSheet({
 
         {step === 1 && (
           <div className="px-6 py-5">
-            <p className="text-xs text-stone-500 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               The rubric the panel and AI score against.
             </p>
             <GuidelinesEditor
@@ -1608,7 +1726,7 @@ function CategoryEditorSheet({
 
         {step === 2 && (
           <div className="px-6 py-5">
-            <p className="text-xs text-stone-500 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               Who can be nominated in this category. Leave fields empty for "open to all."
             </p>
             <CategoryEligibilityEditor
@@ -1620,12 +1738,12 @@ function CategoryEditorSheet({
 
         {step === 3 && (
           <div className="px-6 py-5 space-y-5">
-            <p className="text-xs text-stone-500 -mt-1">
+            <p className="text-xs text-muted-foreground -mt-1">
               Set the prize points each winner receives in this category.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-stone-600">
+                <Label className="text-xs text-muted-foreground">
                   Prize points / winner
                 </Label>
                 <Input
@@ -1653,7 +1771,7 @@ function CategoryEditorSheet({
 
         {step === 4 && (
           <div className="px-6 py-5">
-            <p className="text-xs text-stone-500 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               Reviewers for this category. Exactly one Lead.
             </p>
             <CategoryPanelEditor
@@ -1667,22 +1785,22 @@ function CategoryEditorSheet({
       </div>
 
       {currentError && (
-        <div className="px-6 py-2.5 bg-red-50 border-t border-red-200 flex items-start gap-2 text-sm text-red-800">
+        <div className="px-6 py-2.5 bg-destructive/10 border-t border-destructive/20 flex items-start gap-2 text-sm text-destructive">
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{currentError}</span>
         </div>
       )}
 
       {monetaryEnabled && (
-        <div className="px-6 py-2.5 border-t border-stone-200 bg-stone-50 flex items-baseline justify-between">
-          <span className="text-[11px] uppercase tracking-wide text-stone-500">
+        <div className="px-6 py-2.5 border-t border-border bg-muted flex items-baseline justify-between">
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Category spend
           </span>
           <span className="text-sm tabular-nums">
-            <span className="font-semibold text-stone-900">
+            <span className="font-semibold text-foreground">
               {draftPoints.toLocaleString()} pts
             </span>
-            <span className="text-stone-500">
+            <span className="text-muted-foreground">
               {" "}
               ({currency}
               {draftMoney.toLocaleString()})
@@ -1691,12 +1809,12 @@ function CategoryEditorSheet({
         </div>
       )}
 
-      <footer className="px-6 py-3 border-t border-stone-200 flex items-center justify-between gap-2 bg-white">
+      <footer className="px-6 py-3 border-t border-border flex items-center justify-between gap-2 bg-white">
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           Cancel
         </Button>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-stone-500 mr-2 hidden sm:inline">
+          <span className="text-xs text-muted-foreground mr-2 hidden sm:inline">
             Step {step + 1} of {CATEGORY_STEPS.length}
           </span>
           {!isFirstStep && (
@@ -1709,7 +1827,7 @@ function CategoryEditorSheet({
               type="button"
               size="sm"
               onClick={handleSave}
-              className="bg-stone-900 hover:bg-stone-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {mode === "new" ? "Add category" : "Save changes"}
             </Button>
@@ -1718,7 +1836,7 @@ function CategoryEditorSheet({
               type="button"
               size="sm"
               onClick={nextStep}
-              className="bg-stone-900 hover:bg-stone-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Next <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Button>
@@ -1764,48 +1882,48 @@ function CategorySpendSummary({
       : `${currency}${pointRate.toLocaleString(undefined, { maximumFractionDigits: 4 })} per point`;
 
   return (
-    <div className="rounded-md border border-stone-200 bg-stone-50 p-4 space-y-3">
+    <div className="rounded-md border border-border bg-muted p-4 space-y-3">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-wide text-stone-500">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Per winner
           </p>
-          <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight">
+          <p className="text-xl font-semibold text-foreground tabular-nums leading-tight">
             {category.prizePoints.toLocaleString()} pts
           </p>
           {monetaryEnabled && (
-            <p className="text-xs text-stone-600 tabular-nums mt-0.5">
+            <p className="text-xs text-muted-foreground tabular-nums mt-0.5">
               ≈ {currency}
               {perWinnerMoney.toLocaleString()}
             </p>
           )}
         </div>
         <div className="text-right">
-          <p className="text-[11px] uppercase tracking-wide text-stone-500">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
             Category budget
           </p>
-          <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight">
+          <p className="text-xl font-semibold text-foreground tabular-nums leading-tight">
             {points.toLocaleString()} pts
           </p>
           {monetaryEnabled && (
-            <p className="text-xs text-stone-600 tabular-nums mt-0.5">
+            <p className="text-xs text-muted-foreground tabular-nums mt-0.5">
               ≈ {currency}
               {money.toLocaleString()}
             </p>
           )}
         </div>
       </div>
-      <p className="text-xs text-stone-600 leading-relaxed border-t border-stone-200 pt-2">
+      <p className="text-xs text-muted-foreground leading-relaxed border-t border-border pt-2">
         {category.winnersCount} winner{category.winnersCount === 1 ? "" : "s"} ×{" "}
         {category.prizePoints.toLocaleString()} pts each ={" "}
-        <span className="text-stone-900 font-medium tabular-nums">
+        <span className="text-foreground font-medium tabular-nums">
           {points.toLocaleString()} pts
         </span>
         {monetaryEnabled && (
           <>
             {" "}
             ≈{" "}
-            <span className="text-stone-900 font-medium tabular-nums">
+            <span className="text-foreground font-medium tabular-nums">
               {currency}
               {money.toLocaleString()}
             </span>
@@ -1813,7 +1931,7 @@ function CategorySpendSummary({
         )}
       </p>
       {monetaryEnabled && (
-        <p className="text-[11px] text-stone-500">
+        <p className="text-[11px] text-muted-foreground">
           Conversion: {rateNote} (configured in Settings → Appreciation Policy).
         </p>
       )}
@@ -1833,10 +1951,10 @@ function CategorySubSection({
   return (
     <div className="space-y-2">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {title}
         </h3>
-        {hint && <p className="text-xs text-stone-500 mt-0.5">{hint}</p>}
+        {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
       </div>
       {children}
     </div>
@@ -1875,7 +1993,7 @@ function GuidelinesEditor({
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <Label className="text-xs text-stone-600">What good looks like</Label>
+        <Label className="text-xs text-muted-foreground">What good looks like</Label>
         <RichTextarea
           value={guidelines.whatGoodLooksLike}
           onChange={(v) => patch({ whatGoodLooksLike: v })}
@@ -1887,8 +2005,8 @@ function GuidelinesEditor({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs text-stone-600">Criteria ({criteriaCount}/6)</Label>
-          <span className={`text-xs ${weightOff ? "text-amber-700" : "text-stone-500"}`}>
+          <Label className="text-xs text-muted-foreground">Criteria ({criteriaCount}/6)</Label>
+          <span className={`text-xs ${weightOff ? "text-primary" : "text-muted-foreground"}`}>
             Weights total: {weightTotal}
             {weightOff ? " (should be ~100)" : ""}
           </span>
@@ -1930,7 +2048,7 @@ function GuidelinesEditor({
                 size="sm"
                 onClick={() => removeCriterion(i)}
                 disabled={guidelines.criteria.length <= 1}
-                className="h-9 w-9 p-0 text-stone-400 hover:text-red-600"
+                className="h-9 w-9 p-0 text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -1949,7 +2067,7 @@ function GuidelinesEditor({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs text-stone-600">Disqualifiers (optional)</Label>
+        <Label className="text-xs text-muted-foreground">Disqualifiers (optional)</Label>
         <Textarea
           value={guidelines.disqualifiers ?? ""}
           onChange={(e) =>
@@ -2008,7 +2126,7 @@ function CategoryEligibilityEditor({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label className="text-xs text-stone-600">Min tenure (months)</Label>
+          <Label className="text-xs text-muted-foreground">Min tenure (months)</Label>
           <Input
             type="number"
             min={0}
@@ -2020,7 +2138,7 @@ function CategoryEligibilityEditor({
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-stone-600">
+          <Label className="text-xs text-muted-foreground">
             Exclude winners from last N cycles
           </Label>
           <Input
@@ -2034,12 +2152,12 @@ function CategoryEligibilityEditor({
             }
             className="h-9 text-sm"
           />
-          <p className="text-xs text-stone-400">0 = no exclusion</p>
+          <p className="text-xs text-muted-foreground">0 = no exclusion</p>
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs text-stone-600">
+        <Label className="text-xs text-muted-foreground">
           Custom eligibility note (shown to nominators)
         </Label>
         <Input
@@ -2107,7 +2225,7 @@ function CategoryPanelEditor({
               </Button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-64 p-2">
-              <p className="text-xs text-stone-500 px-2 pb-1">
+              <p className="text-xs text-muted-foreground px-2 pb-1">
                 Reuse another category's judges
               </p>
               {copySources.map((c) => (
@@ -2115,12 +2233,12 @@ function CategoryPanelEditor({
                   key={c.id}
                   type="button"
                   onClick={() => onCopyPanelFrom(c.id)}
-                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-50 text-left"
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted text-left"
                 >
                   <span className="text-sm">{c.emoji}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm truncate">{c.name || "(unnamed)"}</p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-muted-foreground">
                       {(c.panel ?? []).length} judges
                     </p>
                   </div>
@@ -2132,13 +2250,13 @@ function CategoryPanelEditor({
       </div>
 
       {panel.length === 0 ? (
-        <p className="text-xs text-stone-500 italic">No judges added yet.</p>
+        <p className="text-xs text-muted-foreground italic">No judges added yet.</p>
       ) : (
         <div className="space-y-1.5">
           {panel.map((m) => (
             <div
               key={m.id}
-              className="flex items-center gap-3 p-2.5 border border-stone-200 rounded-md"
+              className="flex items-center gap-3 p-2.5 border border-border rounded-md"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={m.avatar} alt={m.name} />
@@ -2147,8 +2265,8 @@ function CategoryPanelEditor({
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">{m.name}</p>
-                <p className="text-xs text-stone-500 truncate">
+                <p className="text-sm font-medium text-foreground truncate">{m.name}</p>
+                <p className="text-xs text-muted-foreground truncate">
                   {m.role} · {m.department}
                 </p>
               </div>
@@ -2157,8 +2275,8 @@ function CategoryPanelEditor({
                 onClick={() => setLead(m.id)}
                 className={`text-xs flex items-center gap-1 px-2 py-1 rounded-md border transition ${
                   m.lead
-                    ? "bg-amber-100 text-amber-800 border-amber-200"
-                    : "bg-white text-stone-600 border-stone-200 hover:border-stone-400"
+                    ? "bg-primary/15 text-primary border-primary/20"
+                    : "bg-white text-muted-foreground border-border hover:border-stone-400"
                 }`}
                 title="Mark as Lead"
               >
@@ -2169,7 +2287,7 @@ function CategoryPanelEditor({
                 variant="ghost"
                 size="sm"
                 onClick={() => remove(m.id)}
-                className="h-8 w-8 p-0 text-stone-400 hover:text-red-600"
+                className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
@@ -2200,7 +2318,7 @@ function ChipPicker({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-stone-700">{label}</Label>
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => {
           const on = selected.includes(o);
@@ -2211,8 +2329,8 @@ function ChipPicker({
               onClick={() => onToggle(o)}
               className={`text-xs px-2.5 py-1 rounded-full border transition ${
                 on
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-white text-muted-foreground border-border hover:border-stone-400"
               }`}
             >
               {o}
@@ -2221,7 +2339,7 @@ function ChipPicker({
         })}
       </div>
       {selected.length === 0 && (
-        <p className="text-xs text-stone-400 italic">{placeholder}</p>
+        <p className="text-xs text-muted-foreground italic">{placeholder}</p>
       )}
     </div>
   );
@@ -2257,7 +2375,7 @@ function EmployeePicker({
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72 p-2">
         <div className="relative">
-          <Search className="w-3.5 h-3.5 absolute left-2 top-2.5 text-stone-400" />
+          <Search className="w-3.5 h-3.5 absolute left-2 top-2.5 text-muted-foreground" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -2268,7 +2386,7 @@ function EmployeePicker({
         </div>
         <div className="mt-2 max-h-72 overflow-y-auto space-y-1">
           {filtered.length === 0 ? (
-            <p className="text-xs text-stone-400 italic px-2 py-3">No matches</p>
+            <p className="text-xs text-muted-foreground italic px-2 py-3">No matches</p>
           ) : (
             filtered.map((e) => (
               <button
@@ -2279,7 +2397,7 @@ function EmployeePicker({
                   setQuery("");
                   setOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-50 text-left"
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted text-left"
               >
                 <Avatar className="h-7 w-7">
                   <AvatarImage src={e.avatar} alt={e.name} />
@@ -2288,8 +2406,8 @@ function EmployeePicker({
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <p className="text-sm text-stone-900 truncate">{e.name}</p>
-                  <p className="text-xs text-stone-500 truncate">
+                  <p className="text-sm text-foreground truncate">{e.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {e.role} · {e.businessUnitName}
                   </p>
                 </div>
@@ -2321,7 +2439,7 @@ function BudgetSection({
       description="Choose how often each category's points budget refreshes."
     >
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Period</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Period</Label>
         <div className="flex gap-2">
           {(["current-cycle", "annual"] as const).map((p) => (
             <button
@@ -2330,20 +2448,20 @@ function BudgetSection({
               onClick={() => patch({ budgetPeriod: p })}
               className={`px-3 py-1.5 rounded-md border text-sm transition capitalize ${
                 form.budgetPeriod === p
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-400"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-white text-muted-foreground border-border hover:border-stone-400"
               }`}
             >
               {p.replace("-", " ")}
             </button>
           ))}
         </div>
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-muted-foreground">
           Determines whether each category's points refresh per cycle or per year.
         </p>
       </div>
 
-      <p className="text-xs text-stone-500 italic">
+      <p className="text-xs text-muted-foreground italic">
         Avg per winner across the program: {currency}
         {perWinnerPreview.toLocaleString()}.
       </p>
@@ -2366,17 +2484,17 @@ function NotificationsSection({
     patch({ notifications: { ...form.notifications, ...p } });
   }
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <button className="w-full p-5 flex items-center justify-between text-left">
             <div>
-              <h2 className="text-sm font-semibold text-stone-900">Notifications</h2>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Who gets pinged when things happen.
               </p>
             </div>
-            <ChevronDown className={`w-4 h-4 text-stone-400 transition-transform ${open ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -2415,8 +2533,8 @@ function NotificationToggle({
   onCheckedChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex items-center justify-between p-3 rounded-md border border-stone-200">
-      <span className="text-sm text-stone-900">{label}</span>
+    <label className="flex items-center justify-between p-3 rounded-md border border-border">
+      <span className="text-sm text-foreground">{label}</span>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </label>
   );
@@ -2441,7 +2559,7 @@ function CategoryStepper({
   onJump: (i: number) => void;
 }) {
   return (
-    <div className="px-6 py-3 border-b border-stone-200 bg-white">
+    <div className="px-6 py-3 border-b border-border bg-white">
       <div className="flex items-center flex-nowrap gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {steps.map((s, i) => {
           const reached = i <= farthest;
@@ -2455,21 +2573,21 @@ function CategoryStepper({
                 disabled={!reached && !active}
                 className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md transition shrink-0 ${
                   active
-                    ? "bg-stone-900 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : reached
-                      ? "text-stone-700 hover:bg-stone-50"
-                      : "text-stone-400 cursor-not-allowed"
+                      ? "text-muted-foreground hover:bg-muted"
+                      : "text-muted-foreground cursor-not-allowed"
                 }`}
               >
                 <span
                   className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-medium shrink-0 ${
                     active
-                      ? "bg-white text-stone-900"
+                      ? "bg-white text-foreground"
                       : completed
-                        ? "bg-green-500 text-white"
+                        ? "bg-success text-white"
                         : reached
-                          ? "bg-stone-200 text-stone-700"
-                          : "bg-stone-100 text-stone-400"
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {completed ? <Check className="w-3 h-3" /> : i + 1}
@@ -2479,7 +2597,7 @@ function CategoryStepper({
                 </span>
               </button>
               {i < steps.length - 1 && (
-                <span className="w-4 h-px bg-stone-200 shrink-0" />
+                <span className="w-4 h-px bg-muted shrink-0" />
               )}
             </div>
           );
@@ -2499,7 +2617,7 @@ function Stepper({
   onJump: (i: number) => void;
 }) {
   return (
-    <div className="border border-stone-200 rounded-xl bg-white p-2">
+    <div className="border border-border rounded-xl bg-white p-2">
       <div className="flex items-center flex-nowrap gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {WIZARD_STEPS.map((s, i) => {
           const reached = i <= farthestStep;
@@ -2513,22 +2631,22 @@ function Stepper({
                 disabled={!reached && !active}
                 className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md transition shrink-0 ${
                   active
-                    ? "bg-stone-900 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : reached
-                      ? "text-stone-700 hover:bg-stone-50"
-                      : "text-stone-400 cursor-not-allowed"
+                      ? "text-muted-foreground hover:bg-muted"
+                      : "text-muted-foreground cursor-not-allowed"
                 }`}
                 data-testid={`wizard-step-${s.id}`}
               >
                 <span
                   className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-medium shrink-0 ${
                     active
-                      ? "bg-white text-stone-900"
+                      ? "bg-white text-foreground"
                       : completed
-                        ? "bg-green-500 text-white"
+                        ? "bg-success text-white"
                         : reached
-                          ? "bg-stone-200 text-stone-700"
-                          : "bg-stone-100 text-stone-400"
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {completed ? <Check className="w-3 h-3" /> : i + 1}
@@ -2536,7 +2654,7 @@ function Stepper({
                 <span className="text-xs font-medium whitespace-nowrap">{s.label}</span>
               </button>
               {i < WIZARD_STEPS.length - 1 && (
-                <span className="w-4 h-px bg-stone-200 shrink-0" />
+                <span className="w-4 h-px bg-muted shrink-0" />
               )}
             </div>
           );
@@ -2580,7 +2698,7 @@ function ReviewCard({
   });
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-0">
         <div className="relative h-32 overflow-hidden rounded-t-lg flex items-end p-4">
           <BannerArt
@@ -2599,7 +2717,7 @@ function ReviewCard({
           </div>
         </div>
         <div className="p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-stone-900">Review</h3>
+          <h3 className="text-sm font-semibold text-foreground">Review</h3>
 
           <ReviewRow label="Cycle" onEdit={() => onJump(1)}>
             <span className="capitalize">{form.cadence.replace("-", " ")}</span> · {fmt(form.startDate)} → {fmt(form.endDate)}
@@ -2614,7 +2732,7 @@ function ReviewCard({
                 <Badge
                   key={c.id}
                   variant="secondary"
-                  className="bg-stone-100 text-stone-700 text-xs"
+                  className="bg-muted text-muted-foreground text-xs"
                 >
                   {c.emoji} {c.name || "(unnamed)"} × {c.winnersCount}
                 </Badge>
@@ -2627,7 +2745,7 @@ function ReviewCard({
               ? "No panel set yet"
               : `${uniquePanel.length} unique judge${uniquePanel.length === 1 ? "" : "s"} across categories`}
             {firstLead && (
-              <> · Lead example: <span className="text-stone-900 font-medium">{firstLead.name}</span></>
+              <> · Lead example: <span className="text-foreground font-medium">{firstLead.name}</span></>
             )}
           </ReviewRow>
 
@@ -2671,10 +2789,10 @@ function ReviewRow({
   onEdit: () => void;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-1.5 border-b border-stone-100 last:border-b-0">
+    <div className="flex items-start justify-between gap-3 py-1.5 border-b border-border last:border-b-0">
       <div className="min-w-0 flex-1">
-        <p className="text-xs uppercase tracking-wide text-stone-500 font-medium mb-1">{label}</p>
-        <div className="text-sm text-stone-700">{children}</div>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-1">{label}</p>
+        <div className="text-sm text-muted-foreground">{children}</div>
       </div>
       <Button variant="ghost" size="sm" onClick={onEdit} className="h-7 text-xs shrink-0">
         Edit

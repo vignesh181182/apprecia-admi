@@ -138,21 +138,21 @@ export default function CheckIns() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Total this week" value={counts.total} icon={<ClipboardList className="w-4 h-4" />} />
-        <KpiCard label="Submitted" value={counts.submitted} icon={<ClipboardCheck className="w-4 h-4" />} accent="text-green-600" />
-        <KpiCard label="Pending" value={counts.pending} icon={<Hourglass className="w-4 h-4" />} accent="text-amber-600" />
-        <KpiCard label="Overdue" value={counts.overdue} icon={<CalendarX className="w-4 h-4" />} accent="text-red-600" />
+        <KpiCard label="Submitted" value={counts.submitted} icon={<ClipboardCheck className="w-4 h-4" />} accent="text-success" />
+        <KpiCard label="Pending" value={counts.pending} icon={<Hourglass className="w-4 h-4" />} accent="text-primary" />
+        <KpiCard label="Overdue" value={counts.overdue} icon={<CalendarX className="w-4 h-4" />} accent="text-destructive" />
       </div>
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by employee name…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm border-stone-200"
+              className="pl-9 h-9 text-sm border-border"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -162,8 +162,8 @@ export default function CheckIns() {
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   statusFilter === s
-                    ? "bg-stone-900 text-white border-stone-900"
-                    : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-white text-muted-foreground border-border hover:bg-muted"
                 }`}
               >
                 {s === "all" ? "All" : statusLabels[s as CheckInStatus]}
@@ -171,7 +171,7 @@ export default function CheckIns() {
             ))}
           </div>
           <Select value={deptFilter} onValueChange={setDeptFilter}>
-            <SelectTrigger className="h-9 w-44 text-sm border-stone-200">
+            <SelectTrigger className="h-9 w-44 text-sm border-border">
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
@@ -184,7 +184,7 @@ export default function CheckIns() {
         <Button
           size="sm"
           variant="ghost"
-          className="h-9 gap-2 text-stone-600 hover:text-stone-900"
+          className="h-9 gap-2 text-muted-foreground hover:text-foreground"
           onClick={sendReminders}
         >
           <Bell className="w-4 h-4" /> Send reminder
@@ -192,52 +192,52 @@ export default function CheckIns() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-stone-200 overflow-hidden">
+      <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">Employee</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Week of</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Mood</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Wins</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Blockers</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Manager viewed</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="text-xs font-semibold text-muted-foreground">Employee</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Week of</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Mood</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Wins</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Blockers</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Status</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Manager viewed</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((c) => (
-              <TableRow key={c.id} className="hover:bg-stone-50 cursor-pointer" onClick={() => openSheet(c)}>
+              <TableRow key={c.id} className="hover:bg-muted cursor-pointer" onClick={() => openSheet(c)}>
                 <TableCell>
                   <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-full bg-stone-200 flex items-center justify-center text-xs font-semibold text-stone-700">
+                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                       {c.employeeAvatar}
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-stone-900">{c.employeeName}</p>
-                      <p className="text-xs text-stone-500">{c.department}</p>
+                      <p className="text-xs font-medium text-foreground">{c.employeeName}</p>
+                      <p className="text-xs text-muted-foreground">{c.department}</p>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-stone-700">{fmtDate(c.weekOf)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{fmtDate(c.weekOf)}</TableCell>
                 <TableCell>
-                  {c.status === "submitted" ? <MoodDots mood={c.mood} /> : <span className="text-xs text-stone-300">—</span>}
+                  {c.status === "submitted" ? <MoodDots mood={c.mood} /> : <span className="text-xs text-muted-foreground">—</span>}
                 </TableCell>
                 <TableCell>
                   {c.wins.length > 0 ? (
-                    <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700">{c.wins.length}</Badge>
+                    <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">{c.wins.length}</Badge>
                   ) : (
-                    <span className="text-xs text-stone-300">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {c.blockers ? (
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-destructive/15">
+                      <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
                     </span>
                   ) : (
-                    <span className="text-xs text-stone-300">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -247,16 +247,16 @@ export default function CheckIns() {
                 </TableCell>
                 <TableCell>
                   {c.managerViewed ? (
-                    <Check className="w-4 h-4 text-green-600" />
+                    <Check className="w-4 h-4 text-success" />
                   ) : (
-                    <span className="text-xs text-stone-300">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 px-2 text-xs text-stone-500 hover:text-stone-900"
+                    className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                     onClick={() => openSheet(c)}
                   >
                     View
@@ -266,7 +266,7 @@ export default function CheckIns() {
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-sm text-stone-500 py-10">
+                <TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-10">
                   No check-ins match your filters.
                 </TableCell>
               </TableRow>
@@ -282,7 +282,7 @@ export default function CheckIns() {
             <>
               <SheetHeader>
                 <div className="flex items-center gap-3 mt-2">
-                  <div className="h-12 w-12 rounded-full bg-stone-200 flex items-center justify-center text-sm font-semibold text-stone-700">
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground">
                     {selected.employeeAvatar}
                   </div>
                   <div>
@@ -295,23 +295,23 @@ export default function CheckIns() {
               </SheetHeader>
 
               {selected.status !== "submitted" ? (
-                <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-6 text-center">
-                  <Hourglass className="w-6 h-6 text-stone-400 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-stone-700">
+                <div className="mt-6 rounded-lg border border-border bg-muted p-6 text-center">
+                  <Hourglass className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium text-muted-foreground">
                     {selected.status === "overdue" ? "Check-in is overdue" : "Check-in pending"}
                   </p>
-                  <p className="text-xs text-stone-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {selected.employeeName} hasn't submitted yet for this week.
                   </p>
                 </div>
               ) : (
                 <>
                   {/* Mood */}
-                  <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-4">
+                  <div className="mt-6 rounded-lg border border-border bg-muted p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">Mood</p>
-                        <p className="text-lg font-bold text-stone-900 mt-0.5">{moodLabels[selected.mood]}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Mood</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{moodLabels[selected.mood]}</p>
                       </div>
                       <MoodDots mood={selected.mood} />
                     </div>
@@ -319,11 +319,11 @@ export default function CheckIns() {
 
                   {/* Wins */}
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide mb-2">Wins</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Wins</p>
                     <ul className="space-y-1.5">
                       {selected.wins.map((w, i) => (
-                        <li key={i} className="text-sm text-stone-700 flex gap-2">
-                          <span className="text-green-600 mt-0.5">●</span>
+                        <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                          <span className="text-success mt-0.5">●</span>
                           <span>{w}</span>
                         </li>
                       ))}
@@ -332,11 +332,11 @@ export default function CheckIns() {
 
                   {/* Priorities */}
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide mb-2">Priorities for next week</p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Priorities for next week</p>
                     <ul className="space-y-1.5">
                       {selected.priorities.map((p, i) => (
-                        <li key={i} className="text-sm text-stone-700 flex gap-2">
-                          <span className="text-stone-400 mt-0.5">●</span>
+                        <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                          <span className="text-muted-foreground mt-0.5">●</span>
                           <span>{p}</span>
                         </li>
                       ))}
@@ -345,35 +345,35 @@ export default function CheckIns() {
 
                   {/* Blockers */}
                   {selected.blockers && (
-                    <div className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3">
+                    <div className="mt-4 rounded-lg border border-destructive/15 bg-destructive/10 p-3">
                       <div className="flex items-start gap-2">
-                        <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
+                        <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
                         <div>
-                          <p className="text-xs font-semibold text-red-900 uppercase tracking-wide">Blocker</p>
-                          <p className="text-sm text-red-900 mt-0.5">{selected.blockers}</p>
+                          <p className="text-xs font-semibold text-destructive uppercase tracking-wide">Blocker</p>
+                          <p className="text-sm text-destructive mt-0.5">{selected.blockers}</p>
                         </div>
                       </div>
                     </div>
                   )}
 
                   {/* Submission meta */}
-                  <p className="text-xs text-stone-400 mt-4">
+                  <p className="text-xs text-muted-foreground mt-4">
                     Submitted {selected.submittedAt ? fmtDateTime(selected.submittedAt) : "—"}
                   </p>
 
                   {/* Manager comment */}
-                  <div className="mt-6 pt-4 border-t border-stone-200 space-y-2">
-                    <Label className="text-xs font-medium text-stone-700">Manager comment</Label>
+                  <div className="mt-6 pt-4 border-t border-border space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Manager comment</Label>
                     <Textarea
                       value={draftComment}
                       onChange={(e) => setDraftComment(e.target.value)}
                       placeholder="Reply or leave a note for the team…"
                       rows={4}
-                      className="text-sm border-stone-200 resize-none"
+                      className="text-sm border-border resize-none"
                     />
                     <Button
                       onClick={saveComment}
-                      className="w-full bg-stone-900 hover:bg-stone-700 text-white"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                       disabled={draftComment.trim() === (selected.managerComment ?? "").trim()}
                     >
                       Save reply
@@ -389,13 +389,13 @@ export default function CheckIns() {
   );
 }
 
-function KpiCard({ label, value, icon, accent = "text-stone-900" }: { label: string; value: number; icon: React.ReactNode; accent?: string }) {
+function KpiCard({ label, value, icon, accent = "text-foreground" }: { label: string; value: number; icon: React.ReactNode; accent?: string }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-          <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600">{icon}</div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
+          <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">{icon}</div>
         </div>
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       </CardContent>
@@ -409,7 +409,7 @@ function MoodDots({ mood }: { mood: Mood }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
-          className={`w-2 h-2 rounded-full ${n <= mood ? moodColors[mood] : "bg-stone-200"}`}
+          className={`w-2 h-2 rounded-full ${n <= mood ? moodColors[mood] : "bg-muted"}`}
         />
       ))}
     </div>

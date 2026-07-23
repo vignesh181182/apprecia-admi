@@ -70,22 +70,22 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-stone-50 grain-texture px-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-muted grain-texture px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <EngageXLogo size={56} />
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">{BRAND.name}</h1>
-          <p className="text-sm text-stone-500 mt-1">Sign in to the {BRAND.tagline}</p>
+          <h1 className="text-2xl font-bold text-foreground">{BRAND.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1">Sign in to the {BRAND.tagline}</p>
         </div>
 
         {invite && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-stone-100 border border-stone-200">
-            <Mail className="w-4 h-4 text-stone-700 shrink-0 mt-0.5" />
-            <div className="text-xs text-stone-700">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-muted border border-border">
+            <Mail className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground">
               <p className="font-medium">Invitation from {BRAND.name}</p>
-              <p className="text-stone-600 mt-0.5">
+              <p className="text-muted-foreground mt-0.5">
                 Welcome, {invite.adminName.split(" ")[0]}! Sign in to finish setting up{" "}
                 <span className="font-medium">{invite.companyName}</span>.
               </p>
@@ -93,17 +93,17 @@ export default function SignIn() {
           </div>
         )}
 
-        <Card className="border border-stone-200 shadow-sm">
+        <Card className="border border-border shadow-sm">
           <CardContent className="p-6 space-y-5">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Email</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                 <Input
                   type="email"
                   placeholder="you@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                   autoComplete="email"
                   readOnly={!!invite}
                 />
@@ -111,11 +111,11 @@ export default function SignIn() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium text-stone-700">
+                  <Label className="text-xs font-medium text-muted-foreground">
                     {invite ? "Set a password" : "Password"}
                   </Label>
                   {!invite && (
-                    <button type="button" className="text-xs text-stone-500 hover:text-stone-900 transition-colors">
+                    <button type="button" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                       Forgot password?
                     </button>
                   )}
@@ -126,13 +126,13 @@ export default function SignIn() {
                     placeholder={invite ? "Choose a strong password" : "••••••••"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-9 text-sm border-stone-200 pr-9"
+                    className="h-9 text-sm border-border pr-9"
                     autoComplete={invite ? "new-password" : "current-password"}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -146,14 +146,14 @@ export default function SignIn() {
                     checked={rememberMe}
                     onCheckedChange={(v) => setRememberMe(v as boolean)}
                   />
-                  <Label htmlFor="remember" className="text-xs text-stone-600 cursor-pointer">
+                  <Label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer">
                     Remember me
                   </Label>
                 </div>
               )}
 
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                <p className="text-xs text-destructive bg-destructive/10 border border-destructive/15 rounded-lg px-3 py-2">
                   {error}
                 </p>
               )}
@@ -161,7 +161,7 @@ export default function SignIn() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-9 bg-stone-900 hover:bg-stone-700 text-white text-sm"
+                className="w-full h-9 bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
               >
                 {loading ? "Signing in…" : invite ? "Sign in & continue setup" : "Sign In"}
               </Button>
@@ -174,12 +174,12 @@ export default function SignIn() {
                     <Separator />
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="px-2 bg-white text-xs text-stone-400">Or continue with</span>
+                    <span className="px-2 bg-white text-xs text-muted-foreground">Or continue with</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-9 text-sm border-stone-200 gap-2">
+                  <Button variant="outline" className="h-9 text-sm border-border gap-2">
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -188,7 +188,7 @@ export default function SignIn() {
                     </svg>
                     Google
                   </Button>
-                  <Button variant="outline" className="h-9 text-sm border-stone-200 gap-2">
+                  <Button variant="outline" className="h-9 text-sm border-border gap-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                     </svg>
@@ -200,7 +200,7 @@ export default function SignIn() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-stone-500">
+        <p className="text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} {BRAND.copyright}. {BRAND.tagline}.
         </p>
       </div>

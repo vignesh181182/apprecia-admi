@@ -9,7 +9,7 @@ export default function Dashboard() {
   return (
     <div className="h-full overflow-y-auto p-6 custom-scrollbar">
       {/* Hero Card with Background Image */}
-      <Card className="relative mb-8 border border-stone-200 bg-white overflow-hidden">
+      <Card className="relative mb-8 border border-border bg-white overflow-hidden">
         <div
           className="relative h-64 bg-cover bg-top bg-no-repeat"
           style={{ backgroundImage: `url(${peopleBackground})` }}
@@ -23,7 +23,7 @@ export default function Dashboard() {
               <h2 className="text-3xl font-bold text-white mb-4">
                 Build Amazing Teams
               </h2>
-              <p className="text-stone-200 text-lg mb-6 leading-relaxed">
+              <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
                 Connect with diverse talent and create inclusive workspaces that
                 drive innovation. Discover how our platform helps you build
                 stronger teams.

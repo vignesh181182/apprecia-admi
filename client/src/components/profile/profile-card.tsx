@@ -29,12 +29,12 @@ export function ProfileCard({
         className={cn(
           "group flex items-center gap-3 rounded-2xl border bg-white px-3 py-2.5 transition-all",
           active
-            ? "border-[#a87a3a] bg-amber-50/40"
-            : "border-stone-200 hover:border-stone-300 hover:bg-stone-50",
+            ? "border-primary bg-primary/40"
+            : "border-border hover:border-border hover:bg-muted",
           asLink && "cursor-pointer",
         )}
       >
-        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center overflow-hidden shrink-0">
           {account.adminPhotoUrl ? (
             <img
               src={account.adminPhotoUrl}
@@ -42,18 +42,18 @@ export function ProfileCard({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="font-mobile font-semibold text-amber-900 text-base">
+            <span className="font-mobile font-semibold text-primary text-base">
               {initial}
             </span>
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="font-mobile font-semibold text-stone-900 text-sm leading-tight truncate">
+          <p className="font-mobile font-semibold text-foreground text-sm leading-tight truncate">
             {account.adminName}
           </p>
           {meta && (
-            <p className="text-xs text-stone-500 leading-snug truncate mt-0.5">
+            <p className="text-xs text-muted-foreground leading-snug truncate mt-0.5">
               {meta}
             </p>
           )}
@@ -64,8 +64,8 @@ export function ProfileCard({
             className={cn(
               "w-4 h-4 shrink-0 transition-all",
               active
-                ? "text-[#a87a3a]"
-                : "text-stone-300 group-hover:text-stone-500 group-hover:translate-x-0.5",
+                ? "text-primary"
+                : "text-muted-foreground group-hover:text-muted-foreground group-hover:translate-x-0.5",
             )}
           />
         )}
@@ -85,10 +85,10 @@ export function ProfileCard({
     <div
       className={cn(
         "rounded-2xl bg-white border transition-colors p-6",
-        active ? "border-[#a87a3a]" : "border-stone-200",
+        active ? "border-primary" : "border-border",
       )}
     >
-      <div className="rounded-full bg-amber-100 flex items-center justify-center overflow-hidden w-24 h-24">
+      <div className="rounded-full bg-primary/15 flex items-center justify-center overflow-hidden w-24 h-24">
         {account.adminPhotoUrl ? (
           <img
             src={account.adminPhotoUrl}
@@ -96,20 +96,20 @@ export function ProfileCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="font-mobile font-semibold text-amber-900 text-3xl">
+          <span className="font-mobile font-semibold text-primary text-3xl">
             {initial}
           </span>
         )}
       </div>
 
-      <p className="mt-3 font-mobile font-semibold text-stone-900 leading-tight text-xl">
+      <p className="mt-3 font-mobile font-semibold text-foreground leading-tight text-xl">
         {account.adminName}
       </p>
-      <p className="mt-0.5 text-stone-600 leading-snug text-sm">
+      <p className="mt-0.5 text-muted-foreground leading-snug text-sm">
         {account.adminDesignation || "Member"}
       </p>
       {account.adminDepartment && (
-        <p className="mt-1 text-xs text-stone-500">{account.adminDepartment}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{account.adminDepartment}</p>
       )}
     </div>
   );

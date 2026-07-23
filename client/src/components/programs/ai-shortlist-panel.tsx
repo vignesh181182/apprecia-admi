@@ -150,26 +150,26 @@ export function AiShortlistPanel({
 
   return (
     <>
-      <Card className="border border-amber-200 bg-amber-50/40">
+      <Card className="border border-primary/20 bg-primary/40">
         <Collapsible open={shortlistOpen} onOpenChange={setShortlistOpen}>
           <CollapsibleTrigger asChild>
             <button className="w-full p-5 flex items-start justify-between text-left">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-amber-700" />
+                <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-stone-900">
+                  <p className="text-sm font-semibold text-foreground">
                     AI shortlist — top {Math.min(TOP_N, shortlist.length)} nominations
                   </p>
-                  <p className="text-xs text-stone-600 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {shortlist.length} approved nominations were scored. Top picks are
                     pre-selected — the panel lead can override.
                   </p>
                 </div>
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-stone-500 mt-1 transition-transform ${
+                className={`w-4 h-4 text-muted-foreground mt-1 transition-transform ${
                   shortlistOpen ? "rotate-180" : ""
                 }`}
               />
@@ -178,7 +178,7 @@ export function AiShortlistPanel({
           <CollapsibleContent>
             <div className="px-5 pb-5 space-y-3">
               {topShortlist.length === 0 ? (
-                <p className="text-sm text-stone-500 italic">
+                <p className="text-sm text-muted-foreground italic">
                   Nothing eligible yet — approve some nominations first.
                 </p>
               ) : (
@@ -202,18 +202,18 @@ export function AiShortlistPanel({
       </Card>
 
       {overflow.length > 0 && (
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-5">
             <div className="flex items-baseline justify-between mb-3">
               <div>
-                <h2 className="text-sm font-semibold text-stone-900">
+                <h2 className="text-sm font-semibold text-foreground">
                   All approved nominations
                 </h2>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Browse outside the top {TOP_N} — anyone can be promoted.
                 </p>
               </div>
-              <span className="text-xs text-stone-400">{overflow.length} more</span>
+              <span className="text-xs text-muted-foreground">{overflow.length} more</span>
             </div>
             <div className="space-y-2">
               {pageItems.map((s) => {
@@ -231,7 +231,7 @@ export function AiShortlistPanel({
               })}
             </div>
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-3 text-xs text-stone-500">
+              <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
                 <span>
                   Page {page + 1} of {totalPages}
                 </span>
@@ -263,14 +263,14 @@ export function AiShortlistPanel({
 
       {mode === "embedded" ? (
         <div className="flex items-center justify-between gap-3 py-2">
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-muted-foreground">
             {selected.size} of {shortlist.length} selected
           </p>
           <Button
             size="sm"
             onClick={confirmWinners}
             disabled={selected.size === 0 || confirming}
-            className="bg-stone-900 hover:bg-stone-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
             data-testid="confirm-winners"
           >
             <Trophy className="w-3.5 h-3.5 mr-1.5" />
@@ -301,8 +301,8 @@ function PageFooter({
   onConfirm: () => void;
 }) {
   return (
-    <div className="sticky -bottom-6 z-30 max-w-5xl mx-auto border-t border-stone-200 bg-white p-3 flex items-center gap-3">
-      <p className="text-xs text-stone-500 ml-2">
+    <div className="sticky -bottom-6 z-30 max-w-5xl mx-auto border-t border-border bg-white p-3 flex items-center gap-3">
+      <p className="text-xs text-muted-foreground ml-2">
         {selectedCount} of {totalCount} selected
       </p>
       <div className="ml-auto flex items-center gap-2">
@@ -313,7 +313,7 @@ function PageFooter({
           size="sm"
           onClick={onConfirm}
           disabled={selectedCount === 0 || confirming}
-          className="bg-stone-900 hover:bg-stone-700 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           data-testid="confirm-winners"
         >
           <Trophy className="w-3.5 h-3.5 mr-1.5" />
@@ -337,14 +337,14 @@ function ShortlistCard({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-stone-200 bg-white rounded-lg p-4">
+    <div className="border border-border bg-white rounded-lg p-4">
       <div className="flex items-start gap-3">
         <div className="flex flex-col items-center gap-1.5 shrink-0 w-10">
-          <div className="w-7 h-7 rounded-full bg-stone-900 text-white flex items-center justify-center text-xs font-semibold">
+          <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
             {entry.rank}
           </div>
-          <span className="text-xs font-semibold text-stone-700">{entry.score}</span>
-          <span className="text-[10px] text-stone-400">/100</span>
+          <span className="text-xs font-semibold text-muted-foreground">{entry.score}</span>
+          <span className="text-[10px] text-muted-foreground">/100</span>
         </div>
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2">
@@ -355,18 +355,18 @@ function ShortlistCard({
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-stone-900 truncate">
+              <p className="text-sm font-semibold text-foreground truncate">
                 {nomination.nomineeName}
               </p>
-              <p className="text-xs text-stone-500 truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {nomination.nomineeRole}
                 {nomination.nomineeDepartment && ` · ${nomination.nomineeDepartment}`}
               </p>
             </div>
           </div>
-          <p className="text-sm text-stone-700 leading-snug">{entry.reasoning}</p>
+          <p className="text-sm text-muted-foreground leading-snug">{entry.reasoning}</p>
           {entry.highlights.length > 1 && (
-            <ul className="text-xs text-stone-600 space-y-0.5 list-disc pl-4">
+            <ul className="text-xs text-muted-foreground space-y-0.5 list-disc pl-4">
               {entry.highlights.slice(0, 3).map((h, i) => (
                 <li key={i}>{h}</li>
               ))}
@@ -379,10 +379,10 @@ function ShortlistCard({
                   key={c.criterionId}
                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] border ${
                     c.score >= 70
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                      ? "bg-success/10 border-success/20 text-success"
                       : c.score >= 40
-                        ? "bg-amber-50 border-amber-200 text-amber-800"
-                        : "bg-stone-50 border-stone-200 text-stone-600"
+                        ? "bg-primary/10 border-primary/20 text-primary"
+                        : "bg-muted border-border text-muted-foreground"
                   }`}
                   title={`Weight ${c.weight}`}
                 >
@@ -394,13 +394,13 @@ function ShortlistCard({
           )}
           <Collapsible open={open} onOpenChange={setOpen}>
             <CollapsibleTrigger asChild>
-              <button className="text-xs text-stone-500 hover:text-stone-900 underline-offset-2 hover:underline">
+              <button className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">
                 {open ? "Hide" : "View"} full nomination
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="mt-2 p-3 bg-stone-50 rounded-md text-xs text-stone-700 leading-relaxed">
-                <p className="font-medium text-stone-900 mb-1">
+              <div className="mt-2 p-3 bg-muted rounded-md text-xs text-muted-foreground leading-relaxed">
+                <p className="font-medium text-foreground mb-1">
                   Nominator: {nomination.nominatorName}
                 </p>
                 <p>{nomination.reason}</p>
@@ -411,7 +411,7 @@ function ShortlistCard({
         </div>
         <label className="flex items-center gap-2 shrink-0 cursor-pointer">
           <Checkbox checked={checked} onCheckedChange={onToggle} />
-          <span className="text-xs text-stone-700 hidden sm:inline">Include</span>
+          <span className="text-xs text-muted-foreground hidden sm:inline">Include</span>
         </label>
       </div>
     </div>
@@ -430,9 +430,9 @@ function CompactNomRow({
   onToggle: () => void;
 }) {
   return (
-    <label className="flex items-center gap-3 p-2 border border-stone-100 rounded-md hover:bg-stone-50 cursor-pointer">
+    <label className="flex items-center gap-3 p-2 border border-border rounded-md hover:bg-muted cursor-pointer">
       <Checkbox checked={checked} onCheckedChange={onToggle} />
-      <span className="text-xs font-mono w-7 text-stone-500">#{entry.rank}</span>
+      <span className="text-xs font-mono w-7 text-muted-foreground">#{entry.rank}</span>
       <Avatar className="h-7 w-7">
         <AvatarImage src={nomination.nomineeAvatar} alt={nomination.nomineeName} />
         <AvatarFallback className="text-xs">
@@ -440,10 +440,10 @@ function CompactNomRow({
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-stone-900 truncate">{nomination.nomineeName}</p>
-        <p className="text-xs text-stone-500 truncate">{nomination.reason}</p>
+        <p className="text-sm text-foreground truncate">{nomination.nomineeName}</p>
+        <p className="text-xs text-muted-foreground truncate">{nomination.reason}</p>
       </div>
-      <span className="text-xs text-stone-700 font-medium">{entry.score}</span>
+      <span className="text-xs text-muted-foreground font-medium">{entry.score}</span>
     </label>
   );
 }
@@ -461,7 +461,7 @@ function BreakdownChips({ breakdown }: { breakdown: ShortlistEntry["breakdown"] 
       {chips.map((c) => (
         <span
           key={c.label}
-          className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-white border border-stone-200 text-stone-600"
+          className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-white border border-border text-muted-foreground"
         >
           {c.label} {c.value}/{c.max}
         </span>

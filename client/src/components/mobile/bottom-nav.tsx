@@ -123,7 +123,7 @@ export function MobileBottomNav() {
                   className={cn(
                     "flex items-center gap-2 h-10 rounded-full transition-all duration-200",
                     isActive
-                      ? "bg-[#a87a3a] text-white px-4"
+                      ? "bg-primary text-white px-4"
                       : "text-[#292927] w-10 justify-center",
                   )}
                 >
@@ -143,13 +143,13 @@ export function MobileBottomNav() {
               <span
                 className={cn(
                   "block w-10 h-10 rounded-full overflow-hidden ring-2 transition-shadow",
-                  isActive ? "ring-[#a87a3a]" : "ring-transparent",
+                  isActive ? "ring-primary" : "ring-transparent",
                 )}
               >
                 {avatarSrc ? (
                   <img src={avatarSrc} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="w-full h-full bg-stone-300 flex items-center justify-center text-sm font-semibold text-stone-700">
+                  <span className="w-full h-full bg-stone-300 flex items-center justify-center text-sm font-semibold text-muted-foreground">
                     {(account?.adminName?.[0] || "?").toUpperCase()}
                   </span>
                 )}
@@ -157,7 +157,7 @@ export function MobileBottomNav() {
               {pendingApprovals > 0 && (
                 <span
                   aria-label={`${pendingApprovals} pending approvals`}
-                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center ring-2 ring-[#ebebe6]"
+                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10px] font-semibold flex items-center justify-center ring-2 ring-[#ebebe6]"
                 >
                   {pendingApprovals > 9 ? "9+" : pendingApprovals}
                 </span>

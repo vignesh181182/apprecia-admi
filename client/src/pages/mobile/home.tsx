@@ -42,8 +42,8 @@ export default function MobileHome() {
 
       <div className="px-5 md:px-0 space-y-4">
         {items.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-stone-200/70 p-8 text-center">
-            <p className="text-sm text-stone-600">No recognitions yet — check back soon.</p>
+          <div className="bg-white rounded-2xl border border-border/70 p-8 text-center">
+            <p className="text-sm text-muted-foreground">No recognitions yet — check back soon.</p>
           </div>
         ) : (
           <>

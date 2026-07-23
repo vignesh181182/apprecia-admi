@@ -4,7 +4,7 @@ import { MY_POINTS } from "@/lib/rewards-data";
 export function PointsBanner() {
   return (
     <div
-      className="relative overflow-hidden rounded-full bg-gradient-to-r from-amber-50 via-amber-100/80 to-amber-200/60 border border-amber-100 px-4 py-3 flex items-center gap-3"
+      className="relative overflow-hidden rounded-full bg-gradient-to-r from-primary/10 via-primary/80 to-primary/60 border border-primary/15 px-4 py-3 flex items-center gap-3"
     >
       <div
         aria-hidden
@@ -16,12 +16,12 @@ export function PointsBanner() {
       />
       <div
         aria-hidden
-        className="absolute right-6 top-1/2 -translate-y-1/2 text-amber-300/70 pointer-events-none"
+        className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/70 pointer-events-none"
       >
         <Sparkles className="w-5 h-5" />
       </div>
 
-      <div className="relative w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shadow-sm">
+      <div className="relative w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-primary/35 to-primary flex items-center justify-center shadow-sm">
         <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
           <path
             d="M12 2L19 6V14L12 18L5 14V6L12 2Z"
@@ -41,10 +41,10 @@ export function PointsBanner() {
       </div>
 
       <div className="relative flex items-baseline gap-1.5 min-w-0">
-        <span className="font-mobile text-xl font-semibold text-stone-900 tabular-nums">
+        <span className="font-mobile text-xl font-semibold text-foreground tabular-nums">
           {MY_POINTS.toLocaleString()}
         </span>
-        <span className="text-sm text-stone-600 truncate">points to redeem</span>
+        <span className="text-sm text-muted-foreground truncate">points to redeem</span>
       </div>
     </div>
   );

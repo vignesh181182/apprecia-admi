@@ -19,7 +19,7 @@ export function MobileLayout({
   hideBottomNav,
 }: Props) {
   return (
-    <div className="min-h-screen bg-stone-50 font-mobile flex flex-col">
+    <div className="min-h-screen bg-muted font-mobile flex flex-col">
       {!hideTopBar && <MobileTopBar title={title} showBack={showBack} onBack={onBack} />}
       <main
         className="flex-1 overflow-y-auto"

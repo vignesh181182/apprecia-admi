@@ -66,7 +66,7 @@ const txnTypeColors: Record<TxnType, string> = {
   Redemption: "bg-pink-100 text-pink-700",
   "Top-up": "bg-green-100 text-green-700",
   Adjustment: "bg-amber-100 text-amber-700",
-  Reset: "bg-stone-200 text-stone-700",
+  Reset: "bg-muted text-muted-foreground",
   Allowance: "bg-purple-100 text-purple-700",
 };
 
@@ -181,21 +181,21 @@ export default function Budget() {
     <div className="p-6 space-y-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
-        <div className="text-xs text-stone-500">
-          Cycle: <span className="font-semibold text-stone-700">{settings.cycle}</span> · {fmtDate(settings.cycleStartDate)} → {fmtDate(settings.cycleEndDate)} · resets in {cycleDaysLeft} days
+        <div className="text-xs text-muted-foreground">
+          Cycle: <span className="font-semibold text-muted-foreground">{settings.cycle}</span> · {fmtDate(settings.cycleStartDate)} → {fmtDate(settings.cycleEndDate)} · resets in {cycleDaysLeft} days
         </div>
         <div className="flex gap-2">
           <Button
             size="sm"
             variant="outline"
-            className="h-9 gap-2 border-stone-200 text-stone-700"
+            className="h-9 gap-2 border-border text-muted-foreground"
             onClick={() => setCycleSheetOpen(true)}
           >
             <SettingsIcon className="w-4 h-4" /> Cycle Settings
           </Button>
           <Button
             size="sm"
-            className="h-9 gap-2 bg-stone-900 hover:bg-stone-700 text-white"
+            className="h-9 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => setAdjustSheetOpen(true)}
           >
             <Plus className="w-4 h-4" /> Manual Adjustment
@@ -222,7 +222,7 @@ export default function Budget() {
           value={fmtPts(totalUsed)}
           unit={`pts · ${spentPct}%`}
           icon={<TrendingDown className="w-4 h-4" />}
-          accent={spentPct >= 80 ? "text-red-600" : "text-stone-900"}
+          accent={spentPct >= 80 ? "text-red-600" : "text-foreground"}
         />
         <KpiCard
           label="Remaining"
@@ -234,28 +234,28 @@ export default function Budget() {
       </div>
 
       {/* Department Allocations */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <div>
-            <p className="text-sm font-semibold text-stone-900">Department Allocations</p>
-            <p className="text-xs text-stone-500 mt-0.5">Click the pencil to edit any department's allocation.</p>
+            <p className="text-sm font-semibold text-foreground">Department Allocations</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Click the pencil to edit any department's allocation.</p>
           </div>
-          <Badge variant="secondary" className="bg-stone-100 text-stone-700 text-xs">
+          <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs">
             {allocations.length} departments
           </Badge>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="rounded-lg border border-stone-200 overflow-hidden">
+          <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-stone-50 hover:bg-stone-50">
-                  <TableHead className="text-xs font-semibold text-stone-600">Department</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Headcount</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Allocated</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Used</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Remaining</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600 w-44">Utilization</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
+                <TableRow className="bg-muted hover:bg-muted">
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Department</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Headcount</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Allocated</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Used</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Remaining</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground w-44">Utilization</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -264,32 +264,32 @@ export default function Budget() {
                   const left = a.allocated - a.used;
                   const isEditing = editingDept === a.department;
                   return (
-                    <TableRow key={a.department} className="hover:bg-stone-50">
-                      <TableCell className="text-xs font-medium text-stone-900">{a.department}</TableCell>
-                      <TableCell className="text-xs text-stone-700">{a.headcount}</TableCell>
+                    <TableRow key={a.department} className="hover:bg-muted">
+                      <TableCell className="text-xs font-medium text-foreground">{a.department}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{a.headcount}</TableCell>
                       <TableCell>
                         {isEditing ? (
                           <Input
                             type="number"
                             value={draftAlloc}
                             onChange={(e) => setDraftAlloc(Number(e.target.value))}
-                            className="h-7 w-28 text-xs border-stone-200"
+                            className="h-7 w-28 text-xs border-border"
                             min={0}
                             autoFocus
                           />
                         ) : (
-                          <span className="text-xs font-semibold text-stone-900">{fmtPts(a.allocated)}</span>
+                          <span className="text-xs font-semibold text-foreground">{fmtPts(a.allocated)}</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-xs text-stone-700">{fmtPts(a.used)}</TableCell>
-                      <TableCell className="text-xs font-medium text-stone-900">{fmtPts(left)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{fmtPts(a.used)}</TableCell>
+                      <TableCell className="text-xs font-medium text-foreground">{fmtPts(left)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Progress
                             value={pct}
-                            className={`h-1.5 flex-1 ${pct >= 90 ? "[&>div]:bg-red-500" : pct >= 70 ? "[&>div]:bg-amber-500" : ""}`}
+                            className={`h-1.5 flex-1 ${pct >= 90 ? "[&>div]:bg-destructive" : pct >= 70 ? "[&>div]:bg-primary" : ""}`}
                           />
-                          <span className={`text-xs font-medium tabular-nums ${pct >= 90 ? "text-red-600" : "text-stone-600"}`}>
+                          <span className={`text-xs font-medium tabular-nums ${pct >= 90 ? "text-destructive" : "text-muted-foreground"}`}>
                             {pct}%
                           </span>
                         </div>
@@ -297,10 +297,10 @@ export default function Budget() {
                       <TableCell className="text-right">
                         {isEditing ? (
                           <div className="flex justify-end gap-1">
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={saveEdit}>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-success hover:text-success hover:bg-success/10" onClick={saveEdit}>
                               <Check className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700" onClick={cancelEdit}>
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground" onClick={cancelEdit}>
                               <X className="w-4 h-4" />
                             </Button>
                           </div>
@@ -308,7 +308,7 @@ export default function Budget() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                             onClick={() => startEdit(a.department, a.allocated)}
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -321,11 +321,11 @@ export default function Budget() {
               </TableBody>
             </Table>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-stone-500">
-            <span>Total allocated across departments: <span className="font-semibold text-stone-700">{fmtPts(totalAllocated)} pts</span></span>
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Total allocated across departments: <span className="font-semibold text-muted-foreground">{fmtPts(totalAllocated)} pts</span></span>
             <span>
-              Org budget: <span className="font-semibold text-stone-700">{fmtPts(settings.totalBudget)} pts</span> ·{" "}
-              <span className={totalAllocated > settings.totalBudget ? "text-red-600 font-semibold" : "text-stone-500"}>
+              Org budget: <span className="font-semibold text-muted-foreground">{fmtPts(settings.totalBudget)} pts</span> ·{" "}
+              <span className={totalAllocated > settings.totalBudget ? "text-destructive font-semibold" : "text-muted-foreground"}>
                 {totalAllocated > settings.totalBudget ? `Over by ${fmtPts(totalAllocated - settings.totalBudget)} pts` : `${fmtPts(settings.totalBudget - totalAllocated)} unallocated`}
               </span>
             </span>
@@ -334,16 +334,16 @@ export default function Budget() {
       </Card>
 
       {/* Per-Employee Allowance */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
           <div>
-            <p className="text-sm font-semibold text-stone-900">Per-Employee Give-Allowance</p>
-            <p className="text-xs text-stone-500 mt-0.5">Points each employee can give per cycle, by badge tier.</p>
+            <p className="text-sm font-semibold text-foreground">Per-Employee Give-Allowance</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Points each employee can give per cycle, by badge tier.</p>
           </div>
           <Button
             size="sm"
             variant="outline"
-            className="h-8 gap-2 text-xs border-stone-200 text-stone-700"
+            className="h-8 gap-2 text-xs border-border text-muted-foreground"
             onClick={() => setAllowanceSheetOpen(true)}
           >
             <Pencil className="w-3.5 h-3.5" /> Edit
@@ -351,16 +351,16 @@ export default function Budget() {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-              <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">Default</p>
-              <p className="text-xl font-bold text-stone-900">{fmtPts(settings.defaultEmployeeAllowance)}</p>
-              <p className="text-xs text-stone-500 mt-0.5">pts / {settings.cycle.toLowerCase().replace("ly", "")}</p>
+            <div className="rounded-lg border border-border bg-muted p-3">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Default</p>
+              <p className="text-xl font-bold text-foreground">{fmtPts(settings.defaultEmployeeAllowance)}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">pts / {settings.cycle.toLowerCase().replace("ly", "")}</p>
             </div>
             {tiers.map((t) => (
-              <div key={t.level} className="rounded-lg border border-stone-200 p-3">
-                <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{t.level}</p>
-                <p className="text-xl font-bold text-stone-900">{fmtPts(t.monthlyAllowance)}</p>
-                <p className="text-xs text-stone-500 mt-0.5">pts / {settings.cycle.toLowerCase().replace("ly", "")}</p>
+              <div key={t.level} className="rounded-lg border border-border p-3">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">{t.level}</p>
+                <p className="text-xl font-bold text-foreground">{fmtPts(t.monthlyAllowance)}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">pts / {settings.cycle.toLowerCase().replace("ly", "")}</p>
               </div>
             ))}
           </div>
@@ -368,26 +368,26 @@ export default function Budget() {
       </Card>
 
       {/* Transaction Ledger */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-stone-900">Transaction Ledger</p>
-              <p className="text-xs text-stone-500 mt-0.5">Every point movement — recognitions, redemptions, top-ups, adjustments.</p>
+              <p className="text-sm font-semibold text-foreground">Transaction Ledger</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Every point movement — recognitions, redemptions, top-ups, adjustments.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search ledger…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 text-sm border-stone-200 w-full sm:w-56"
+                  className="pl-9 h-9 text-sm border-border w-full sm:w-56"
                 />
               </div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-9 w-36 text-sm border-stone-200">
-                  <Filter className="w-3.5 h-3.5 mr-1 text-stone-400" />
+                <SelectTrigger className="h-9 w-36 text-sm border-border">
+                  <Filter className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -398,7 +398,7 @@ export default function Budget() {
                 </SelectContent>
               </Select>
               <Select value={directionFilter} onValueChange={setDirectionFilter}>
-                <SelectTrigger className="h-9 w-36 text-sm border-stone-200">
+                <SelectTrigger className="h-9 w-36 text-sm border-border">
                   <SelectValue placeholder="Direction" />
                 </SelectTrigger>
                 <SelectContent>
@@ -411,63 +411,63 @@ export default function Budget() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="rounded-lg border border-stone-200 overflow-hidden">
+          <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-stone-50 hover:bg-stone-50">
-                  <TableHead className="text-xs font-semibold text-stone-600">Date</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Type</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Amount</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">From → To</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Scope</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Reason</TableHead>
-                  <TableHead className="text-xs font-semibold text-stone-600">Actor</TableHead>
+                <TableRow className="bg-muted hover:bg-muted">
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Date</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Type</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Amount</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">From → To</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Scope</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Reason</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Actor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTxns.map((t) => (
-                  <TableRow key={t.id} className="hover:bg-stone-50">
-                    <TableCell className="text-xs text-stone-600 whitespace-nowrap">{fmtDateTime(t.createdAt)}</TableCell>
+                  <TableRow key={t.id} className="hover:bg-muted">
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{fmtDateTime(t.createdAt)}</TableCell>
                     <TableCell>
                       <Badge className={`text-xs ${txnTypeColors[t.type]}`} variant="secondary">
                         {t.type}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <span className={`text-xs font-semibold flex items-center gap-1 ${t.direction === "credit" ? "text-green-700" : "text-stone-900"}`}>
+                      <span className={`text-xs font-semibold flex items-center gap-1 ${t.direction === "credit" ? "text-success" : "text-foreground"}`}>
                         {t.direction === "credit" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                         {t.direction === "credit" ? "+" : "−"}{fmtPts(t.amount)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs text-stone-700">
+                    <TableCell className="text-xs text-muted-foreground">
                       {t.fromName && t.toName ? (
-                        <span><span className="text-stone-500">{t.fromName}</span> → <span className="font-medium">{t.toName}</span></span>
+                        <span><span className="text-muted-foreground">{t.fromName}</span> → <span className="font-medium">{t.toName}</span></span>
                       ) : t.toName ? (
                         <span>→ <span className="font-medium">{t.toName}</span></span>
                       ) : t.fromName ? (
-                        <span><span className="text-stone-500">{t.fromName}</span> →</span>
+                        <span><span className="text-muted-foreground">{t.fromName}</span> →</span>
                       ) : (
-                        <span className="text-stone-400">—</span>
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-stone-700">
-                      <span className="capitalize text-stone-500">{t.scope}</span>
+                    <TableCell className="text-xs text-muted-foreground">
+                      <span className="capitalize text-muted-foreground">{t.scope}</span>
                       {t.scopeName && <span> · {t.scopeName}</span>}
                     </TableCell>
-                    <TableCell className="text-xs text-stone-700">
+                    <TableCell className="text-xs text-muted-foreground">
                       {t.reasonCode && (
-                        <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700 mr-1">
+                        <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground mr-1">
                           {reasonLabels[t.reasonCode]}
                         </Badge>
                       )}
-                      <span className="text-stone-500">{t.reasonNote ?? "—"}</span>
+                      <span className="text-muted-foreground">{t.reasonNote ?? "—"}</span>
                     </TableCell>
-                    <TableCell className="text-xs text-stone-500">{t.adminName ?? "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{t.adminName ?? "—"}</TableCell>
                   </TableRow>
                 ))}
                 {filteredTxns.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-sm text-stone-500 py-10">
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-10">
                       No transactions match your filters.
                     </TableCell>
                   </TableRow>
@@ -525,7 +525,7 @@ function KpiCard({
   value,
   unit,
   icon,
-  accent = "text-stone-900",
+  accent = "text-foreground",
 }: {
   label: string;
   value: string;
@@ -534,14 +534,14 @@ function KpiCard({
   accent?: string;
 }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-          <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600">{icon}</div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
+          <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">{icon}</div>
         </div>
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
-        <p className="text-xs text-stone-500 mt-0.5">{unit}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{unit}</p>
       </CardContent>
     </Card>
   );
@@ -559,20 +559,20 @@ function CycleSettingsForm({ initial, onSubmit }: { initial: BudgetSettings; onS
       }}
     >
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Total Org Budget (pts)</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Total Org Budget (pts)</Label>
         <Input
           type="number"
           value={draft.totalBudget}
           onChange={(e) => setDraft({ ...draft, totalBudget: Number(e.target.value) })}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
           min={0}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Cycle Period</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Cycle Period</Label>
         <Select value={draft.cycle} onValueChange={(v) => setDraft({ ...draft, cycle: v as CyclePeriod })}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -585,54 +585,54 @@ function CycleSettingsForm({ initial, onSubmit }: { initial: BudgetSettings; onS
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Cycle Start</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Cycle Start</Label>
           <Input
             type="date"
             value={draft.cycleStartDate}
             onChange={(e) => setDraft({ ...draft, cycleStartDate: e.target.value })}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Cycle End</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Cycle End</Label>
           <Input
             type="date"
             value={draft.cycleEndDate}
             onChange={(e) => setDraft({ ...draft, cycleEndDate: e.target.value })}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Reset Day of Month</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Reset Day of Month</Label>
         <Input
           type="number"
           min={1}
           max={28}
           value={draft.resetDayOfMonth}
           onChange={(e) => setDraft({ ...draft, resetDayOfMonth: Number(e.target.value) })}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
         />
-        <p className="text-xs text-stone-500">Day of month when employee allowances reset.</p>
+        <p className="text-xs text-muted-foreground">Day of month when employee allowances reset.</p>
       </div>
 
-      <div className="flex items-center justify-between rounded-lg border border-stone-200 px-3 py-2.5">
+      <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
         <div>
-          <p className="text-xs font-medium text-stone-900">Auto-reset allowances</p>
-          <p className="text-xs text-stone-500">Restore everyone's give-allowance on each cycle reset.</p>
+          <p className="text-xs font-medium text-foreground">Auto-reset allowances</p>
+          <p className="text-xs text-muted-foreground">Restore everyone's give-allowance on each cycle reset.</p>
         </div>
         <Switch checked={draft.autoReset} onCheckedChange={(v) => setDraft({ ...draft, autoReset: v })} />
       </div>
 
-      <div className="pt-2 flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
-        <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
-        <p className="text-xs text-blue-900">
+      <div className="pt-2 flex items-center gap-2 rounded-lg border border-info/15 bg-info/10 px-3 py-2">
+        <Calendar className="w-4 h-4 text-info shrink-0" />
+        <p className="text-xs text-info">
           Cycle resets in <span className="font-semibold">{daysUntil(draft.cycleEndDate)} days</span>.
         </p>
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Save Cycle Settings
       </Button>
     </form>
@@ -660,23 +660,23 @@ function AllowanceForm({
       }}
     >
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Default Allowance (pts / cycle)</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Default Allowance (pts / cycle)</Label>
         <Input
           type="number"
           value={defaultAllowance}
           onChange={(e) => setDefaultAllowance(Number(e.target.value))}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
           min={0}
         />
-        <p className="text-xs text-stone-500">Applied to anyone without a tier-specific override.</p>
+        <p className="text-xs text-muted-foreground">Applied to anyone without a tier-specific override.</p>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-medium text-stone-700">Per-Tier Overrides</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Per-Tier Overrides</Label>
         <div className="space-y-2">
           {tiers.map((t, idx) => (
             <div key={t.level} className="grid grid-cols-3 gap-2 items-center">
-              <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700 justify-self-start">
+              <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground justify-self-start">
                 {t.level}
               </Badge>
               <Input
@@ -687,7 +687,7 @@ function AllowanceForm({
                     prev.map((p, i) => (i === idx ? { ...p, monthlyAllowance: Number(e.target.value) } : p))
                   )
                 }
-                className="h-9 text-sm border-stone-200 col-span-2"
+                className="h-9 text-sm border-border col-span-2"
                 min={0}
               />
             </div>
@@ -695,7 +695,7 @@ function AllowanceForm({
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Save Allowance
       </Button>
     </form>
@@ -737,7 +737,7 @@ function AdjustmentForm({
       }}
     >
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Direction</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Direction</Label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -747,8 +747,8 @@ function AdjustmentForm({
             }}
             className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
               direction === "credit"
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-white text-muted-foreground border-border hover:bg-muted"
             }`}
           >
             <ArrowUp className="w-3.5 h-3.5 inline mr-1.5" /> Credit (top-up)
@@ -761,8 +761,8 @@ function AdjustmentForm({
             }}
             className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
               direction === "debit"
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-white text-muted-foreground border-border hover:bg-muted"
             }`}
           >
             <ArrowDown className="w-3.5 h-3.5 inline mr-1.5" /> Debit (deduct)
@@ -771,9 +771,9 @@ function AdjustmentForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Scope</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Scope</Label>
         <Select value={scope} onValueChange={(v) => setScope(v as "org" | "department" | "employee")}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -786,9 +786,9 @@ function AdjustmentForm({
 
       {scope === "department" && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Department</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Department</Label>
           <Select value={scopeName} onValueChange={setScopeName}>
-            <SelectTrigger className="h-9 text-sm border-stone-200">
+            <SelectTrigger className="h-9 text-sm border-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -802,31 +802,31 @@ function AdjustmentForm({
 
       {scope === "employee" && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Employee</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Employee</Label>
           <Input
             placeholder="Employee name…"
             value={scopeName}
             onChange={(e) => setScopeName(e.target.value)}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
         </div>
       )}
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Amount (pts)</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Amount (pts)</Label>
         <Input
           type="number"
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
           min={1}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Reason Code</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Reason Code</Label>
         <Select value={reasonCode} onValueChange={(v) => setReasonCode(v as AdjustmentReason)}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -847,17 +847,17 @@ function AdjustmentForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Note (optional)</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Note (optional)</Label>
         <Textarea
           value={reasonNote}
           onChange={(e) => setReasonNote(e.target.value)}
           placeholder="Add context for the audit log…"
-          className="text-sm border-stone-200 resize-none"
+          className="text-sm border-border resize-none"
           rows={3}
         />
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Apply {direction === "credit" ? "Top-up" : "Adjustment"}
       </Button>
     </form>

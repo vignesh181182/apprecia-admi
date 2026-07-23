@@ -27,10 +27,10 @@ export function ProductTile({ product, size = "md" }: { product: RewardProduct; 
         )}
       </div>
       <div className="mt-1.5 max-w-[10rem]">
-        <p className="text-xs text-stone-700 line-clamp-1 group-hover:text-stone-900">
+        <p className="text-xs text-muted-foreground line-clamp-1 group-hover:text-foreground">
           {product.name}
         </p>
-        <p className="text-xs font-semibold text-amber-800 mt-0.5 inline-flex items-center gap-1">
+        <p className="text-xs font-semibold text-primary mt-0.5 inline-flex items-center gap-1">
           <Sparkles className="w-3 h-3" />
           {product.points.toLocaleString()} pts
         </p>

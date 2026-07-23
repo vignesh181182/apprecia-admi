@@ -54,7 +54,7 @@ function statusFor(invite: InviteRecord): CompanyStatus {
 const STATUS_STYLES: Record<CompanyStatus, { bg: string; text: string; Icon: typeof CheckCircle2 }> = {
   Active: { bg: "bg-green-100", text: "text-green-700", Icon: CheckCircle2 },
   "In setup": { bg: "bg-amber-100", text: "text-amber-700", Icon: Hourglass },
-  "Pending invite": { bg: "bg-stone-100", text: "text-stone-600", Icon: Clock },
+  "Pending invite": { bg: "bg-muted", text: "text-muted-foreground", Icon: Clock },
 };
 
 function formatDate(iso: string) {
@@ -196,15 +196,15 @@ export default function SuperAdmin() {
   }, [invites, search, statusFilter]);
 
   return (
-    <div className="min-h-screen w-full bg-stone-50 grain-texture">
+    <div className="min-h-screen w-full bg-muted grain-texture">
       {/* Header */}
-      <header className="border-b border-stone-200 bg-white">
+      <header className="border-b border-border bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <EngageXLogo size={32} />
             <div>
-              <p className="text-sm font-semibold text-stone-900 leading-tight">{BRAND.name} · Super Admin</p>
-              <p className="text-xs text-stone-500 leading-tight">Provision and manage customer accounts</p>
+              <p className="text-sm font-semibold text-foreground leading-tight">{BRAND.name} · Super Admin</p>
+              <p className="text-xs text-muted-foreground leading-tight">Provision and manage customer accounts</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default function SuperAdmin() {
               variant="ghost"
               size="sm"
               onClick={resetEverything}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset all
@@ -221,7 +221,7 @@ export default function SuperAdmin() {
               variant="ghost"
               size="sm"
               onClick={signOut}
-              className="text-stone-600 hover:text-stone-900 hover:bg-stone-100 gap-1.5"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted gap-1.5"
             >
               <LogOut className="w-3.5 h-3.5" />
               Sign out
@@ -232,11 +232,11 @@ export default function SuperAdmin() {
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Internal-only banner */}
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-100">
-          <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900">
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/15">
+          <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-xs text-primary">
             <p className="font-medium">Internal-only page</p>
-            <p className="text-amber-800 mt-0.5">
+            <p className="text-primary mt-0.5">
               This is the {BRAND.name} super admin console. Create new customer accounts, manage product flags
               (Appreciation default, RnR optional), and track onboarding progress. In production this lives behind your
               internal SSO.
@@ -246,12 +246,12 @@ export default function SuperAdmin() {
 
         {/* KPI cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wide mb-1">Total companies</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.total}</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Total companies</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.total}</p>
                 </div>
                 <div className="w-9 h-9 rounded-lg bg-stone-900 flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
@@ -259,44 +259,44 @@ export default function SuperAdmin() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wide mb-1">Active</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.active}</p>
-                  <p className="text-xs text-green-600 mt-0.5">Setup complete</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Active</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.active}</p>
+                  <p className="text-xs text-success mt-0.5">Setup complete</p>
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-green-700" />
+                <div className="w-9 h-9 rounded-lg bg-success/15 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-success" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wide mb-1">In setup</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.inSetup}</p>
-                  <p className="text-xs text-amber-600 mt-0.5">Onboarding</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">In setup</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.inSetup}</p>
+                  <p className="text-xs text-primary mt-0.5">Onboarding</p>
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Hourglass className="w-4 h-4 text-amber-700" />
+                <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <Hourglass className="w-4 h-4 text-primary" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs text-stone-500 font-medium uppercase tracking-wide mb-1">Pending invites</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.pending}</p>
-                  <p className="text-xs text-stone-500 mt-0.5">Not yet signed in</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Pending invites</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Not yet signed in</p>
                 </div>
-                <div className="w-9 h-9 rounded-lg bg-stone-100 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-stone-600" />
+                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -304,20 +304,21 @@ export default function SuperAdmin() {
         </div>
 
         {/* Companies list */}
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <CardTitle className="text-sm font-semibold text-stone-900">
-                  Companies <span className="font-normal text-stone-500">({invites.length})</span>
+                <CardTitle className="text-sm font-semibold text-foreground">
+                  Companies <span className="font-normal text-muted-foreground">({invites.length})</span>
                 </CardTitle>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   All customer accounts provisioned through this console
                 </p>
               </div>
               <Button
                 onClick={() => setShowCreateForm((v) => !v)}
-                className="bg-stone-900 hover:bg-stone-700 text-white gap-1.5 h-9"
+                variant={showCreateForm ? "outline" : "default"}
+                className="gap-1.5 h-9"
                 size="sm"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -329,25 +330,26 @@ export default function SuperAdmin() {
             {invites.length > 0 && (
               <div className="flex items-center gap-2 pt-3 flex-wrap">
                 <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input
                     placeholder="Search by company, admin, or account ID…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="h-9 text-sm border-stone-200 pl-8"
+                    className="h-9 text-sm border-border pl-8"
                   />
                 </div>
                 <div className="flex items-center gap-1">
                   {(["all", "Active", "In setup", "Pending invite"] as const).map((s) => (
                     <Button
                       key={s}
-                      variant={statusFilter === s ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
                       onClick={() => setStatusFilter(s)}
+                      aria-pressed={statusFilter === s}
                       className={
                         statusFilter === s
-                          ? "h-8 text-xs bg-stone-900 hover:bg-stone-700"
-                          : "h-8 text-xs border-stone-200 text-stone-600"
+                          ? "h-8 text-xs border-foreground/20 bg-muted text-foreground font-medium"
+                          : "h-8 text-xs border-border text-muted-foreground hover:text-foreground"
                       }
                     >
                       {s === "all" ? "All" : s}
@@ -361,104 +363,104 @@ export default function SuperAdmin() {
           <CardContent className="space-y-3">
             {/* Inline create form */}
             {showCreateForm && (
-              <div className="p-4 rounded-lg border border-stone-200 bg-stone-50 space-y-4">
+              <div className="p-4 rounded-lg border border-border bg-muted space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-stone-900">Create new customer account</p>
+                  <p className="text-sm font-semibold text-foreground">Create new customer account</p>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowCreateForm(false)}
-                    className="h-7 text-xs text-stone-500 hover:text-stone-900"
+                    className="h-7 text-xs text-muted-foreground hover:text-foreground"
                   >
                     Cancel
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Company name *</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Company name *</Label>
                     <Input
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="Acme Corp"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Admin name *</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Admin name *</Label>
                     <Input
                       value={adminName}
                       onChange={(e) => setAdminName(e.target.value)}
                       placeholder="Jane Doe"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Admin email *</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Admin email *</Label>
                     <Input
                       type="email"
                       value={adminEmail}
                       onChange={(e) => setAdminEmail(e.target.value)}
                       placeholder="jane@acme.com"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Phone</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Phone</Label>
                     <Input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Admin designation</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Admin designation</Label>
                     <Input
                       value={adminDesignation}
                       onChange={(e) => setAdminDesignation(e.target.value)}
                       placeholder="Head of People"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-stone-700">Admin department</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">Admin department</Label>
                     <Input
                       value={adminDepartment}
                       onChange={(e) => setAdminDepartment(e.target.value)}
                       placeholder="People Operations"
-                      className="h-9 text-sm border-stone-200 bg-white"
+                      className="h-9 text-sm border-border bg-white"
                     />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Address</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Address</Label>
                   <Textarea
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    className="text-sm border-stone-200 min-h-[60px] bg-white"
+                    className="text-sm border-border min-h-[60px] bg-white"
                   />
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide">Products</p>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-stone-200">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Products</p>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-border">
                     <div>
-                      <p className="text-sm font-medium text-stone-900">Appreciation</p>
-                      <p className="text-xs text-stone-500">Always enabled — default product.</p>
+                      <p className="text-sm font-medium text-foreground">Appreciation</p>
+                      <p className="text-xs text-muted-foreground">Always enabled — default product.</p>
                     </div>
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Always on</Badge>
+                    <Badge className="bg-success/15 text-success hover:bg-success/15">Always on</Badge>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-stone-200">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-border">
                     <div>
-                      <p className="text-sm font-medium text-stone-900">Rewards & Recognition</p>
-                      <p className="text-xs text-stone-500">Adds points budget, reward catalog, redemptions.</p>
+                      <p className="text-sm font-medium text-foreground">Rewards & Recognition</p>
+                      <p className="text-xs text-muted-foreground">Adds points budget, reward catalog, redemptions.</p>
                     </div>
                     <Switch checked={enableRnR} onCheckedChange={setEnableRnR} />
                   </div>
                 </div>
 
                 <div className="flex justify-end pt-1">
-                  <Button onClick={createAccount} className="bg-stone-900 hover:bg-stone-700 text-white gap-1.5">
+                  <Button onClick={createAccount} className="gap-1.5">
                     <Mail className="w-3.5 h-3.5" />
                     Create account & generate invite
                   </Button>
@@ -469,16 +471,17 @@ export default function SuperAdmin() {
             {/* Empty state */}
             {invites.length === 0 && !showCreateForm && (
               <div className="text-center py-12 px-4">
-                <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto mb-3">
-                  <Building2 className="w-5 h-5 text-stone-400" />
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+                  <Building2 className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-medium text-stone-900">No companies yet</p>
-                <p className="text-xs text-stone-500 mt-1 mb-4">
+                <p className="text-sm font-medium text-foreground">No companies yet</p>
+                <p className="text-xs text-muted-foreground mt-1 mb-4">
                   Create your first customer account to generate an invite link.
                 </p>
                 <Button
                   onClick={() => setShowCreateForm(true)}
-                  className="bg-stone-900 hover:bg-stone-700 text-white gap-1.5"
+                  variant="outline"
+                  className="gap-1.5"
                   size="sm"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -489,7 +492,7 @@ export default function SuperAdmin() {
 
             {/* No-results state */}
             {invites.length > 0 && filtered.length === 0 && (
-              <p className="text-sm text-stone-500 text-center py-8">
+              <p className="text-sm text-muted-foreground text-center py-8">
                 No companies match your filters. Try a different search term.
               </p>
             )}
@@ -503,31 +506,31 @@ export default function SuperAdmin() {
               return (
                 <div
                   key={inv.token}
-                  className="rounded-lg border border-stone-200 bg-white overflow-hidden"
+                  className="rounded-lg border border-border bg-white overflow-hidden"
                 >
                   {/* Summary row */}
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center shrink-0">
-                          <Building2 className="w-4 h-4 text-stone-600" />
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-semibold text-stone-900 truncate">{inv.companyName}</p>
+                            <p className="text-sm font-semibold text-foreground truncate">{inv.companyName}</p>
                             <Badge className={`${styles.bg} ${styles.text} hover:${styles.bg} gap-1 text-xs`}>
                               <StatusIcon className="w-3 h-3" />
                               {status}
                             </Badge>
                           </div>
-                          <p className="text-xs text-stone-500 mt-0.5 truncate">
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
                             {inv.adminName} · {inv.adminEmail}
                           </p>
                           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                            <Badge variant="secondary" className="bg-stone-100 text-stone-600 text-xs font-mono">
+                            <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs font-mono">
                               {inv.accountId}
                             </Badge>
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 text-xs gap-1">
+                            <Badge variant="secondary" className="bg-info/10 text-info text-xs gap-1">
                               <Star className="w-2.5 h-2.5" />
                               Appreciation
                             </Badge>
@@ -546,13 +549,13 @@ export default function SuperAdmin() {
                           size="sm"
                           variant="outline"
                           onClick={() => copyLink(inv.token)}
-                          className="h-8 border-stone-200 gap-1 text-xs"
+                          className="h-8 border-border gap-1 text-xs"
                         >
                           <Copy className="w-3 h-3" />
                           Copy link
                         </Button>
                         <Link to={`/auth/sign-in?invite=${inv.token}`}>
-                          <Button size="sm" className="h-8 bg-stone-900 hover:bg-stone-700 text-white gap-1 text-xs">
+                          <Button size="sm" variant="secondary" className="h-8 gap-1 text-xs">
                             <ExternalLink className="w-3 h-3" />
                             Open
                           </Button>
@@ -561,7 +564,7 @@ export default function SuperAdmin() {
                           size="sm"
                           variant="ghost"
                           onClick={() => toggleExpanded(inv.token)}
-                          className="h-8 w-8 p-0 text-stone-500 hover:text-stone-900"
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                           aria-label={isOpen ? "Collapse details" : "Expand details"}
                         >
                           {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -572,10 +575,10 @@ export default function SuperAdmin() {
 
                   {/* Expanded details */}
                   {isOpen && (
-                    <div className="border-t border-stone-200 bg-stone-50 p-4 space-y-4">
+                    <div className="border-t border-border bg-muted p-4 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2.5">
-                          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Admin contact</p>
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Admin contact</p>
                           <DetailRow icon={User} label="Name" value={inv.adminName} />
                           <DetailRow icon={Mail} label="Email" value={inv.adminEmail} />
                           <DetailRow
@@ -590,7 +593,7 @@ export default function SuperAdmin() {
                           />
                         </div>
                         <div className="space-y-2.5">
-                          <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Company info</p>
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Company info</p>
                           <DetailRow icon={Phone} label="Phone" value={inv.phone || "—"} />
                           <DetailRow icon={MapPin} label="Address" value={inv.address || "—"} multiline />
                           <DetailRow
@@ -616,18 +619,18 @@ export default function SuperAdmin() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Invite link</p>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Invite link</p>
                         <div className="flex items-center gap-2">
                           <Input
                             readOnly
                             value={inviteUrl(inv.token)}
-                            className="h-8 text-xs border-stone-200 bg-white font-mono"
+                            className="h-8 text-xs border-border bg-white font-mono"
                           />
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => copyLink(inv.token)}
-                            className="h-8 border-stone-200 gap-1 shrink-0"
+                            className="h-8 border-border gap-1 shrink-0"
                           >
                             <Copy className="w-3 h-3" />
                             Copy
@@ -659,10 +662,10 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start gap-2 text-xs">
-      <Icon className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
+      <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
       <div className="min-w-0 flex-1">
-        <p className="text-stone-500">{label}</p>
-        <p className={`text-stone-900 mt-0.5 ${multiline ? "whitespace-pre-line" : "truncate"}`}>{value}</p>
+        <p className="text-muted-foreground">{label}</p>
+        <p className={`text-foreground mt-0.5 ${multiline ? "whitespace-pre-line" : "truncate"}`}>{value}</p>
       </div>
     </div>
   );

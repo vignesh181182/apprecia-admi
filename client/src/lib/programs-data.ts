@@ -122,6 +122,20 @@ export type PanelMember = {
   totalToReview: number;
 };
 
+/** A document attached to a program (guidelines PDF / Word doc). */
+export type ProgramDocument = {
+  /** Original filename, shown next to the link. */
+  name: string;
+  /** MIME type, e.g. "application/pdf". */
+  type: string;
+  /**
+   * Either a `data:` URL for a file uploaded by the admin (there is no backend,
+   * so it lives in localStorage alongside the program) or an external http(s)
+   * link to a doc hosted elsewhere.
+   */
+  url: string;
+};
+
 export type Program = {
   id: string;
   name: string;
@@ -169,6 +183,8 @@ export type Program = {
   /** Display emoji for the program (the existing `emoji` field stays as-is). */
   iconEmoji?: string;
   cadence?: ProgramCadence;
+  /** Detailed guidelines doc (PDF/Word) the admin attaches when creating the program. */
+  guidelinesDoc?: ProgramDocument;
   /** ISO date strings. */
   startDate?: string;
   endDate?: string;
@@ -1397,6 +1413,43 @@ export function getStoredPrograms(): StoredProgram[] {
 
 export function getProgramById(id: string): StoredProgram | undefined {
   return getStoredPrograms().find((p) => p.id === id);
+}
+
+const DAY_MS = 1000 * 60 * 60 * 24;
+
+/** Cycle length in days, used to derive a start date from an end date. */
+const CADENCE_DAYS: Record<ProgramCadence, number> = {
+  monthly: 30,
+  quarterly: 90,
+  yearly: 365,
+  "one-off": 30,
+};
+
+/**
+ * Effective cycle window for a program.
+ *
+ * `startDate`/`endDate` are optional and most programs only carry `daysLeft`,
+ * so derive the window from the countdown instead of rendering an empty dash:
+ * the cycle ends `daysLeft` days from now and spans back by its cadence length.
+ * Explicit dates always win, so HR-configured programs render exactly what was
+ * saved.
+ */
+export function getProgramWindow(
+  program: Pick<Program, "startDate" | "endDate" | "daysLeft" | "cadence">,
+  now: Date = new Date(),
+): { start: Date; end: Date } {
+  const end = program.endDate
+    ? new Date(program.endDate)
+    : new Date(now.getTime() + Math.max(0, program.daysLeft ?? 0) * DAY_MS);
+  const start = program.startDate
+    ? new Date(program.startDate)
+    : new Date(end.getTime() - (CADENCE_DAYS[program.cadence ?? "one-off"] ?? 30) * DAY_MS);
+  return { start, end };
+}
+
+/** Short, locale-aware date label (e.g. "Jul 21, 2026"). */
+export function formatProgramDate(d: Date): string {
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function saveProgram(program: StoredProgram): void {

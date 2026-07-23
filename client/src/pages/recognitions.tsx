@@ -216,17 +216,17 @@ export default function Recognitions({
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by name, category, or message…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm border-stone-200"
+              className="pl-9 h-9 text-sm border-border"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9 w-40 text-sm border-stone-200">
-              <Filter className="w-4 h-4 mr-2 text-stone-400" />
+            <SelectTrigger className="h-9 w-40 text-sm border-border">
+              <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -246,7 +246,7 @@ export default function Recognitions({
           {showCreate && (
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9">
                   <Plus className="w-4 h-4" /> Add Recognition
                 </Button>
               </SheetTrigger>
@@ -314,7 +314,7 @@ export default function Recognitions({
                 if (deleteCandidate) deleteRecognition(deleteCandidate.id);
                 setDeleteCandidate(null);
               }}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Delete
             </AlertDialogAction>
@@ -330,11 +330,11 @@ export default function Recognitions({
           return (
             <Card
               key={s}
-              className={`border cursor-pointer transition-all ${isActive ? "border-stone-800 shadow-sm" : "border-stone-200 hover:border-stone-300"}`}
+              className={`border cursor-pointer transition-all ${isActive ? "border-stone-800 shadow-sm" : "border-border hover:border-border"}`}
               onClick={() => setStatusFilter(isActive ? "all" : s)}
             >
               <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-stone-900">{count}</p>
+                <p className="text-2xl font-bold text-foreground">{count}</p>
                 <Badge className={`mt-1 ${statusColors[s]}`} variant="secondary">{s === "Pending" ? "Pending Approval" : s}</Badge>
               </CardContent>
             </Card>
@@ -343,25 +343,25 @@ export default function Recognitions({
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-stone-200 overflow-hidden">
+      <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">From → To</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Badge</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Category</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Points</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Note</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Date</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="text-xs font-semibold text-muted-foreground">From → To</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Badge</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Category</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Points</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Note</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Date</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Status</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((rec) => (
               <TableRow
                 key={rec.id}
-                className="hover:bg-stone-50 cursor-pointer"
+                className="hover:bg-muted cursor-pointer"
                 onClick={() => setSelected(rec)}
               >
                 <TableCell>
@@ -377,12 +377,12 @@ export default function Recognitions({
                       </Avatar>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-stone-900">{rec.senderName}</p>
-                      <p className="text-xs text-stone-500">→ {rec.recipientName}</p>
+                      <p className="text-xs font-medium text-foreground">{rec.senderName}</p>
+                      <p className="text-xs text-muted-foreground">→ {rec.recipientName}</p>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-stone-700">
+                <TableCell className="text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <span aria-hidden>{getCategoryStyle(rec.category).emoji}</span>
                     <span className="font-medium">{rec.programName}</span>
@@ -393,16 +393,16 @@ export default function Recognitions({
                     {rec.category}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-xs font-semibold text-stone-900">+{rec.points}</TableCell>
+                <TableCell className="text-xs font-semibold text-foreground">+{rec.points}</TableCell>
                 <TableCell className="max-w-[260px]">
                   <p
-                    className="text-xs text-stone-600 truncate"
+                    className="text-xs text-muted-foreground truncate"
                     title={rec.message}
                   >
                     {rec.message}
                   </p>
                 </TableCell>
-                <TableCell className="text-xs text-stone-600 whitespace-nowrap">{formatDate(rec.createdAt)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(rec.createdAt)}</TableCell>
                 <TableCell>
                   <Badge className={`text-xs ${statusColors[rec.status]}`} variant="secondary">
                     {rec.status}
@@ -414,14 +414,14 @@ export default function Recognitions({
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        className="h-7 w-7 p-0 text-success hover:text-success hover:bg-success/10"
                         onClick={() => approve(rec.id)}
                       >
                         <Check className="w-4 h-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-600 hover:bg-red-50">
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10">
                             <X className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
@@ -434,7 +434,7 @@ export default function Recognitions({
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => reject(rec.id)} className="bg-red-600 hover:bg-red-700">
+                            <AlertDialogAction onClick={() => reject(rec.id)} className="bg-destructive hover:bg-destructive">
                               Reject
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -445,7 +445,7 @@ export default function Recognitions({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 px-2 text-xs text-stone-500 hover:text-stone-900"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => setSelected(rec)}
                     >
                       View
@@ -453,7 +453,7 @@ export default function Recognitions({
                   ) : (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-stone-500 hover:text-stone-900">
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -466,7 +466,7 @@ export default function Recognitions({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleteCandidate(rec)}
-                          className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </DropdownMenuItem>
@@ -478,7 +478,7 @@ export default function Recognitions({
             ))}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-sm text-stone-500 py-10">
+                <TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-10">
                   No recognitions found.
                 </TableCell>
               </TableRow>
@@ -504,14 +504,14 @@ export default function Recognitions({
                 <Badge className={`${statusColors[selected.status]}`} variant="secondary">
                   {selected.status === "Pending" ? "Pending Approval" : selected.status}
                 </Badge>
-                <div className="flex items-center gap-1 text-sm font-bold text-stone-900">
-                  <Star className="w-3.5 h-3.5 text-yellow-500" />
+                <div className="flex items-center gap-1 text-sm font-bold text-foreground">
+                  <Star className="w-3.5 h-3.5 text-primary" />
                   +{selected.points} pts
                 </div>
               </div>
 
               {/* From → To card */}
-              <div className="mt-4 rounded-xl border border-stone-200 bg-stone-50 p-4">
+              <div className="mt-4 rounded-xl border border-border bg-muted p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <Avatar className="h-9 w-9">
@@ -519,19 +519,19 @@ export default function Recognitions({
                       <AvatarFallback className="text-xs">{selected.senderName.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="text-xs text-stone-500">From</p>
-                      <p className="text-sm font-semibold text-stone-900 truncate">{selected.senderName}</p>
+                      <p className="text-xs text-muted-foreground">From</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{selected.senderName}</p>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-stone-400 shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={selected.recipientAvatar} />
                       <AvatarFallback className="text-xs">{selected.recipientName.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="text-xs text-stone-500">To</p>
-                      <p className="text-sm font-semibold text-stone-900 truncate">{selected.recipientName}</p>
+                      <p className="text-xs text-muted-foreground">To</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{selected.recipientName}</p>
                     </div>
                   </div>
                 </div>
@@ -540,11 +540,11 @@ export default function Recognitions({
               {/* Meta */}
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Program</p>
-                  <p className="text-sm font-medium text-stone-900">{selected.programName}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Program</p>
+                  <p className="text-sm font-medium text-foreground">{selected.programName}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Category</p>
+                  <p className="text-xs text-muted-foreground mb-1">Category</p>
                   <Badge className={`text-xs ${getCategoryStyle(selected.category).chip}`} variant="secondary">
                     {selected.category}
                   </Badge>
@@ -553,9 +553,9 @@ export default function Recognitions({
 
               {/* Reason */}
               <div className="mt-4">
-                <p className="text-xs font-semibold text-stone-700 mb-1.5 uppercase tracking-wide">Reason</p>
-                <div className="rounded-lg border border-stone-200 bg-white p-3.5">
-                  <p className="text-sm text-stone-700 leading-relaxed">{selected.message}</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Reason</p>
+                <div className="rounded-lg border border-border bg-white p-3.5">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{selected.message}</p>
                 </div>
               </div>
 
@@ -564,7 +564,7 @@ export default function Recognitions({
                 <div className="mt-6 flex gap-2">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2">
+                      <Button variant="outline" className="flex-1 border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive gap-2">
                         <X className="w-4 h-4" /> Reject
                       </Button>
                     </AlertDialogTrigger>
@@ -577,14 +577,14 @@ export default function Recognitions({
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => reject(selected.id)} className="bg-red-600 hover:bg-red-700">
+                        <AlertDialogAction onClick={() => reject(selected.id)} className="bg-destructive hover:bg-destructive">
                           Reject
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                   <Button
-                    className="flex-1 bg-stone-900 hover:bg-stone-700 text-white gap-2"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                     onClick={() => approve(selected.id)}
                   >
                     <Check className="w-4 h-4" /> Approve
@@ -596,13 +596,13 @@ export default function Recognitions({
                 <div className="mt-6 flex gap-2">
                   <Button
                     variant="outline"
-                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2"
+                    className="flex-1 border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive gap-2"
                     onClick={() => setDeleteCandidate(selected)}
                   >
                     <Trash2 className="w-4 h-4" /> Delete
                   </Button>
                   <Button
-                    className="flex-1 bg-stone-900 hover:bg-stone-700 text-white gap-2"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                     onClick={() => {
                       setEditing(selected);
                       setSelected(null);
@@ -655,31 +655,31 @@ function AutoApprovalPill({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-blue-100 bg-blue-50 text-xs text-blue-900 hover:bg-blue-100 transition-colors"
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-info/15 bg-info/10 text-xs text-info hover:bg-info/15 transition-colors"
         >
-          <Info className="w-3.5 h-3.5 text-blue-600" />
+          <Info className="w-3.5 h-3.5 text-info" />
           <span>
             Auto-approve under <span className="font-semibold">{threshold} pts</span>
           </span>
-          <Settings className="w-3.5 h-3.5 text-blue-600 ml-1" />
+          <Settings className="w-3.5 h-3.5 text-info ml-1" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72" align="end">
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-semibold text-stone-900">Auto-approval rule</p>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <p className="text-sm font-semibold text-foreground">Auto-approval rule</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Recognitions under this point value go live instantly; anything at or above requires admin approval.
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-stone-700">Threshold (points)</Label>
+            <Label className="text-xs font-medium text-muted-foreground">Threshold (points)</Label>
             <Input
               type="number"
               min={0}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              className="h-9 text-sm border-stone-200"
+              className="h-9 text-sm border-border"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -692,7 +692,7 @@ function AutoApprovalPill({
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={save}>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={save}>
               Save
             </Button>
           </div>
@@ -757,9 +757,9 @@ function RecognitionForm({
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Recipient</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Recipient</Label>
         <Select value={recipientId} onValueChange={setRecipientId}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue placeholder="Select employee…" />
           </SelectTrigger>
           <SelectContent>
@@ -771,15 +771,15 @@ function RecognitionForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Badge</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Badge</Label>
         <Select value={badgeName} onValueChange={handleBadgeChange}>
-          <SelectTrigger className="h-9 text-sm border-stone-200">
+          <SelectTrigger className="h-9 text-sm border-border">
             <SelectValue placeholder="Select a badge…" />
           </SelectTrigger>
           <SelectContent className="max-h-80">
             {activeBadgesByCategory.map((group) => (
               <div key={group.category}>
-                <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-stone-400">
+                <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {getCategoryStyle(group.category).emoji} {group.category}
                 </div>
                 {group.badges.map((b) => (
@@ -790,13 +790,13 @@ function RecognitionForm({
           </SelectContent>
         </Select>
         {selectedBadge && (
-          <p className="text-xs text-stone-500">{selectedBadge.description}</p>
+          <p className="text-xs text-muted-foreground">{selectedBadge.description}</p>
         )}
       </div>
 
       {category && categoryStyle && (
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Category</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Category</Label>
           <div>
             <Badge className={`text-xs ${categoryStyle.chip}`} variant="secondary">
               {categoryStyle.emoji} {category}
@@ -806,16 +806,16 @@ function RecognitionForm({
       )}
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Points</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Points</Label>
         <Input
           type="number"
           value={points}
           onChange={(e) => setPoints(Number(e.target.value))}
           min={25}
           max={500}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
         />
-        <p className={`text-xs ${willAutoApprove ? "text-green-600" : "text-amber-600"}`}>
+        <p className={`text-xs ${willAutoApprove ? "text-success" : "text-primary"}`}>
           {willAutoApprove
             ? `Will go live instantly (under ${threshold} pts).`
             : `Requires admin approval (${threshold}+ pts).`}
@@ -823,18 +823,18 @@ function RecognitionForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Note</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Note</Label>
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Describe what this person did and why it matters…"
-          className="text-sm border-stone-200 resize-none"
+          className="text-sm border-border resize-none"
           rows={4}
         />
       </div>
 
-      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)]">
-        <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <div className="sticky bottom-0 -mx-6 px-6 pt-3 pb-1 bg-white/95 backdrop-blur border-t border-border shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)]">
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           {submitLabel}
         </Button>
       </div>

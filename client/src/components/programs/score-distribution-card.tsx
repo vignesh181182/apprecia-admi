@@ -23,14 +23,14 @@ function median(values: number[]): number {
 export function ScoreDistributionCard({ shortlist }: { shortlist: ShortlistEntry[] }) {
   const distribution = scoreDistribution(shortlist);
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-5">
         <div className="flex items-baseline justify-between mb-3">
           <div>
-            <h2 className="text-sm font-semibold text-stone-900">Score distribution</h2>
-            <p className="text-xs text-stone-500 mt-0.5">Where the natural cutoff lives</p>
+            <h2 className="text-sm font-semibold text-foreground">Score distribution</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Where the natural cutoff lives</p>
           </div>
-          <span className="text-xs text-stone-400">
+          <span className="text-xs text-muted-foreground">
             Median {median(shortlist.map((s) => s.score))}/100
           </span>
         </div>
@@ -42,15 +42,15 @@ export function ScoreDistributionCard({ shortlist }: { shortlist: ShortlistEntry
               data={distribution}
               margin={{ top: 5, right: 8, left: -16, bottom: 0 }}
             >
-              <CartesianGrid stroke="#e7e5e4" strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="range"
-                tick={{ fontSize: 11, fill: "#78716c" }}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "#78716c" }}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 tickLine={false}
                 axisLine={false}
                 width={32}
@@ -58,13 +58,13 @@ export function ScoreDistributionCard({ shortlist }: { shortlist: ShortlistEntry
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid #e7e5e4",
+                  border: "1px solid var(--border)",
                   fontSize: 12,
                 }}
               />
               <Bar
                 dataKey="count"
-                fill="#a87a3a"
+                fill="var(--primary)"
                 radius={[4, 4, 0, 0]}
                 isAnimationActive={false}
               />
@@ -78,7 +78,7 @@ export function ScoreDistributionCard({ shortlist }: { shortlist: ShortlistEntry
 
 function EmptyChart({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 text-stone-400">
+    <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
       <Crown className="w-5 h-5 mb-1.5" />
       <p className="text-xs">{label}</p>
     </div>

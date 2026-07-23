@@ -122,7 +122,7 @@ export default function Subscriptions() {
         {/* Current Subscription Status */}
         <Card className="bg-white dark:bg-stone-800 border-0">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-stone-900 dark:text-white">
+            <CardTitle className="text-lg font-semibold text-foreground dark:text-white">
               Current Subscription
             </CardTitle>
           </CardHeader>
@@ -130,29 +130,29 @@ export default function Subscriptions() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Plan Information */}
               <div className="space-y-4">
-                <div className="bg-stone-50 dark:bg-stone-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-stone-900 dark:text-white mb-3">Plan Details</h3>
+                <div className="bg-muted dark:bg-stone-700/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground dark:text-white mb-3">Plan Details</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Plan</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Plan</span>
                       <Badge variant="default">
                         {currentSubscription.plan}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Status</span>
-                      <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1" />
+                      <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Status</span>
+                      <Badge variant="default" className="bg-success/15 text-success hover:bg-success/15">
+                        <div className="w-2 h-2 bg-success rounded-full mr-1" />
                         {currentSubscription.status}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Next Billing</span>
-                      <span className="text-sm text-stone-900 dark:text-white">{currentSubscription.nextBilling}</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Next Billing</span>
+                      <span className="text-sm text-foreground dark:text-white">{currentSubscription.nextBilling}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Amount</span>
-                      <span className="text-sm font-semibold text-stone-900 dark:text-white">{currentSubscription.amount}</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Amount</span>
+                      <span className="text-sm font-semibold text-foreground dark:text-white">{currentSubscription.amount}</span>
                     </div>
                   </div>
                 </div>
@@ -160,21 +160,21 @@ export default function Subscriptions() {
 
               {/* Usage Information */}
               <div className="space-y-4">
-                <div className="bg-stone-50 dark:bg-stone-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-stone-900 dark:text-white mb-3">Usage</h3>
+                <div className="bg-muted dark:bg-stone-700/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground dark:text-white mb-3">Usage</h3>
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Projects</span>
-                        <span className="text-sm text-stone-900 dark:text-white">
+                        <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Projects</span>
+                        <span className="text-sm text-foreground dark:text-white">
                           {currentSubscription.usage.projects.current} / {currentSubscription.usage.projects.limit}
                         </span>
                       </div>
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Storage</span>
-                        <span className="text-sm text-stone-900 dark:text-white">
+                        <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Storage</span>
+                        <span className="text-sm text-foreground dark:text-white">
                           {currentSubscription.usage.storage.current}GB / {currentSubscription.usage.storage.limit}GB
                         </span>
                       </div>
@@ -189,11 +189,11 @@ export default function Subscriptions() {
 
               {/* Actions */}
               <div className="space-y-4 sm:col-span-2 lg:col-span-1">
-                <div className="bg-stone-50 dark:bg-stone-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-stone-900 dark:text-white mb-3">Settings & Actions</h3>
+                <div className="bg-muted dark:bg-stone-700/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground dark:text-white mb-3">Settings & Actions</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-stone-700 dark:text-stone-300">Auto-renewal</span>
+                      <span className="text-sm font-normal text-muted-foreground dark:text-muted-foreground">Auto-renewal</span>
                       <Switch 
                         checked={autoRenew}
                         onCheckedChange={setAutoRenew}
@@ -222,7 +222,7 @@ export default function Subscriptions() {
             <Card 
               key={plan.id} 
               className={cn(
-                "relative bg-white dark:bg-stone-800 border border-stone-200 transition-all duration-200",
+                "relative bg-white dark:bg-stone-800 border border-border transition-all duration-200",
                 plan.popular && "ring-2 ring-primary ring-opacity-50 scale-105",
                 selectedPlan === plan.id && "ring-2 ring-primary"
               )}
@@ -236,14 +236,14 @@ export default function Subscriptions() {
               )}
               
               <CardHeader className="text-center">
-                <CardTitle className="text-xl font-bold text-stone-900 dark:text-white">
+                <CardTitle className="text-xl font-bold text-foreground dark:text-white">
                   {plan.name}
                 </CardTitle>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-stone-900 dark:text-white">{plan.price}</span>
-                  <span className="text-stone-500 dark:text-stone-400">{plan.period}</span>
+                  <span className="text-4xl font-bold text-foreground dark:text-white">{plan.price}</span>
+                  <span className="text-muted-foreground dark:text-muted-foreground">{plan.period}</span>
                 </div>
-                <p className="text-sm text-stone-600 dark:text-stone-400 mt-2">
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-2">
                   {plan.description}
                 </p>
               </CardHeader>
@@ -253,15 +253,15 @@ export default function Subscriptions() {
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center">
                       {feature.included ? (
-                        <Check className="w-4 h-4 text-green-500 mr-3 flex-shrink-0" />
+                        <Check className="w-4 h-4 text-success mr-3 flex-shrink-0" />
                       ) : (
-                        <X className="w-4 h-4 text-stone-400 mr-3 flex-shrink-0" />
+                        <X className="w-4 h-4 text-muted-foreground mr-3 flex-shrink-0" />
                       )}
                       <span className={cn(
                         "text-sm",
                         feature.included 
-                          ? "text-stone-900 dark:text-white" 
-                          : "text-stone-500 dark:text-stone-400"
+                          ? "text-foreground dark:text-white" 
+                          : "text-muted-foreground dark:text-muted-foreground"
                       )}>
                         {feature.name}
                       </span>
@@ -282,50 +282,50 @@ export default function Subscriptions() {
         </div>
 
         {/* Billing History */}
-        <Card className="bg-white dark:bg-stone-800 border border-stone-200">
+        <Card className="bg-white dark:bg-stone-800 border border-border">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-stone-900 dark:text-white">
+            <CardTitle className="text-lg font-semibold text-foreground dark:text-white">
               Billing History
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-stone-50 dark:bg-stone-700">
+                <thead className="bg-muted dark:bg-stone-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">
                       Description
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">
                       Amount
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground dark:text-muted-foreground uppercase tracking-wider">
                       Action
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-stone-800 divide-y divide-stone-200 dark:divide-stone-700">
+                <tbody className="bg-white dark:bg-stone-800 divide-y divide-border dark:divide-stone-700">
                   {billingHistory.map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-stone-50 dark:hover:bg-stone-700">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900 dark:text-white">
+                    <tr key={invoice.id} className="hover:bg-muted dark:hover:bg-stone-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-white">
                         {invoice.date}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground dark:text-white">
                         {invoice.description}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-normal text-stone-900 dark:text-white">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-normal text-foreground dark:text-white">
                         {invoice.amount}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge 
                           variant="default" 
-                          className="bg-green-100 text-green-800 hover:bg-green-100"
+                          className="bg-success/15 text-success hover:bg-success/15"
                         >
                           {invoice.status}
                         </Badge>

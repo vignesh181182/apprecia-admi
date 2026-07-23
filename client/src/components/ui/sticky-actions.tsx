@@ -19,7 +19,7 @@ export function StickyActions({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 -mx-6 px-6 py-3 mt-2 bg-white/95 backdrop-blur border-t border-stone-200 shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)]",
+        "sticky bottom-0 z-20 -mx-6 px-6 py-3 mt-2 bg-white/95 backdrop-blur border-t border-border shadow-[0_-4px_12px_-8px_rgba(0,0,0,0.12)]",
         "flex items-center gap-2",
         alignClass,
         className,

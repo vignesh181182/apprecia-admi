@@ -101,20 +101,20 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
   return (
     <div className="space-y-4">
       {/* 1. Monetary */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-stone-500" /> Monetary benefits
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-muted-foreground" /> Monetary benefits
           </CardTitle>
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-muted-foreground">
             Controls whether badges credit points to the receiver.
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-stone-50 border border-stone-200">
+          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted border border-border">
             <div>
-              <p className="text-sm font-medium text-stone-900">Allow points and redemption on appreciations</p>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <p className="text-sm font-medium text-foreground">Allow points and redemption on appreciations</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 When off, badges still recognize work but no points are credited and the Rewards catalog is hidden for employees.
               </p>
             </div>
@@ -125,17 +125,17 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
           </div>
 
           {policy.monetaryEnabled && (
-            <div className="p-3 rounded-lg border border-stone-200 space-y-3">
+            <div className="p-3 rounded-lg border border-border space-y-3">
               <div>
-                <p className="text-sm font-medium text-stone-900">Point value</p>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-sm font-medium text-foreground">Point value</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   How much one point is worth when employees redeem rewards.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-end gap-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Points</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Points</Label>
                   <Input
                     type="number"
                     min={1}
@@ -143,12 +143,12 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
                     onChange={(e) =>
                       patchPointValue({ points: Math.max(1, Number(e.target.value) || 0) })
                     }
-                    className="h-9 text-sm border-stone-200 w-24"
+                    className="h-9 text-sm border-border w-24"
                   />
                 </div>
-                <span className="text-sm text-stone-500 pb-2">=</span>
+                <span className="text-sm text-muted-foreground pb-2">=</span>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Amount ({currency})</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Amount ({currency})</Label>
                   <Input
                     type="number"
                     min={0}
@@ -157,15 +157,15 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
                     onChange={(e) =>
                       patchPointValue({ amount: Math.max(0, Number(e.target.value) || 0) })
                     }
-                    className="h-9 text-sm border-stone-200 w-28"
+                    className="h-9 text-sm border-border w-28"
                   />
                 </div>
               </div>
 
-              <p className="text-xs text-stone-600">
+              <p className="text-xs text-muted-foreground">
                 {pointValueValid
                   ? <>1 point ≈ <strong>{currency}{perPoint.toFixed(2)}</strong>. A 100-pt badge redeems for {currency}{(perPoint * 100).toFixed(2)}.</>
-                  : <span className="text-red-600">Both values must be greater than 0.</span>
+                  : <span className="text-destructive">Both values must be greater than 0.</span>
                 }
               </p>
             </div>
@@ -174,12 +174,12 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
       </Card>
 
       {/* 2. Window */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-stone-500" /> Sending window
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" /> Sending window
           </CardTitle>
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-muted-foreground">
             Decide when employees can send appreciations.
           </p>
         </CardHeader>
@@ -189,18 +189,18 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
             onValueChange={(v) => patchWindow({ mode: v as "always" | "scheduled" })}
             className="grid grid-cols-1 sm:grid-cols-2 gap-2"
           >
-            <label className="flex items-start gap-2 p-3 rounded-lg border border-stone-200 cursor-pointer hover:bg-stone-50">
+            <label className="flex items-start gap-2 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted">
               <RadioGroupItem value="always" id="window-always" className="mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-stone-900">Always open</p>
-                <p className="text-xs text-stone-500">Employees can send any time.</p>
+                <p className="text-sm font-medium text-foreground">Always open</p>
+                <p className="text-xs text-muted-foreground">Employees can send any time.</p>
               </div>
             </label>
-            <label className="flex items-start gap-2 p-3 rounded-lg border border-stone-200 cursor-pointer hover:bg-stone-50">
+            <label className="flex items-start gap-2 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted">
               <RadioGroupItem value="scheduled" id="window-scheduled" className="mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-stone-900">Scheduled window</p>
-                <p className="text-xs text-stone-500">Restrict to a date range.</p>
+                <p className="text-sm font-medium text-foreground">Scheduled window</p>
+                <p className="text-xs text-muted-foreground">Restrict to a date range.</p>
               </div>
             </label>
           </RadioGroup>
@@ -208,30 +208,30 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
           {policy.window.mode === "scheduled" && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Start date</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Start date</Label>
                 <Input
                   type="date"
                   value={toDateInput(policy.window.startDate)}
                   onChange={(e) => patchWindow({ startDate: fromDateInput(e.target.value) })}
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">End date</Label>
+                <Label className="text-xs font-medium text-muted-foreground">End date</Label>
                 <Input
                   type="date"
                   value={toDateInput(policy.window.endDate)}
                   onChange={(e) => patchWindow({ endDate: fromDateInput(e.target.value, true) })}
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Timezone</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Timezone</Label>
                 <Select
                   value={policy.window.timezone ?? accountTimezone ?? "pt"}
                   onValueChange={(v) => patchWindow({ timezone: v })}
                 >
-                  <SelectTrigger className="h-9 text-sm border-stone-200">
+                  <SelectTrigger className="h-9 text-sm border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -244,7 +244,7 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
             </div>
           )}
 
-          <div className="text-xs text-stone-600 p-3 rounded-lg bg-amber-50 border border-amber-100">
+          <div className="text-xs text-muted-foreground p-3 rounded-lg bg-primary/10 border border-primary/15">
             {policy.window.mode === "always" ? (
               <>Employees can send appreciations any time. Outside any window check the button stays enabled.</>
             ) : policy.window.startDate && policy.window.endDate ? (
@@ -260,20 +260,20 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
       </Card>
 
       {/* 3. Approval */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-stone-500" /> Approval workflow
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-muted-foreground" /> Approval workflow
           </CardTitle>
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-muted-foreground">
             Optionally require manager approval before badges post to the feed.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-stone-50 border border-stone-200">
+          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted border border-border">
             <div>
-              <p className="text-sm font-medium text-stone-900">Require approval before badges post</p>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <p className="text-sm font-medium text-foreground">Require approval before badges post</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 When on, badges enter a pending queue until the chosen approver decides.
               </p>
             </div>
@@ -286,7 +286,7 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
           {policy.approval.required && (
             <>
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-stone-700">Approver level</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Approver level</Label>
                 <RadioGroup
                   value={policy.approval.approverLevel}
                   onValueChange={(v) => patchApproval({ approverLevel: v as ApprovalLevel })}
@@ -295,12 +295,12 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
                   {(Object.keys(APPROVER_LABELS) as ApprovalLevel[]).map((level) => (
                     <label
                       key={level}
-                      className="flex items-start gap-2 p-3 rounded-lg border border-stone-200 cursor-pointer hover:bg-stone-50"
+                      className="flex items-start gap-2 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted"
                     >
                       <RadioGroupItem value={level} id={`approver-${level}`} className="mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-stone-900">{APPROVER_LABELS[level].label}</p>
-                        <p className="text-xs text-stone-500">{APPROVER_LABELS[level].help}</p>
+                        <p className="text-sm font-medium text-foreground">{APPROVER_LABELS[level].label}</p>
+                        <p className="text-xs text-muted-foreground">{APPROVER_LABELS[level].help}</p>
                       </div>
                     </label>
                   ))}
@@ -308,7 +308,7 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
               </div>
 
               <div className="space-y-1.5 max-w-xs">
-                <Label className="text-xs font-medium text-stone-700">Auto-approve after</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Auto-approve after</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -317,13 +317,13 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
                     onChange={(e) =>
                       patchApproval({ autoApproveAfterHours: Number(e.target.value) || 0 })
                     }
-                    className="h-9 text-sm border-stone-200"
+                    className="h-9 text-sm border-border"
                   />
-                  <span className="text-xs text-stone-500 shrink-0">hours (0 = never)</span>
+                  <span className="text-xs text-muted-foreground shrink-0">hours (0 = never)</span>
                 </div>
               </div>
 
-              <div className="text-xs text-stone-700 p-3 rounded-lg bg-blue-50 border border-blue-100">
+              <div className="text-xs text-muted-foreground p-3 rounded-lg bg-info/10 border border-info/15">
                 When <strong>{sampleSender?.name ?? "an employee"}</strong> sends an appreciation, it
                 goes to <strong>{sampleApprover?.name ?? "—"}</strong> for review before posting.
                 {policy.approval.autoApproveAfterHours
@@ -336,14 +336,14 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
       </Card>
 
       {/* 4. Status preview */}
-      <Card className="border border-stone-200 bg-stone-50">
+      <Card className="border border-border bg-muted">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-            <Eye className="w-4 h-4 text-stone-500" /> Status preview
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Eye className="w-4 h-4 text-muted-foreground" /> Status preview
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="text-xs text-stone-700 space-y-1.5">
+          <ul className="text-xs text-muted-foreground space-y-1.5">
             <li>
               <strong>Window:</strong>{" "}
               {policy.window.mode === "always"

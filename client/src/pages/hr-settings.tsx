@@ -20,10 +20,11 @@ import { Building2, Star, Bell, Plug, Shield, Check, AlertTriangle, Wallet, Uplo
 import { useToast } from "@/hooks/use-toast";
 import { getAccount, updateAccount, DEFAULT_POINTS_POLICY, type HRAdmin } from "@/lib/account";
 import type { PointsPolicy } from "@/lib/account";
+import { applyBrandColor } from "@/lib/theme";
 
 const COLOR_PRESETS = [
-  "#1c1917", "#0f172a", "#1e3a8a", "#7c2d12",
-  "#065f46", "#831843", "#5b21b6", "#9a3412",
+  "#a87a3a", "#1c1917", "#0f172a", "#1e3a8a",
+  "#7c2d12", "#065f46", "#831843", "#5b21b6",
 ];
 
 export default function HRSettings() {
@@ -71,6 +72,7 @@ export default function HRSettings() {
       companyLogo,
       brandColor,
     });
+    applyBrandColor(brandColor);
     toast({ title: "Company profile saved", description: "Your changes are visible across the portal." });
   }
 
@@ -142,7 +144,7 @@ export default function HRSettings() {
   return (
     <div className="p-6 overflow-y-auto h-full custom-scrollbar">
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="bg-stone-100 h-10">
+        <TabsList className="bg-muted h-10">
           <TabsTrigger value="general" className="text-xs gap-1.5 h-8">
             <Building2 className="w-3.5 h-3.5" /> General
           </TabsTrigger>
@@ -166,59 +168,59 @@ export default function HRSettings() {
         {/* ── General ── */}
         <TabsContent value="general" className="space-y-4 mt-0">
           <div>
-            <h2 className="text-base font-semibold text-stone-900">Tell us about your company</h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <h2 className="text-base font-semibold text-foreground">Tell us about your company</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               This information appears on your portal, recognition emails, and reports.
             </p>
           </div>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Account ID</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Account ID</Label>
                   <Input
                     value={account?.accountId ?? ""}
                     readOnly
-                    className="h-9 text-sm border-stone-200 bg-stone-50 font-mono text-stone-500"
+                    className="h-9 text-sm border-border bg-muted font-mono text-muted-foreground"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Admin email</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Admin email</Label>
                   <Input
                     value={account?.adminEmail ?? ""}
                     readOnly
-                    className="h-9 text-sm border-stone-200 bg-stone-50 text-stone-500"
+                    className="h-9 text-sm border-border bg-muted text-muted-foreground"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">
-                  Company name <span className="text-red-500">*</span>
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Company name <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Acme Corp"
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Company logo</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Company logo</Label>
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="w-16 h-16 rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
                     {companyLogo ? (
                       <img src={companyLogo} alt="Company logo" className="w-full h-full object-contain" />
                     ) : (
-                      <Building2 className="w-6 h-6 text-stone-400" />
+                      <Building2 className="w-6 h-6 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="cursor-pointer">
                       <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                      <span className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium border border-stone-200 rounded-md hover:bg-stone-50 transition-colors">
+                      <span className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium border border-border rounded-md hover:bg-muted transition-colors">
                         <Upload className="w-3.5 h-3.5" />
                         {companyLogo ? "Replace" : "Upload"}
                       </span>
@@ -229,7 +231,7 @@ export default function HRSettings() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setCompanyLogo(null)}
-                        className="text-stone-500 hover:text-stone-900 h-8 gap-1"
+                        className="text-muted-foreground hover:text-foreground h-8 gap-1"
                       >
                         <X className="w-3.5 h-3.5" />
                         Remove
@@ -237,36 +239,36 @@ export default function HRSettings() {
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-stone-500">PNG or SVG, square format works best. Stored locally for now.</p>
+                <p className="text-xs text-muted-foreground">PNG or SVG, square format works best. Stored locally for now.</p>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Address</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Address</Label>
                 <Textarea
                   value={companyAddress}
                   onChange={(e) => setCompanyAddress(e.target.value)}
                   placeholder="Street, city, state, postal code, country"
-                  className="text-sm border-stone-200 min-h-[72px]"
+                  className="text-sm border-border min-h-[72px]"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Phone number</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Phone number</Label>
                 <Input
                   value={companyPhone}
                   onChange={(e) => setCompanyPhone(e.target.value)}
                   placeholder="+1 (555) 000-0000"
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-5 space-y-3">
               <div>
-                <p className="text-sm font-medium text-stone-900">Brand color</p>
-                <p className="text-xs text-stone-500 mt-0.5">Used for highlights in your portal and email headers.</p>
+                <p className="text-sm font-medium text-foreground">Brand color</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Used for highlights in your portal and email headers.</p>
               </div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 {COLOR_PRESETS.map((c) => (
@@ -275,27 +277,27 @@ export default function HRSettings() {
                     type="button"
                     onClick={() => setBrandColor(c)}
                     className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      brandColor === c ? "border-stone-900 scale-110" : "border-stone-200"
+                      brandColor === c ? "border-stone-900 scale-110" : "border-border"
                     }`}
                     style={{ backgroundColor: c }}
                     aria-label={`Pick color ${c}`}
                   />
                 ))}
-                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-stone-200">
+                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
                   <input
                     type="color"
                     value={brandColor}
                     onChange={(e) => setBrandColor(e.target.value)}
-                    className="w-8 h-8 rounded cursor-pointer border border-stone-200"
+                    className="w-8 h-8 rounded cursor-pointer border border-border"
                   />
-                  <span className="text-xs font-mono text-stone-500">{brandColor.toUpperCase()}</span>
+                  <span className="text-xs font-mono text-muted-foreground">{brandColor.toUpperCase()}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <StickyActions>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={saveCompanyProfile}>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={saveCompanyProfile}>
               Save Changes
             </Button>
           </StickyActions>
@@ -304,7 +306,7 @@ export default function HRSettings() {
         {/* ── Points Policy ── */}
         <TabsContent value="points" className="space-y-4 mt-0">
           {!monetaryActive && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
                 Monetary recognition is currently disabled in <strong>Appreciation Policy</strong>. These
@@ -315,12 +317,12 @@ export default function HRSettings() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 space-y-4">
-              <Card className="border border-stone-200">
+              <Card className="border border-border">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-sm font-semibold text-stone-900 flex items-center gap-2">
-                    <Wallet className="w-4 h-4 text-stone-500" /> Per-role monthly allowance
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-muted-foreground" /> Per-role monthly allowance
                   </CardTitle>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-xs text-muted-foreground">
                     How many points each role can give out per month. Resets on the 1st when "Expire unused" is on.
                   </p>
                 </CardHeader>
@@ -331,21 +333,21 @@ export default function HRSettings() {
                     { key: "admin",    label: "Admin"    },
                   ] as const).map(({ key, label }) => (
                     <div key={key} className="flex items-center gap-4">
-                      <span className="text-sm text-stone-700 flex-1">{label}</span>
+                      <span className="text-sm text-muted-foreground flex-1">{label}</span>
                       <Input
                         type="number"
                         min={0}
                         value={pointsPolicy.monthlyAllowance[key]}
                         onChange={(e) => patchAllowance({ [key]: Math.max(0, Number(e.target.value) || 0) } as Partial<PointsPolicy["monthlyAllowance"]>)}
-                        className="h-8 text-sm border-stone-200 w-24 text-right"
+                        className="h-8 text-sm border-border w-24 text-right"
                       />
-                      <span className="text-xs text-stone-500 w-12">pts/mo</span>
+                      <span className="text-xs text-muted-foreground w-12">pts/mo</span>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between p-3 mt-2 rounded-lg bg-stone-50 border border-stone-200">
+                  <div className="flex items-center justify-between p-3 mt-2 rounded-lg bg-muted border border-border">
                     <div>
-                      <p className="text-sm font-medium text-stone-900">Expire unused balance on rollover</p>
-                      <p className="text-xs text-stone-500">When off, leftover give-points carry into next month.</p>
+                      <p className="text-sm font-medium text-foreground">Expire unused balance on rollover</p>
+                      <p className="text-xs text-muted-foreground">When off, leftover give-points carry into next month.</p>
                     </div>
                     <Switch
                       checked={pointsPolicy.expireUnused}
@@ -355,10 +357,10 @@ export default function HRSettings() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-stone-200">
+              <Card className="border border-border">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-sm font-semibold text-stone-900">Appreciation tier values</CardTitle>
-                  <p className="text-xs text-stone-500">
+                  <CardTitle className="text-sm font-semibold text-foreground">Appreciation tier values</CardTitle>
+                  <p className="text-xs text-muted-foreground">
                     Points credited when a sender picks each tier. "Thanks" is always free.
                   </p>
                 </CardHeader>
@@ -369,35 +371,35 @@ export default function HRSettings() {
                     { key: "exceptional", label: "Exceptional", locked: false },
                   ] as const).map(({ key, label, locked }) => (
                     <div key={key} className="flex items-center gap-4">
-                      <span className="text-sm text-stone-700 flex-1">{label}</span>
+                      <span className="text-sm text-muted-foreground flex-1">{label}</span>
                       <Input
                         type="number"
                         min={0}
                         disabled={locked}
                         value={locked ? 0 : pointsPolicy.tierValues[key]}
                         onChange={(e) => patchTierValues({ [key]: Math.max(0, Number(e.target.value) || 0) } as Partial<PointsPolicy["tierValues"]>)}
-                        className="h-8 text-sm border-stone-200 w-24 text-right disabled:bg-stone-50"
+                        className="h-8 text-sm border-border w-24 text-right disabled:bg-muted"
                       />
-                      <span className="text-xs text-stone-500 w-6">pts</span>
+                      <span className="text-xs text-muted-foreground w-6">pts</span>
                     </div>
                   ))}
                 </CardContent>
               </Card>
 
               <div className="flex justify-end">
-                <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={savePointsPolicy}>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={savePointsPolicy}>
                   Save Wallet Policy
                 </Button>
               </div>
             </div>
 
-            <Card className="border border-stone-200 bg-stone-50 h-fit">
+            <Card className="border border-border bg-muted h-fit">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-stone-900">Live preview</CardTitle>
+                <CardTitle className="text-sm font-semibold text-foreground">Live preview</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs text-stone-700">
+              <CardContent className="space-y-3 text-xs text-muted-foreground">
                 <div>
-                  <p className="font-medium text-stone-900 mb-1">Monthly allowance</p>
+                  <p className="font-medium text-foreground mb-1">Monthly allowance</p>
                   <ul className="space-y-0.5">
                     <li>Employee: <strong>{pointsPolicy.monthlyAllowance.employee} pts</strong></li>
                     <li>Manager: <strong>{pointsPolicy.monthlyAllowance.manager} pts</strong></li>
@@ -405,28 +407,28 @@ export default function HRSettings() {
                   </ul>
                 </div>
                 <div>
-                  <p className="font-medium text-stone-900 mb-1">Tier credit to receiver</p>
+                  <p className="font-medium text-foreground mb-1">Tier credit to receiver</p>
                   <ul className="space-y-0.5">
                     <li>Thanks: <strong>0 pts</strong></li>
                     <li>Good Job: <strong>{pointsPolicy.tierValues.goodJob} pts</strong></li>
                     <li>Exceptional: <strong>{pointsPolicy.tierValues.exceptional} pts</strong></li>
                   </ul>
                 </div>
-                <p className="text-stone-600">
+                <p className="text-muted-foreground">
                   A manager gets <strong>{pointsPolicy.monthlyAllowance.manager} pts</strong> to give each month.
                   Sending an "Exceptional" badge ({pointsPolicy.tierValues.exceptional} pts) credits the receiver's redeemable balance.
                 </p>
-                <p className="text-stone-500">
+                <p className="text-muted-foreground">
                   Unused balance {pointsPolicy.expireUnused ? "expires" : "rolls over"} on the 1st.
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-semibold text-stone-900">Point Values by Category</CardTitle>
-              <p className="text-xs text-stone-500">Set the default points awarded for each recognition category.</p>
+              <CardTitle className="text-sm font-semibold text-foreground">Point Values by Category</CardTitle>
+              <p className="text-xs text-muted-foreground">Set the default points awarded for each recognition category.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
@@ -438,26 +440,26 @@ export default function HRSettings() {
                 { category: "Customer Focus", default: 175 },
               ].map(({ category, default: def }) => (
                 <div key={category} className="flex items-center gap-4">
-                  <span className="text-sm text-stone-700 flex-1">{category}</span>
-                  <Input type="number" defaultValue={def} className="h-8 text-sm border-stone-200 w-24 text-right" />
-                  <span className="text-xs text-stone-500 w-6">pts</span>
+                  <span className="text-sm text-muted-foreground flex-1">{category}</span>
+                  <Input type="number" defaultValue={def} className="h-8 text-sm border-border w-24 text-right" />
+                  <span className="text-xs text-muted-foreground w-6">pts</span>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-semibold text-stone-900">Expiry & Limits</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">Expiry & Limits</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Points Expire After</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Points Expire After</Label>
                   <div className="flex gap-2">
-                    <Input type="number" defaultValue={12} className="h-9 text-sm border-stone-200" />
+                    <Input type="number" defaultValue={12} className="h-9 text-sm border-border" />
                     <Select defaultValue="months">
-                      <SelectTrigger className="h-9 text-sm border-stone-200 w-28">
+                      <SelectTrigger className="h-9 text-sm border-border w-28">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -469,14 +471,14 @@ export default function HRSettings() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Max Points Per Recognition</Label>
-                  <Input type="number" defaultValue={500} className="h-9 text-sm border-stone-200" />
+                  <Label className="text-xs font-medium text-muted-foreground">Max Points Per Recognition</Label>
+                  <Input type="number" defaultValue={500} className="h-9 text-sm border-border" />
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-stone-50 border border-stone-200">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border">
                 <div>
-                  <p className="text-sm font-medium text-stone-900">Require Manager Approval</p>
-                  <p className="text-xs text-stone-500">All peer-to-peer recognitions need manager sign-off before points are issued.</p>
+                  <p className="text-sm font-medium text-foreground">Require Manager Approval</p>
+                  <p className="text-xs text-muted-foreground">All peer-to-peer recognitions need manager sign-off before points are issued.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -484,15 +486,15 @@ export default function HRSettings() {
           </Card>
 
           <StickyActions>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white" onClick={save}>Save Policy</Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={save}>Save Policy</Button>
           </StickyActions>
         </TabsContent>
 
         {/* ── Notifications ── */}
         <TabsContent value="notifications" className="space-y-4 mt-0">
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-semibold text-stone-900">Email Notifications</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">Email Notifications</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
@@ -503,10 +505,10 @@ export default function HRSettings() {
                 { label: "Weekly Digest", desc: "Send admins a weekly summary of recognition activity", enabled: true },
                 { label: "Budget Alert (80%)", desc: "Alert admins when a program reaches 80% of its budget", enabled: true },
               ].map(({ label, desc, enabled }) => (
-                <div key={label} className="flex items-start justify-between p-3 rounded-lg border border-stone-100 hover:border-stone-200 transition-colors">
+                <div key={label} className="flex items-start justify-between p-3 rounded-lg border border-border hover:border-border transition-colors">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-stone-900">{label}</p>
-                    <p className="text-xs text-stone-500 mt-0.5">{desc}</p>
+                    <p className="text-sm font-medium text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
                   </div>
                   <Switch defaultChecked={enabled} className="ml-4 shrink-0" />
                 </div>
@@ -549,28 +551,28 @@ export default function HRSettings() {
               detail: "acme.com",
             },
           ].map(({ name, description, status, detail }) => (
-            <Card key={name} className="border border-stone-200">
+            <Card key={name} className="border border-border">
               <CardContent className="p-4 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-stone-100 flex items-center justify-center text-stone-700 font-bold text-sm shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm shrink-0">
                   {name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-stone-900">{name}</p>
+                    <p className="text-sm font-semibold text-foreground">{name}</p>
                     <Badge
-                      className={`text-xs ${status === "connected" ? "bg-green-100 text-green-700" : "bg-stone-100 text-stone-500"}`}
+                      className={`text-xs ${status === "connected" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}
                       variant="secondary"
                     >
                       {status === "connected" ? "Connected" : "Disconnected"}
                     </Badge>
                   </div>
-                  <p className="text-xs text-stone-500 mt-0.5">{description}</p>
-                  {detail && <p className="text-xs text-stone-400 mt-0.5">{detail}</p>}
+                  <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+                  {detail && <p className="text-xs text-muted-foreground mt-0.5">{detail}</p>}
                 </div>
                 <Button
                   size="sm"
                   variant={status === "connected" ? "outline" : "default"}
-                  className={`shrink-0 text-xs h-8 ${status === "connected" ? "border-stone-200 text-stone-700" : "bg-stone-900 hover:bg-stone-700 text-white"}`}
+                  className={`shrink-0 text-xs h-8 ${status === "connected" ? "border-border text-muted-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"}`}
                 >
                   {status === "connected" ? "Configure" : "Connect"}
                 </Button>
@@ -583,45 +585,45 @@ export default function HRSettings() {
         {/* ── HR Admins ── */}
         <TabsContent value="hr-admins" className="space-y-4 mt-0">
           <div>
-            <h2 className="text-base font-semibold text-stone-900">HR Admins</h2>
-            <p className="text-xs text-stone-500 mt-0.5">
+            <h2 className="text-base font-semibold text-foreground">HR Admins</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Invite teammates to co-manage the account. HR admins can manage everything except adding more admins —
               that stays with you.
             </p>
           </div>
 
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-100">
-            <Shield className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-            <div className="text-xs text-amber-900">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/15">
+            <Shield className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div className="text-xs text-primary">
               <p className="font-medium">HR Admin permissions</p>
-              <p className="text-amber-800 mt-0.5">
+              <p className="text-primary mt-0.5">
                 Full access to programs, recognitions, employees, rewards, analytics, and settings.
                 <span className="font-medium"> They cannot add or remove other admins</span> — only you can.
               </p>
             </div>
           </div>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-5 space-y-3">
-              <p className="text-sm font-semibold text-stone-900">Invite an HR admin</p>
+              <p className="text-sm font-semibold text-foreground">Invite an HR admin</p>
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.4fr_auto] gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Full name</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Full name</Label>
                   <Input
                     value={newAdminName}
                     onChange={(e) => setNewAdminName(e.target.value)}
                     placeholder="Jane Doe"
-                    className="h-9 text-sm border-stone-200"
+                    className="h-9 text-sm border-border"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-stone-700">Email</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                   <Input
                     type="email"
                     value={newAdminEmail}
                     onChange={(e) => setNewAdminEmail(e.target.value)}
                     placeholder="jane@company.com"
-                    className="h-9 text-sm border-stone-200"
+                    className="h-9 text-sm border-border"
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addHrAdmin())}
                   />
                 </div>
@@ -629,7 +631,7 @@ export default function HRSettings() {
                   <Button
                     size="sm"
                     onClick={addHrAdmin}
-                    className="h-9 bg-stone-900 hover:bg-stone-700 text-white gap-1.5"
+                    className="h-9 bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
                     Add
@@ -637,7 +639,7 @@ export default function HRSettings() {
                 </div>
               </div>
               {adminError && (
-                <div className="flex items-center gap-1.5 text-xs text-red-600">
+                <div className="flex items-center gap-1.5 text-xs text-destructive">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {adminError}
                 </div>
@@ -645,16 +647,16 @@ export default function HRSettings() {
             </CardContent>
           </Card>
 
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-semibold text-stone-900">
+                <p className="text-sm font-semibold text-foreground">
                   Current HR admins{" "}
-                  <span className="text-xs font-normal text-stone-500">({hrAdmins.length})</span>
+                  <span className="text-xs font-normal text-muted-foreground">({hrAdmins.length})</span>
                 </p>
               </div>
               {hrAdmins.length === 0 ? (
-                <p className="text-sm text-stone-500 text-center py-6">
+                <p className="text-sm text-muted-foreground text-center py-6">
                   No HR admins yet. Add one above and they'll get an invite email.
                 </p>
               ) : (
@@ -662,15 +664,15 @@ export default function HRSettings() {
                   {hrAdmins.map((a) => (
                     <div
                       key={a.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-stone-100 hover:border-stone-200 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-border transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-700 font-semibold text-sm shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold text-sm shrink-0">
                           {a.name[0]?.toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-stone-900 truncate">{a.name}</p>
-                          <p className="text-xs text-stone-500 flex items-center gap-1 truncate">
+                          <p className="text-sm font-medium text-foreground truncate">{a.name}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
                             <Mail className="w-3 h-3" />
                             {a.email}
                           </p>
@@ -680,7 +682,7 @@ export default function HRSettings() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeHrAdmin(a.id)}
-                        className="text-stone-400 hover:text-red-600"
+                        className="text-muted-foreground hover:text-destructive"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -693,23 +695,23 @@ export default function HRSettings() {
         </TabsContent>
 
         <TabsContent value="roles" className="space-y-4 mt-0">
-          <Card className="border border-stone-200">
+          <Card className="border border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-stone-900">Permission Matrix</CardTitle>
-              <p className="text-xs text-stone-500">Capabilities granted per role</p>
+              <CardTitle className="text-sm font-semibold text-foreground">Permission Matrix</CardTitle>
+              <p className="text-xs text-muted-foreground">Capabilities granted per role</p>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-stone-200">
-                      <th className="text-left py-2 pr-4 text-stone-600 font-semibold">Permission</th>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 pr-4 text-muted-foreground font-semibold">Permission</th>
                       {["Super Admin", "HR Admin", "Manager", "Employee"].map((role) => (
-                        <th key={role} className="py-2 px-3 text-stone-600 font-semibold text-center w-24">{role}</th>
+                        <th key={role} className="py-2 px-3 text-muted-foreground font-semibold text-center w-24">{role}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100">
+                  <tbody className="divide-y divide-border">
                     {[
                       { perm: "Send Recognitions", vals: [true, true, true, true] },
                       { perm: "Approve Recognitions", vals: [true, true, true, false] },
@@ -720,14 +722,14 @@ export default function HRSettings() {
                       { perm: "Edit Settings", vals: [true, false, false, false] },
                       { perm: "Manage Roles", vals: [true, false, false, false] },
                     ].map(({ perm, vals }) => (
-                      <tr key={perm} className="hover:bg-stone-50">
-                        <td className="py-2.5 pr-4 text-stone-700 font-medium">{perm}</td>
+                      <tr key={perm} className="hover:bg-muted">
+                        <td className="py-2.5 pr-4 text-muted-foreground font-medium">{perm}</td>
                         {vals.map((v, i) => (
                           <td key={i} className="py-2.5 px-3 text-center">
                             {v ? (
-                              <Check className="w-4 h-4 text-green-600 mx-auto" />
+                              <Check className="w-4 h-4 text-success mx-auto" />
                             ) : (
-                              <span className="block w-4 h-0.5 bg-stone-200 mx-auto rounded" />
+                              <span className="block w-4 h-0.5 bg-muted mx-auto rounded" />
                             )}
                           </td>
                         ))}
@@ -737,7 +739,7 @@ export default function HRSettings() {
                 </table>
               </div>
               <Separator className="my-4" />
-              <p className="text-xs text-stone-500">Contact your Super Admin to change role assignments.</p>
+              <p className="text-xs text-muted-foreground">Contact your Super Admin to change role assignments.</p>
             </CardContent>
           </Card>
         </TabsContent>

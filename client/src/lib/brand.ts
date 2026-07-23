@@ -1,5 +1,5 @@
 export const BRAND = {
-  name: "EngageX",
-  tagline: "HR Admin Portal",
-  copyright: "EngageX",
+  name: "Hip Hip Hoor",
+  tagline: "Celebrate. Appreciate. Inspire.",
+  copyright: "Hip Hip Hoor",
 };

@@ -37,16 +37,16 @@ export default function Analytics() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map(({ label, value, trend, icon: Icon, positive }) => (
-          <Card key={label} className="border border-stone-200">
+          <Card key={label} className="border border-border">
             <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
-                <p className="text-xs text-stone-500 font-medium uppercase tracking-wide">{label}</p>
-                <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-stone-600" />
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+                <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <Icon className="w-4 h-4 text-muted-foreground" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-stone-900">{value}</p>
-              <p className={`text-xs mt-1 ${positive ? "text-green-600" : "text-amber-600"}`}>{trend}</p>
+              <p className="text-2xl font-bold text-foreground">{value}</p>
+              <p className={`text-xs mt-1 ${positive ? "text-success" : "text-primary"}`}>{trend}</p>
             </CardContent>
           </Card>
         ))}
@@ -54,10 +54,10 @@ export default function Analytics() {
 
       {/* Participation + Points Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-stone-900">Recognition Volume</CardTitle>
-            <p className="text-xs text-stone-500">Monthly recognitions issued, Jan–Dec</p>
+            <CardTitle className="text-sm font-semibold text-foreground">Recognition Volume</CardTitle>
+            <p className="text-xs text-muted-foreground">Monthly recognitions issued, Jan–Dec</p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
@@ -82,10 +82,10 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-stone-900">Participation Rate</CardTitle>
-            <p className="text-xs text-stone-500">Unique participants per month</p>
+            <CardTitle className="text-sm font-semibold text-foreground">Participation Rate</CardTitle>
+            <p className="text-xs text-muted-foreground">Unique participants per month</p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
@@ -118,10 +118,10 @@ export default function Analytics() {
 
       {/* Department + Category */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-stone-900">Points by Department</CardTitle>
-            <p className="text-xs text-stone-500">Total recognition points earned</p>
+            <CardTitle className="text-sm font-semibold text-foreground">Points by Department</CardTitle>
+            <p className="text-xs text-muted-foreground">Total recognition points earned</p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
@@ -143,10 +143,10 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-stone-900">Recognition by Category</CardTitle>
-            <p className="text-xs text-stone-500">Distribution of recognition types</p>
+            <CardTitle className="text-sm font-semibold text-foreground">Recognition by Category</CardTitle>
+            <p className="text-xs text-muted-foreground">Distribution of recognition types</p>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
@@ -176,9 +176,9 @@ export default function Analytics() {
                   <div key={cat.category} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: cat.fill }} />
-                      <span className="text-stone-700">{cat.category}</span>
+                      <span className="text-muted-foreground">{cat.category}</span>
                     </div>
-                    <span className="font-semibold text-stone-900">{cat.value}%</span>
+                    <span className="font-semibold text-foreground">{cat.value}%</span>
                   </div>
                 ))}
               </div>
@@ -188,16 +188,16 @@ export default function Analytics() {
       </div>
 
       {/* Budget Burn Rate */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold text-stone-900">Budget Burn Rate</CardTitle>
-              <p className="text-xs text-stone-500">Cumulative spending vs. total budget ($50,000)</p>
+              <CardTitle className="text-sm font-semibold text-foreground">Budget Burn Rate</CardTitle>
+              <p className="text-xs text-muted-foreground">Cumulative spending vs. total budget ($50,000)</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-stone-500">Current spend</p>
-              <p className="text-lg font-bold text-stone-900">$42,000</p>
+              <p className="text-xs text-muted-foreground">Current spend</p>
+              <p className="text-lg font-bold text-foreground">$42,000</p>
             </div>
           </div>
         </CardHeader>
@@ -222,7 +222,7 @@ export default function Analytics() {
                 contentStyle={{ fontSize: 12, border: "1px solid #e7e5e4", borderRadius: 8 }}
                 formatter={(v: number, name) => [`$${v.toLocaleString()}`, name === "spent" ? "Spent" : "Budget"]}
               />
-              <Legend formatter={(v) => <span className="text-xs text-stone-600">{v === "spent" ? "Spent" : "Total Budget"}</span>} />
+              <Legend formatter={(v) => <span className="text-xs text-muted-foreground">{v === "spent" ? "Spent" : "Total Budget"}</span>} />
               <Area
                 type="monotone"
                 dataKey="budget"
@@ -246,10 +246,10 @@ export default function Analytics() {
       </Card>
 
       {/* Department Participation Table */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-stone-900">Department Participation Rates</CardTitle>
-          <p className="text-xs text-stone-500">% of employees who gave or received a recognition this quarter</p>
+          <CardTitle className="text-sm font-semibold text-foreground">Department Participation Rates</CardTitle>
+          <p className="text-xs text-muted-foreground">% of employees who gave or received a recognition this quarter</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -257,18 +257,18 @@ export default function Analytics() {
               .sort((a, b) => b.participationRate - a.participationRate)
               .map((dept) => (
                 <div key={dept.department} className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-stone-700 w-28 shrink-0">{dept.department}</span>
-                  <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                  <span className="text-xs font-medium text-muted-foreground w-28 shrink-0">{dept.department}</span>
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        dept.participationRate >= 85 ? "bg-green-500" :
+                        dept.participationRate >= 85 ? "bg-success" :
                         dept.participationRate >= 70 ? "bg-stone-700" :
-                        "bg-amber-500"
+                        "bg-primary"
                       }`}
                       style={{ width: `${dept.participationRate}%` }}
                     />
                   </div>
-                  <span className="text-xs font-semibold text-stone-900 w-10 text-right">{dept.participationRate}%</span>
+                  <span className="text-xs font-semibold text-foreground w-10 text-right">{dept.participationRate}%</span>
                 </div>
               ))}
           </div>

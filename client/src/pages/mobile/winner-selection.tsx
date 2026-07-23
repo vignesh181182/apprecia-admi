@@ -127,9 +127,9 @@ export default function MobileWinnerSelection() {
 
   if (!program) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-stone-50">
-        <p className="text-sm text-stone-700 mb-2">Program not found.</p>
-        <Link to="/m/programs" className="text-sm text-amber-800 underline">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-muted">
+        <p className="text-sm text-muted-foreground mb-2">Program not found.</p>
+        <Link to="/m/programs" className="text-sm text-primary underline">
           Back to programs
         </Link>
       </div>
@@ -138,11 +138,11 @@ export default function MobileWinnerSelection() {
 
   if (!currentUserCanManageProgram(account, program)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-stone-50">
-        <p className="text-sm text-stone-700 mb-2">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-muted">
+        <p className="text-sm text-muted-foreground mb-2">
           You don't have permission to declare winners for this program.
         </p>
-        <Link to={`/m/programs/${program.id}`} className="text-sm text-amber-800 underline">
+        <Link to={`/m/programs/${program.id}`} className="text-sm text-primary underline">
           Back to program
         </Link>
       </div>
@@ -151,14 +151,14 @@ export default function MobileWinnerSelection() {
 
   if (alreadyHasWinners) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-stone-50 text-center">
-        <Trophy className="w-8 h-8 text-amber-700 mb-3" />
-        <p className="text-sm text-stone-700 mb-3">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-muted text-center">
+        <Trophy className="w-8 h-8 text-primary mb-3" />
+        <p className="text-sm text-muted-foreground mb-3">
           Winners have already been declared for this cycle.
         </p>
         <Link
           to={`/m/programs/${program.id}`}
-          className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white text-sm font-mobile font-semibold"
+          className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-primary hover:bg-primary/90 text-white text-sm font-mobile font-semibold"
         >
           View winners
         </Link>
@@ -168,11 +168,11 @@ export default function MobileWinnerSelection() {
 
   if (eligible.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-stone-50 text-center">
-        <p className="text-sm text-stone-700 mb-3">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5 bg-muted text-center">
+        <p className="text-sm text-muted-foreground mb-3">
           No eligible nominations to score.
         </p>
-        <Link to={`/m/programs/${program.id}`} className="text-sm text-amber-800 underline">
+        <Link to={`/m/programs/${program.id}`} className="text-sm text-primary underline">
           Back to program
         </Link>
       </div>
@@ -231,7 +231,7 @@ export default function MobileWinnerSelection() {
   const selectionCount = selected.size;
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
+    <div className="min-h-screen flex flex-col bg-muted">
       <header
         className="px-5 pt-3 pb-4"
         style={program.themeBg ? { background: program.themeBg } : undefined}
@@ -241,17 +241,17 @@ export default function MobileWinnerSelection() {
           aria-label="Back"
           className="-ml-2 p-2 mb-1 rounded-full hover:bg-black/5 inline-flex"
         >
-          <ChevronLeft className="w-5 h-5 text-stone-800" />
+          <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/50 flex items-center justify-center text-2xl shrink-0">
             {program.emoji}
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="font-mobile text-lg font-semibold text-stone-900 leading-tight truncate">
+            <h1 className="font-mobile text-lg font-semibold text-foreground leading-tight truncate">
               {program.name}
             </h1>
-            <p className="text-xs text-stone-700 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Pick winners across {categories.length} categor
               {categories.length === 1 ? "y" : "ies"}
             </p>
@@ -268,13 +268,13 @@ export default function MobileWinnerSelection() {
             <section key={cat.id}>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">{cat.emoji}</span>
-                <h2 className="font-mobile font-semibold text-stone-900">{cat.name}</h2>
+                <h2 className="font-mobile font-semibold text-foreground">{cat.name}</h2>
                 <span
                   className={cn(
                     "ml-auto text-[11px] font-mobile font-semibold px-2 py-0.5 rounded-full",
                     selectedInCat >= cat.winnersCount
-                      ? "bg-amber-100 text-amber-800 border border-amber-200"
-                      : "bg-stone-100 text-stone-600",
+                      ? "bg-primary/15 text-primary border border-primary/20"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   {selectedInCat}/{cat.winnersCount} selected
@@ -291,7 +291,7 @@ export default function MobileWinnerSelection() {
                       <div
                         className={cn(
                           "bg-white border rounded-2xl p-3 transition-colors",
-                          isSelected ? "border-amber-400 ring-1 ring-amber-300" : "border-stone-200",
+                          isSelected ? "border-amber-400 ring-1 ring-amber-300" : "border-border",
                         )}
                       >
                         <button
@@ -304,8 +304,8 @@ export default function MobileWinnerSelection() {
                             className={cn(
                               "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
                               isSelected
-                                ? "bg-[#a87a3a] border-[#a87a3a] text-white"
-                                : "bg-white border-stone-300 text-transparent",
+                                ? "bg-primary border-primary text-white"
+                                : "bg-white border-border text-transparent",
                             )}
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -313,22 +313,22 @@ export default function MobileWinnerSelection() {
                           <img
                             src={nom.nomineeAvatar}
                             alt=""
-                            className="w-11 h-11 rounded-full object-cover shrink-0 border border-stone-200"
+                            className="w-11 h-11 rounded-full object-cover shrink-0 border border-border"
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="font-mobile font-semibold text-stone-900 truncate">
+                            <p className="font-mobile font-semibold text-foreground truncate">
                               {nom.nomineeName}
                             </p>
-                            <p className="text-xs text-stone-500 truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                               {nom.nomineeRole}
                               {nom.nomineeDepartment && ` · ${nom.nomineeDepartment}`}
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-1 shrink-0">
-                            <span className="px-2 py-0.5 rounded-full bg-stone-900 text-white text-[11px] font-mobile font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-mobile font-semibold">
                               #{entry.rank}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100 text-[11px] font-mobile font-semibold tabular-nums">
+                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/15 text-[11px] font-mobile font-semibold tabular-nums">
                               {entry.score}/100
                             </span>
                           </div>
@@ -337,7 +337,7 @@ export default function MobileWinnerSelection() {
                         <button
                           type="button"
                           onClick={() => setOpenEntryId(entry.nominationId)}
-                          className="mt-2 w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-full bg-stone-50 hover:bg-stone-100 text-xs text-stone-600 font-mobile font-semibold transition-colors"
+                          className="mt-2 w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-full bg-muted hover:bg-muted text-xs text-muted-foreground font-mobile font-semibold transition-colors"
                         >
                           <Info className="w-3.5 h-3.5" />
                           View reasoning &amp; details
@@ -355,8 +355,8 @@ export default function MobileWinnerSelection() {
       <footer className="fixed inset-x-0 bottom-0 z-30 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] bg-gradient-to-t from-stone-50 via-stone-50/95 to-transparent">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-stone-500">Ready to declare</p>
-            <p className="font-mobile font-semibold text-stone-900 tabular-nums">
+            <p className="text-xs text-muted-foreground">Ready to declare</p>
+            <p className="font-mobile font-semibold text-foreground tabular-nums">
               {selectionCount} of {shortlist.length} selected
             </p>
           </div>
@@ -365,7 +365,7 @@ export default function MobileWinnerSelection() {
               <button
                 type="button"
                 disabled={selectionCount === 0 || submitting}
-                className="inline-flex items-center justify-center gap-2 px-5 h-12 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white font-mobile font-semibold transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-5 h-12 rounded-full bg-primary hover:bg-primary/90 text-white font-mobile font-semibold transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="confirm-winners"
               >
                 <Trophy className="w-4 h-4" />
@@ -387,7 +387,7 @@ export default function MobileWinnerSelection() {
                 <AlertDialogCancel>Keep editing</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleConfirm}
-                  className="bg-[#a87a3a] hover:bg-[#8e6630]"
+                  className="bg-primary hover:bg-primary/90"
                 >
                   Declare winners
                 </AlertDialogAction>

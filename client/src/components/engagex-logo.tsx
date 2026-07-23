@@ -10,16 +10,17 @@ type Props = {
 };
 
 /**
- * EngageX brand mark. Loaded from /client/public/images/engagex-logo.svg.
+ * Hip Hip Hoor brand mark. Loaded from /client/public/images/hhh-logo.png.
  * Use anywhere the brand identity appears (sign-in, super admin, onboarding wizard).
+ * Export name kept as `EngageXLogo` for backwards compatibility with existing imports.
  */
-export function EngageXLogo({ size = 32, className, title = "EngageX" }: Props) {
+export function EngageXLogo({ size = 32, className, title = "Hip Hip Hoor" }: Props) {
   return (
     <img
-      src="/images/engagex-logo.svg"
+      src="/images/hhh-logo.png"
       alt={title}
       width={size}
-      height={Math.round((size * 426) / 383)}
+      height={Math.round((size * 40) / 43)}
       className={cn("object-contain shrink-0", className)}
       draggable={false}
     />

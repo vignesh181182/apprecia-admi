@@ -51,15 +51,15 @@ export function WebTopBar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-stone-200">
+    <header className="sticky top-0 z-40 bg-white border-b border-border">
       <div className="max-w-7xl mx-auto h-16 px-6 flex items-center gap-4">
         <Link to="/m" className="flex items-center gap-2.5 shrink-0">
           <img src={logoSrc} alt="" className="w-8 h-10 object-contain" />
           <div className="leading-tight">
-            <p className="text-sm font-semibold text-stone-900 truncate max-w-[160px]">
+            <p className="text-sm font-semibold text-foreground truncate max-w-[160px]">
               {companyName}
             </p>
-            <p className="text-[11px] text-stone-500">{BRAND.name}</p>
+            <p className="text-[11px] text-muted-foreground">{BRAND.name}</p>
           </div>
         </Link>
 
@@ -85,19 +85,19 @@ export function WebTopBar() {
               onClick={() => setSearchOpen((v) => !v)}
               className={cn(
                 "p-2 rounded-full transition-colors",
-                searchOpen ? "bg-stone-100" : "hover:bg-stone-100",
+                searchOpen ? "bg-muted" : "hover:bg-muted",
               )}
               aria-label="Search"
               aria-expanded={searchOpen}
             >
-              <Search className="w-5 h-5 text-stone-700" />
+              <Search className="w-5 h-5 text-muted-foreground" />
             </button>
             <input
               ref={searchInputRef}
               type="search"
               placeholder="Search people, badges, recognitions…"
               className={cn(
-                "h-9 pl-3 pr-3 rounded-full bg-stone-100 border border-transparent focus:bg-white focus:border-stone-300 focus:outline-none text-sm text-stone-700 placeholder:text-stone-400 transition-all",
+                "h-9 pl-3 pr-3 rounded-full bg-muted border border-transparent focus:bg-white focus:border-border focus:outline-none text-sm text-muted-foreground placeholder:text-muted-foreground transition-all",
                 searchOpen ? "w-64 ml-1 opacity-100" : "w-0 ml-0 opacity-0 pointer-events-none",
               )}
               onBlur={(e) => {
@@ -137,17 +137,17 @@ function TopTab({
       className={cn(
         "relative h-12 px-6 text-sm font-mobile font-semibold transition-colors",
         active
-          ? "text-[#a87a3a]"
+          ? "text-primary"
           : disabled
-          ? "text-stone-300 cursor-not-allowed"
-          : "text-stone-600 hover:text-stone-900",
+          ? "text-muted-foreground cursor-not-allowed"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
       {label}
       <span
         className={cn(
           "absolute left-3 right-3 -bottom-px h-0.5 rounded-full transition-all",
-          active ? "bg-[#a87a3a]" : "bg-transparent",
+          active ? "bg-primary" : "bg-transparent",
         )}
       />
     </button>

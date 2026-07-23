@@ -37,9 +37,9 @@ export default function MobileInsights() {
     return (
       <EmployeeLayout showRightRail={false}>
         <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6">
-          <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
-            <p className="text-sm text-stone-700 font-mobile font-semibold mb-1">RnR isn't enabled</p>
-            <p className="text-xs text-stone-500">
+          <div className="bg-white rounded-2xl border border-border p-8 text-center">
+            <p className="text-sm text-muted-foreground font-mobile font-semibold mb-1">RnR isn't enabled</p>
+            <p className="text-xs text-muted-foreground">
               Reach out to your EngageX contact to enable Rewards & Recognition.
             </p>
           </div>
@@ -68,10 +68,10 @@ function AppreciationInsights() {
       <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6 space-y-4">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-mobile text-xl md:text-2xl font-semibold text-stone-900">
+            <h1 className="font-mobile text-xl md:text-2xl font-semibold text-foreground">
               Appreciation Insights
             </h1>
-            <p className="text-xs md:text-sm text-stone-500 mt-0.5">
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
               How appreciation is moving across your company.
             </p>
           </div>
@@ -120,8 +120,8 @@ function RnRInsights() {
       <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6 space-y-4">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-mobile text-xl md:text-2xl font-semibold text-stone-900">RnR Insights</h1>
-            <p className="text-xs md:text-sm text-stone-500 mt-0.5">
+            <h1 className="font-mobile text-xl md:text-2xl font-semibold text-foreground">RnR Insights</h1>
+            <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
               How rewards & recognition is moving across your company.
             </p>
           </div>

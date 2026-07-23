@@ -14,12 +14,32 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  formatProgramDate,
+  getProgramWindow,
   getStoredPrograms,
   type ProgramStatus,
   type StoredProgram,
 } from "@/lib/programs-data";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getAccount, isAdmin } from "@/lib/account";
-import { Plus, Users, Calendar, Pencil, Star, LayoutGrid, List } from "lucide-react";
+import {
+  Plus,
+  Users,
+  Calendar,
+  Pencil,
+  Star,
+  LayoutGrid,
+  List,
+  ChevronDown,
+  Trophy,
+  Award,
+} from "lucide-react";
 import { BannerArt } from "@/components/programs/banner-art";
 
 type ViewMode = "cards" | "list";
@@ -43,7 +63,7 @@ const statusBadgeClass: Record<ProgramStatus, string> = {
   scheduled: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   active: "bg-green-100 text-green-800 hover:bg-green-100",
   "ending-soon": "bg-orange-100 text-orange-800 hover:bg-orange-100",
-  ended: "bg-stone-100 text-stone-700 hover:bg-stone-100",
+  ended: "bg-muted text-muted-foreground hover:bg-muted",
 };
 
 export default function Programs() {
@@ -107,8 +127,8 @@ export default function Programs() {
               data-testid={`programs-filter-${f.id}`}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 statusFilter === f.id
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-white text-muted-foreground border-border hover:bg-muted"
               }`}
             >
               {f.label} ({counts[f.id] ?? 0})
@@ -123,13 +143,13 @@ export default function Programs() {
             onValueChange={(v) => {
               if (v === "cards" || v === "list") setViewMode(v);
             }}
-            className="bg-white border border-stone-200 rounded-lg p-0.5"
+            className="bg-white border border-border rounded-lg p-0.5"
           >
             <ToggleGroupItem
               value="cards"
               aria-label="Card view"
               data-testid="programs-view-cards"
-              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+              className="h-8 px-2.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               <LayoutGrid className="w-4 h-4" />
             </ToggleGroupItem>
@@ -137,7 +157,7 @@ export default function Programs() {
               value="list"
               aria-label="List view"
               data-testid="programs-view-list"
-              className="h-8 px-2.5 data-[state=on]:bg-stone-900 data-[state=on]:text-white"
+              className="h-8 px-2.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               <List className="w-4 h-4" />
             </ToggleGroupItem>
@@ -147,7 +167,7 @@ export default function Programs() {
             <Button
               asChild
               size="sm"
-              className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9"
             >
               <Link to="/programs/new" data-testid="programs-new">
                 <Plus className="w-4 h-4" /> New program
@@ -187,7 +207,7 @@ export default function Programs() {
           return (
             <Card
               key={prog.id}
-              className={`border border-stone-200 hover:shadow-sm transition-all ${
+              className={`border border-border hover:shadow-sm transition-all ${
                 ended ? "opacity-70" : ""
               }`}
             >
@@ -209,8 +229,8 @@ export default function Programs() {
                       </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-stone-900 truncate">{prog.name}</p>
-                      <p className="text-xs text-stone-500 mt-0.5 line-clamp-2">
+                      <p className="text-sm font-semibold text-foreground truncate">{prog.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                         {prog.description ?? prog.shortDesc}
                       </p>
                     </div>
@@ -227,7 +247,7 @@ export default function Programs() {
                         asChild
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground"
                       >
                         <Link
                           to={`/programs/${prog.id}/edit`}
@@ -243,12 +263,12 @@ export default function Programs() {
               <CardContent className="pt-0 space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-stone-600 flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-500" /> Budget
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Star className="w-3 h-3 text-primary" /> Budget
                     </span>
                     <span
                       className={`text-xs font-medium ${
-                        isOverBudget ? "text-red-600" : "text-stone-700"
+                        isOverBudget ? "text-red-600" : "text-muted-foreground"
                       }`}
                     >
                       {currency}
@@ -260,35 +280,29 @@ export default function Programs() {
                     value={pct}
                     className={`h-1.5 ${
                       isOverBudget
-                        ? "[&>div]:bg-red-500"
+                        ? "[&>div]:bg-destructive"
                         : pct >= 60
-                          ? "[&>div]:bg-yellow-500"
+                          ? "[&>div]:bg-primary"
                           : ""
                     }`}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
-                  <div className="flex items-center gap-1.5 text-xs text-stone-600">
-                    <Users className="w-3.5 h-3.5 text-stone-400" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Users className="w-3.5 h-3.5 text-muted-foreground" />
                     {prog.nominations} nomination{prog.nominations === 1 ? "" : "s"}
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-stone-600">
-                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                    {prog.endDate
-                      ? new Date(prog.endDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                      : `${prog.daysLeft} days left`}
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                    {formatProgramDate(getProgramWindow(prog).end)}
                   </div>
                 </div>
 
                 {(prog.status === "active" ||
                   prog.status === "ending-soon" ||
                   prog.status === "ended") && (
-                  <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+                  <div className="flex items-center gap-2 pt-2 border-t border-border">
                     <Button asChild variant="ghost" size="sm" className="h-7 text-xs flex-1">
                       <Link to={`/programs/${prog.id}?focus=shortlist`}>
                         Pick winners
@@ -307,7 +321,7 @@ export default function Programs() {
         })}
 
         {filtered.length === 0 && (
-          <div className="col-span-full text-center py-16 text-stone-500 text-sm">
+          <div className="col-span-full text-center py-16 text-muted-foreground text-sm">
             No programs found.
           </div>
         )}
@@ -316,16 +330,16 @@ export default function Programs() {
 
       {/* Program List */}
       {viewMode === "list" && (
-        <Card className="border border-stone-200 overflow-hidden">
-          <Table>
+        <Card className="border border-border overflow-hidden">
+          <Table className="table-fixed w-full">
             <TableHeader>
-              <TableRow className="bg-stone-50 hover:bg-stone-50">
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Program</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Status</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500">Budget</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Nominations</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500">End date</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-stone-500 text-right">Actions</TableHead>
+              <TableRow className="bg-muted hover:bg-muted">
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Program</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground w-[104px]">Status</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground w-[210px]">Budget</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground text-right w-[112px]">Nominations</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground w-[104px]">End date</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground w-[104px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -340,13 +354,13 @@ export default function Programs() {
                 return (
                   <TableRow
                     key={prog.id}
-                    className={`hover:bg-stone-50 ${ended ? "opacity-70" : ""}`}
+                    className={`hover:bg-muted ${ended ? "opacity-70" : ""}`}
                     data-testid={`programs-row-${prog.id}`}
                   >
-                    <TableCell className="min-w-[260px]">
+                    <TableCell className="min-w-0">
                       <Link
                         to={`/programs/${prog.id}`}
-                        className="flex items-center gap-3 hover:opacity-90"
+                        className="flex items-center gap-3 hover:opacity-90 min-w-0"
                         data-testid={`programs-open-${prog.id}`}
                       >
                         <div className="w-10 h-10 rounded-lg shrink-0 relative overflow-hidden flex items-center justify-center">
@@ -360,27 +374,27 @@ export default function Programs() {
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-stone-900 truncate">{prog.name}</p>
-                          <p className="text-xs text-stone-500 truncate max-w-[320px]">
+                          <p className="text-sm font-semibold text-foreground truncate">{prog.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">
                             {prog.description ?? prog.shortDesc}
                           </p>
                         </div>
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge className={`text-xs ${statusBadgeClass[prog.status]}`} variant="secondary">
+                      <Badge className={`text-xs whitespace-nowrap ${statusBadgeClass[prog.status]}`} variant="secondary">
                         {prog.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="min-w-[200px]">
+                    <TableCell className="min-w-[150px]">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-stone-600 flex items-center gap-1">
-                          <Star className="w-3 h-3 text-yellow-500" />
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Star className="w-3 h-3 text-primary" />
                           {pct}%
                         </span>
                         <span
-                          className={`text-xs font-medium ${
-                            isOverBudget ? "text-red-600" : "text-stone-700"
+                          className={`text-xs font-medium whitespace-nowrap ${
+                            isOverBudget ? "text-red-600" : "text-muted-foreground"
                           }`}
                         >
                           {currency}
@@ -392,68 +406,85 @@ export default function Programs() {
                         value={pct}
                         className={`h-1.5 ${
                           isOverBudget
-                            ? "[&>div]:bg-red-500"
+                            ? "[&>div]:bg-destructive"
                             : pct >= 60
-                              ? "[&>div]:bg-yellow-500"
+                              ? "[&>div]:bg-primary"
                               : ""
                         }`}
                       />
                     </TableCell>
-                    <TableCell className="text-right text-xs text-stone-600">
+                    <TableCell className="text-right text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-stone-400" />
+                        <Users className="w-3.5 h-3.5 text-muted-foreground" />
                         {prog.nominations}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs text-stone-600">
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       <span className="inline-flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                        {prog.endDate
-                          ? new Date(prog.endDate).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          : `${prog.daysLeft} days left`}
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        {formatProgramDate(getProgramWindow(prog).end)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex items-center gap-1">
-                        {(prog.status === "active" ||
+                    <TableCell>
+                      {(() => {
+                        const canPick =
+                          prog.status === "active" ||
                           prog.status === "ending-soon" ||
-                          prog.status === "ended") && (
-                          <>
-                            <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
-                              <Link to={`/programs/${prog.id}?focus=shortlist`}>Pick</Link>
-                            </Button>
-                            <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
-                              <Link to={`/programs/${prog.id}?focus=winners`}>Winners</Link>
-                            </Button>
-                          </>
-                        )}
-                        {adminView && (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-stone-400 hover:text-stone-700"
-                          >
-                            <Link
-                              to={`/programs/${prog.id}/edit`}
-                              data-testid={`programs-edit-${prog.id}`}
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
+                          prog.status === "ended";
+                        if (!canPick && !adminView) return null;
+                        return (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs gap-1"
+                                data-testid={`programs-action-${prog.id}`}
+                              >
+                                Action
+                                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                              {canPick && (
+                                <>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/programs/${prog.id}?focus=shortlist`}>
+                                      <Trophy className="w-4 h-4 mr-2" />
+                                      Pick winners
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild>
+                                    <Link to={`/programs/${prog.id}?focus=winners`}>
+                                      <Award className="w-4 h-4 mr-2" />
+                                      Winners
+                                    </Link>
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {canPick && adminView && <DropdownMenuSeparator />}
+                              {adminView && (
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    to={`/programs/${prog.id}/edit`}
+                                    data-testid={`programs-edit-${prog.id}`}
+                                  >
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 );
               })}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-16 text-stone-500 text-sm">
+                  <TableCell colSpan={6} className="text-center py-16 text-muted-foreground text-sm">
                     No programs found.
                   </TableCell>
                 </TableRow>
@@ -468,10 +499,10 @@ export default function Programs() {
 
 function SummaryStat({ label, value }: { label: string; value: number | string }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
-        <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">{label}</p>
-        <p className="text-2xl font-bold text-stone-900">{value}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">{label}</p>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
       </CardContent>
     </Card>
   );

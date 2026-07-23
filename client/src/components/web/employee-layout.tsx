@@ -11,7 +11,7 @@ type Props = {
 
 export function WebEmployeeLayout({ children, showRightRail = true, contentTitle, rightRail }: Props) {
   return (
-    <div className="min-h-screen bg-stone-50 font-mobile">
+    <div className="min-h-screen bg-muted font-mobile">
       <WebTopBar />
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-12 gap-6 pt-4">
@@ -21,7 +21,7 @@ export function WebEmployeeLayout({ children, showRightRail = true, contentTitle
 
           <div className={showRightRail ? "col-span-6" : "col-span-9"}>
             {contentTitle && (
-              <h1 className="text-xl font-semibold text-stone-900 mb-3 px-1">{contentTitle}</h1>
+              <h1 className="text-xl font-semibold text-foreground mb-3 px-1">{contentTitle}</h1>
             )}
             <div className="space-y-4 pb-12">{children}</div>
           </div>

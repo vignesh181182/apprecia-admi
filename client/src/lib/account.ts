@@ -25,6 +25,16 @@ export type Integrations = {
   ssoProvider: "none" | "saml" | "oidc";
 };
 
+export type IntegrationCategory = "directory" | "hrms" | "comms";
+
+/** A user-added integration beyond the built-in connectors. */
+export type CustomIntegration = {
+  id: string;
+  name: string;
+  category: IntegrationCategory;
+  status: IntegrationStatus;
+};
+
 export type RecognitionCategoryColor =
   | "blue"
   | "amber"
@@ -121,6 +131,7 @@ export type Account = {
   fiscalYearStart: string;
   hrAdmins: HRAdmin[];
   integrations: Integrations;
+  customIntegrations: CustomIntegration[];
   recognitionCategories: RecognitionCategory[];
   appreciationPolicy: AppreciationPolicy;
   pointsPolicy: PointsPolicy;
@@ -219,6 +230,11 @@ export function getAccount(): Account | null {
       parsed.recognitionCategories = migrateCategories(
         parsed.recognitionCategories as unknown as unknown[],
       );
+      mutated = true;
+    }
+
+    if (!Array.isArray(parsed.customIntegrations)) {
+      parsed.customIntegrations = [];
       mutated = true;
     }
 
@@ -404,11 +420,12 @@ export function createAccountFromInvite(invite: InviteRecord): Account {
     role: "admin",
     currency: "₹",
     products: invite.products,
-    brandColor: "#1c1917",
+    brandColor: "#a87a3a",
     timezone: "pt",
     fiscalYearStart: "jan",
     hrAdmins: [],
     integrations: DEFAULT_INTEGRATIONS,
+    customIntegrations: [],
     recognitionCategories: DEFAULT_CATEGORIES,
     appreciationPolicy:
       getSeedPolicyOverride(invite.accountId) ?? { ...DEFAULT_APPRECIATION_POLICY },

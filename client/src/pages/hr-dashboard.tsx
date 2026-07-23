@@ -54,6 +54,13 @@ import {
   Clock,
   Award,
   Coins,
+  PieChart,
+  Gift,
+  Crown,
+  Star,
+  UserRound,
+  Calendar,
+  LineChart as LineChartIcon,
   AlertCircle,
   BellRing,
   Wallet,
@@ -88,6 +95,7 @@ import {
   type DateRangePresetId,
   type RnRStats,
 } from "@/lib/dashboard-stats";
+import emptyDecoration from "/images/bg01.png";
 
 // ─── Tabbed shell ──────────────────────────────────────────────────────
 
@@ -116,10 +124,10 @@ export default function HRDashboard() {
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl font-semibold text-stone-900">
+            <h1 className="text-xl font-semibold text-foreground">
               {tab === RNR_TAB ? "Rewards & Recognition Analytics" : "Appreciation Analytics"}
             </h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {tab === RNR_TAB
                 ? "Programs, redemptions, and budget health"
                 : "Recognition activity, approvals, and badge trends"}
@@ -211,11 +219,11 @@ function AppreciationTab() {
       <UnderrecognizedTable data={stats.underrecognized} />
 
       {!hasAnyData && (
-        <Card className="border border-stone-200 bg-stone-50">
+        <Card className="border border-border bg-muted">
           <CardContent className="p-8 text-center">
-            <Sparkles className="w-8 h-8 text-stone-400 mx-auto mb-3" />
-            <p className="text-sm font-medium text-stone-900 mb-1">No appreciation activity yet</p>
-            <p className="text-xs text-stone-500">
+            <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm font-medium text-foreground mb-1">No appreciation activity yet</p>
+            <p className="text-xs text-muted-foreground">
               Once employees start sending badges, the dashboard will fill in automatically.
             </p>
           </CardContent>
@@ -249,12 +257,14 @@ function FilterBar({
   const toIso = (d: Date) => d.toISOString().slice(0, 10);
 
   return (
-    <Card className="border border-stone-200">
-      <CardContent className="p-4 flex flex-wrap items-center gap-3">
-        <Filter className="w-4 h-4 text-stone-500 shrink-0" />
+    <div className="flex flex-wrap items-center gap-3">
+        <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
 
         <Select value={preset} onValueChange={(v) => setPreset(v as DateRangePresetId)}>
-          <SelectTrigger className="w-[170px] h-9 text-sm" data-testid="filter-date-range">
+          <SelectTrigger
+            className="w-[170px] h-9 text-sm rounded-full"
+            data-testid="filter-date-range"
+          >
             <SelectValue placeholder="Date range" />
           </SelectTrigger>
           <SelectContent>
@@ -270,15 +280,15 @@ function FilterBar({
           <div className="flex items-center gap-2">
             <input
               type="date"
-              className="h-9 px-2 text-sm border border-stone-300 rounded-md"
+              className="h-9 px-2 text-sm border border-border rounded-md"
               value={toIso(customRange.start)}
               onChange={(e) => setCustomRange({ ...customRange, start: new Date(e.target.value) })}
               data-testid="filter-custom-start"
             />
-            <span className="text-xs text-stone-400">→</span>
+            <span className="text-xs text-muted-foreground">→</span>
             <input
               type="date"
-              className="h-9 px-2 text-sm border border-stone-300 rounded-md"
+              className="h-9 px-2 text-sm border border-border rounded-md"
               value={toIso(customRange.end)}
               onChange={(e) => setCustomRange({ ...customRange, end: new Date(e.target.value) })}
               data-testid="filter-custom-end"
@@ -292,9 +302,12 @@ function FilterBar({
           onChange={setDepartments}
         />
 
-        <span className="ml-auto text-xs text-stone-500">{formatRangeLabel(range)}</span>
-      </CardContent>
-    </Card>
+        <div className="ml-auto flex items-center gap-2 h-9 pl-3 pr-2.5 rounded-full border border-border bg-white text-sm text-muted-foreground">
+          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="whitespace-nowrap">{formatRangeLabel(range)}</span>
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        </div>
+    </div>
   );
 }
 
@@ -325,19 +338,19 @@ function DepartmentFilter({
         <Button
           variant="outline"
           size="sm"
-          className="h-9 text-sm font-normal"
+          className="h-9 text-sm font-normal rounded-full px-4"
           data-testid="filter-department"
         >
           {label}
-          <ChevronDown className="w-3.5 h-3.5 ml-2 text-stone-400" />
+          <ChevronDown className="w-3.5 h-3.5 ml-2 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-2" align="start">
         <div className="flex items-center justify-between px-2 pb-2">
-          <span className="text-xs font-medium text-stone-700">Departments</span>
+          <span className="text-xs font-medium text-muted-foreground">Departments</span>
           {selected.length > 0 && (
             <button
-              className="text-xs text-stone-500 hover:text-stone-900"
+              className="text-xs text-muted-foreground hover:text-foreground"
               onClick={() => onChange([])}
             >
               Clear
@@ -348,13 +361,13 @@ function DepartmentFilter({
           {all.map((d) => (
             <label
               key={d}
-              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-50 cursor-pointer"
+              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
             >
               <Checkbox
                 checked={selected.includes(d)}
                 onCheckedChange={() => toggle(d)}
               />
-              <span className="text-sm text-stone-700">{d}</span>
+              <span className="text-sm text-muted-foreground">{d}</span>
             </label>
           ))}
         </div>
@@ -389,11 +402,15 @@ function KpiStrip({
         label="Top giver"
         user={stats.topGiver}
         emptyText="No givers in range"
+        icon={Crown}
+        tint="amber"
       />
       <TopUserKpi
         label="Top receiver"
         user={stats.topReceiver}
         emptyText="No receivers in range"
+        icon={UserRound}
+        tint="blue"
       />
       {monetaryEnabled && (
         <PointsCirculatedKpi totals={stats.totals} currency={currency} />
@@ -402,29 +419,40 @@ function KpiStrip({
   );
 }
 
+const KPI_TINTS = {
+  rose: { bg: "bg-rose-100", fg: "text-rose-500" },
+  green: { bg: "bg-green-100", fg: "text-green-600" },
+  amber: { bg: "bg-amber-100", fg: "text-amber-600" },
+  purple: { bg: "bg-purple-100", fg: "text-purple-500" },
+  blue: { bg: "bg-blue-100", fg: "text-blue-500" },
+  stone: { bg: "bg-muted", fg: "text-muted-foreground" },
+} as const;
+
+type KpiTint = keyof typeof KPI_TINTS;
+
 function KpiCard({
   label,
+  icon: Icon,
+  tint = "stone",
   children,
-  tint,
   testId,
 }: {
   label: string;
+  icon: React.ElementType;
+  tint?: KpiTint;
   children: React.ReactNode;
-  tint?: "green" | "amber" | "red";
   testId?: string;
 }) {
-  const tintClass =
-    tint === "green"
-      ? "bg-green-50 border-green-200"
-      : tint === "amber"
-        ? "bg-amber-50 border-amber-200"
-        : tint === "red"
-          ? "bg-red-50 border-red-200"
-          : "border-stone-200 bg-white";
+  const t = KPI_TINTS[tint];
   return (
-    <Card className={`border ${tintClass}`} data-testid={testId}>
+    <Card className="border border-border bg-white" data-testid={testId}>
       <CardContent className="p-4">
-        <p className="text-xs text-stone-500 font-medium uppercase tracking-wide mb-2">
+        <div
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 ${t.bg}`}
+        >
+          <Icon className={`w-[18px] h-[18px] ${t.fg}`} />
+        </div>
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1.5">
           {label}
         </p>
         {children}
@@ -434,14 +462,11 @@ function KpiCard({
 }
 
 function UtilizationKpi({ util }: { util: AppreciationStats["utilization"] }) {
-  const tint = util.pct >= 70 ? "green" : util.pct >= 40 ? "amber" : "red";
+  const tint: KpiTint = util.pct >= 70 ? "green" : util.pct >= 40 ? "amber" : "rose";
   return (
-    <KpiCard label="Utilization" tint={tint} testId="kpi-utilization">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{util.pct}%</p>
-        <Users className="w-4 h-4 text-stone-400" />
-      </div>
-      <p className="text-xs text-stone-500 mt-1">
+    <KpiCard label="Utilization" icon={PieChart} tint={tint} testId="kpi-utilization">
+      <p className="text-2xl font-bold text-foreground">{util.pct}%</p>
+      <p className="text-xs text-muted-foreground mt-1">
         {util.active} of {util.total} employees active
       </p>
     </KpiCard>
@@ -450,12 +475,12 @@ function UtilizationKpi({ util }: { util: AppreciationStats["utilization"] }) {
 
 function ApprovalKpi({ approval }: { approval: AppreciationStats["approval"] }) {
   return (
-    <KpiCard label="Approval status" testId="kpi-approval">
+    <KpiCard label="Approval status" icon={Clock} tint="amber" testId="kpi-approval">
       <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{approval.pending}</p>
-        <span className="text-xs text-stone-500">pending</span>
+        <p className="text-2xl font-bold text-foreground">{approval.pending}</p>
+        <span className="text-xs text-muted-foreground">pending</span>
       </div>
-      <p className="text-xs text-stone-500 mt-1 flex items-center gap-1">
+      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
         <Clock className="w-3 h-3" />
         Avg decision: {approval.avgDecisionHours}h
       </p>
@@ -465,13 +490,14 @@ function ApprovalKpi({ approval }: { approval: AppreciationStats["approval"] }) 
 
 function AutoPublishedKpi({ approval }: { approval: AppreciationStats["approval"] }) {
   return (
-    <KpiCard label="Approval status" testId="kpi-auto-published">
-      <div className="flex items-baseline gap-2">
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          Auto-published
-        </Badge>
-      </div>
-      <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
+    <KpiCard
+      label="Approval status"
+      icon={CheckCircle2}
+      tint="green"
+      testId="kpi-auto-published"
+    >
+      <p className="text-lg font-semibold text-success">Auto-published</p>
+      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
         <Clock className="w-3 h-3" />
         First reaction: {approval.avgFirstReactionHours}h avg
       </p>
@@ -482,14 +508,11 @@ function AutoPublishedKpi({ approval }: { approval: AppreciationStats["approval"
 function TotalAppreciationsKpi({ totals }: { totals: AppreciationStats["totals"] }) {
   const delta = totals.deltaBadges;
   return (
-    <KpiCard label="Total appreciations" testId="kpi-total">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{totals.badges.toLocaleString()}</p>
-        <Award className="w-4 h-4 text-stone-400" />
-      </div>
+    <KpiCard label="Total appreciations" icon={Gift} tint="purple" testId="kpi-total">
+      <p className="text-2xl font-bold text-foreground">{totals.badges.toLocaleString()}</p>
       <p
         className={`text-xs mt-1 flex items-center gap-1 ${
-          delta > 0 ? "text-green-600" : delta < 0 ? "text-red-600" : "text-stone-500"
+          delta > 0 ? "text-green-600" : delta < 0 ? "text-red-600" : "text-muted-foreground"
         }`}
       >
         {delta > 0 ? (
@@ -507,13 +530,22 @@ function TopUserKpi({
   label,
   user,
   emptyText,
+  icon,
+  tint,
 }: {
   label: string;
   user: AppreciationStats["topGiver"];
   emptyText: string;
+  icon: React.ElementType;
+  tint: KpiTint;
 }) {
   return (
-    <KpiCard label={label} testId={`kpi-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+    <KpiCard
+      label={label}
+      icon={icon}
+      tint={tint}
+      testId={`kpi-${label.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       {user ? (
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
@@ -523,12 +555,12 @@ function TopUserKpi({
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-stone-900 truncate">{user.userName}</p>
-            <p className="text-xs text-stone-500">{user.count} appreciations</p>
+            <p className="text-sm font-semibold text-foreground truncate">{user.userName}</p>
+            <p className="text-xs text-muted-foreground">{user.count} appreciations</p>
           </div>
         </div>
       ) : (
-        <p className="text-xs text-stone-400 mt-2">{emptyText}</p>
+        <p className="text-xs text-muted-foreground mt-2">{emptyText}</p>
       )}
     </KpiCard>
   );
@@ -542,14 +574,14 @@ function PointsCirculatedKpi({
   currency: string;
 }) {
   return (
-    <KpiCard label="Points circulated" testId="kpi-points">
+    <KpiCard label="Points circulated" icon={Star} tint="rose" testId="kpi-points">
       <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">
+        <p className="text-2xl font-bold text-foreground">
           {totals.pointsCirculated.toLocaleString()}
         </p>
-        <Coins className="w-4 h-4 text-stone-400" />
+        <Coins className="w-4 h-4 text-muted-foreground" />
       </div>
-      <p className="text-xs text-stone-500 mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         {currency}
         {totals.pointsCirculated.toLocaleString()} value
       </p>
@@ -568,16 +600,16 @@ function TrendCard({
 }) {
   const empty = data.every((d) => d.badges === 0 && d.points === 0);
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Month-wise trend
         </CardTitle>
-        <p className="text-xs text-stone-500">Last 12 months</p>
+        <p className="text-xs text-muted-foreground">Last 12 months</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className={empty ? "p-0" : undefined}>
         {empty ? (
-          <EmptyChart label="No appreciation data in the last 12 months" />
+          <EmptyChart label="No appreciation data in the last 12 months" icon={LineChartIcon} />
         ) : (
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={data} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
@@ -655,11 +687,11 @@ function ApprovalFunnelCard({ stats }: { stats: AppreciationStats }) {
   const pct = (n: number) => (total === 0 ? 0 : Math.round((n / total) * 100));
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle className="text-sm font-semibold text-stone-900">Approval funnel</CardTitle>
-          <p className="text-xs text-stone-500">
+          <CardTitle className="text-sm font-semibold text-foreground">Approval funnel</CardTitle>
+          <p className="text-xs text-muted-foreground">
             {total === 0 ? "No requests yet" : `${total} request${total === 1 ? "" : "s"} in range`}
           </p>
         </div>
@@ -679,44 +711,44 @@ function ApprovalFunnelCard({ stats }: { stats: AppreciationStats }) {
           Send reminder to approvers
         </Button>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={total === 0 ? "p-0" : "space-y-4"}>
         {total === 0 ? (
           <EmptyChart label="No approvals to show for this period" />
         ) : (
           <>
             <div>
-              <div className="flex h-8 rounded-md overflow-hidden border border-stone-200">
+              <div className="flex h-8 rounded-md overflow-hidden border border-border">
                 <FunnelSegment
                   flex={stats.approval.approved}
                   total={total}
-                  color="bg-green-500"
+                  color="bg-success"
                 />
                 <FunnelSegment
                   flex={stats.approval.pending}
                   total={total}
-                  color="bg-amber-400"
+                  color="bg-primary/60"
                 />
                 <FunnelSegment
                   flex={stats.approval.rejected}
                   total={total}
-                  color="bg-red-400"
+                  color="bg-destructive/60"
                 />
               </div>
-              <div className="flex flex-wrap gap-4 mt-2 text-xs text-stone-600">
+              <div className="flex flex-wrap gap-4 mt-2 text-xs text-muted-foreground">
                 <FunnelLegend
-                  swatch="bg-green-500"
+                  swatch="bg-success"
                   label="Approved"
                   count={stats.approval.approved}
                   pct={pct(stats.approval.approved)}
                 />
                 <FunnelLegend
-                  swatch="bg-amber-400"
+                  swatch="bg-primary/60"
                   label="Pending"
                   count={stats.approval.pending}
                   pct={pct(stats.approval.pending)}
                 />
                 <FunnelLegend
-                  swatch="bg-red-400"
+                  swatch="bg-destructive/60"
                   label="Rejected"
                   count={stats.approval.rejected}
                   pct={pct(stats.approval.rejected)}
@@ -725,8 +757,8 @@ function ApprovalFunnelCard({ stats }: { stats: AppreciationStats }) {
             </div>
 
             {stats.slowApprovers.length > 0 && (
-              <div className="border-t border-stone-100 pt-3">
-                <p className="text-xs font-medium text-stone-700 mb-2">
+              <div className="border-t border-border pt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
                   Slowest approvers
                 </p>
                 <div className="space-y-2">
@@ -738,14 +770,14 @@ function ApprovalFunnelCard({ stats }: { stats: AppreciationStats }) {
                           {a.userName.split(" ").map((n) => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs text-stone-700 flex-1 truncate">
+                      <span className="text-xs text-muted-foreground flex-1 truncate">
                         {a.userName}
                       </span>
-                      <span className="text-xs text-stone-500">
+                      <span className="text-xs text-muted-foreground">
                         {a.avgDecisionHours}h avg
                       </span>
                       {a.backlog > 0 && (
-                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-xs">
+                        <Badge className="bg-primary/15 text-primary hover:bg-primary/15 text-xs">
                           {a.backlog} pending
                         </Badge>
                       )}
@@ -790,9 +822,9 @@ function FunnelLegend({
     <div className="flex items-center gap-1.5">
       <span className={`w-2.5 h-2.5 rounded-sm ${swatch}`} />
       <span>
-        {label} <span className="text-stone-400">·</span>{" "}
-        <span className="font-medium text-stone-900">{count}</span>{" "}
-        <span className="text-stone-400">({pct}%)</span>
+        {label} <span className="text-muted-foreground">·</span>{" "}
+        <span className="font-medium text-foreground">{count}</span>{" "}
+        <span className="text-muted-foreground">({pct}%)</span>
       </span>
     </div>
   );
@@ -808,14 +840,14 @@ function DepartmentChart({ data }: { data: AppreciationStats["byDepartment"] }) 
   const lowThreshold = companyAvg * 0.5;
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Recognition by department
         </CardTitle>
-        <p className="text-xs text-stone-500">Avg badges per employee</p>
+        <p className="text-xs text-muted-foreground">Avg badges per employee</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className={data.length === 0 ? "p-0 flex-1" : "flex-1"}>
         {data.length === 0 ? (
           <EmptyChart label="No department data for this period" />
         ) : (
@@ -869,16 +901,16 @@ const CATEGORY_FILL: Record<RecognitionCategoryColor, string> = {
 
 function CategoryChart({ data }: { data: AppreciationStats["byCategory"] }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border flex flex-col">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Top values used
         </CardTitle>
-        <p className="text-xs text-stone-500">Top 6 categories by badge count</p>
+        <p className="text-xs text-muted-foreground">Top 6 categories by badge count</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className={data.length === 0 ? "p-0 flex-1" : "flex-1"}>
         {data.length === 0 ? (
-          <EmptyChart label="No category data for this period" />
+          <EmptyChart label="No category data for this period" icon={Award} />
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart
@@ -932,33 +964,33 @@ function UnderrecognizedTable({
   const [open, setOpen] = useState(false);
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <button
-            className="w-full flex items-center justify-between p-4 hover:bg-stone-50 text-left"
+            className="w-full flex items-center justify-between p-4 hover:bg-muted text-left"
             data-testid="underrecognized-toggle"
           >
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600" />
+              <AlertCircle className="w-4 h-4 text-primary" />
               <div>
-                <p className="text-sm font-semibold text-stone-900">
+                <p className="text-sm font-semibold text-foreground">
                   Underrecognized employees
                 </p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   {data.length} employee{data.length === 1 ? "" : "s"} received zero badges in this period
                 </p>
               </div>
             </div>
             <ChevronDown
-              className={`w-4 h-4 text-stone-400 transition-transform ${open ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
             />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="border-t border-stone-100">
+          <div className="border-t border-border">
             {data.length === 0 ? (
-              <div className="p-6 text-center text-xs text-stone-500">
+              <div className="p-6 text-center text-xs text-muted-foreground">
                 Everyone received recognition in this period — nice.
               </div>
             ) : (
@@ -984,15 +1016,15 @@ function UnderrecognizedTable({
                               {u.userName.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm text-stone-900">{u.userName}</span>
+                          <span className="text-sm text-foreground">{u.userName}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs text-stone-600">{u.userRole}</TableCell>
-                      <TableCell className="text-xs text-stone-600">{u.department}</TableCell>
-                      <TableCell className="text-xs text-stone-500">
+                      <TableCell className="text-xs text-muted-foreground">{u.userRole}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{u.department}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
                         {u.lastReceivedAt ? timeAgo(u.lastReceivedAt) : "Never"}
                       </TableCell>
-                      <TableCell className="text-xs text-stone-600">
+                      <TableCell className="text-xs text-muted-foreground">
                         {u.managerName ?? "—"}
                       </TableCell>
                       <TableCell className="text-right">
@@ -1017,7 +1049,7 @@ function UnderrecognizedTable({
               </Table>
             )}
             {data.length > 25 && (
-              <p className="text-xs text-stone-400 text-center py-2">
+              <p className="text-xs text-muted-foreground text-center py-2">
                 Showing 25 of {data.length} — sorted by longest without recognition
               </p>
             )}
@@ -1030,11 +1062,27 @@ function UnderrecognizedTable({
 
 // ─── Helpers + RnR placeholder ─────────────────────────────────────────
 
-function EmptyChart({ label }: { label: string }) {
+function EmptyChart({
+  label,
+  icon: Icon = Sparkles,
+}: {
+  label: string;
+  icon?: React.ElementType;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center py-10 text-stone-400">
-      <Sparkles className="w-6 h-6 mb-2" />
-      <p className="text-xs">{label}</p>
+    <div className="relative flex flex-col items-center justify-center pt-2 pb-10 overflow-hidden rounded-lg h-full w-full">
+      <img
+        src={emptyDecoration}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-0 w-2/5 max-w-[240px] object-contain opacity-80"
+      />
+      <div className="relative z-10 flex flex-col items-center">
+        <div className="w-12 h-12 rounded-2xl bg-white/70 backdrop-blur-sm shadow-sm flex items-center justify-center mb-3">
+          <Icon className="w-6 h-6 text-purple-400" />
+        </div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
     </div>
   );
 }
@@ -1143,13 +1191,13 @@ function RnRTab() {
       <RnRKpiStrip stats={stats} currency={currency} />
 
       {!hasAnyPrograms ? (
-        <Card className="border border-dashed border-stone-300 bg-stone-50">
+        <Card className="border border-dashed border-border bg-muted">
           <CardContent className="p-12 text-center">
-            <Trophy className="w-10 h-10 text-stone-400 mx-auto mb-3" />
-            <p className="text-base font-semibold text-stone-900 mb-1">
+            <Trophy className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-base font-semibold text-foreground mb-1">
               No programs yet
             </p>
-            <p className="text-sm text-stone-500 max-w-md mx-auto mb-4">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
               Create your first recognition program to start tracking budget, nominations, and winners.
             </p>
             <Button asChild>
@@ -1218,12 +1266,15 @@ function RnRFilterBar({
   const toIso = (d: Date) => d.toISOString().slice(0, 10);
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4 flex flex-wrap items-center gap-3">
-        <Filter className="w-4 h-4 text-stone-500 shrink-0" />
+        <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
 
         <Select value={preset} onValueChange={(v) => setPreset(v as DateRangePresetId)}>
-          <SelectTrigger className="w-[160px] h-9 text-sm" data-testid="rnr-filter-date-range">
+          <SelectTrigger
+            className="w-[160px] h-9 text-sm rounded-full bg-white"
+            data-testid="rnr-filter-date-range"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -1239,14 +1290,14 @@ function RnRFilterBar({
           <div className="flex items-center gap-2">
             <input
               type="date"
-              className="h-9 px-2 text-sm border border-stone-300 rounded-md"
+              className="h-9 px-2 text-sm border border-border rounded-md"
               value={toIso(customRange.start)}
               onChange={(e) => setCustomRange({ ...customRange, start: new Date(e.target.value) })}
             />
-            <span className="text-xs text-stone-400">→</span>
+            <span className="text-xs text-muted-foreground">→</span>
             <input
               type="date"
-              className="h-9 px-2 text-sm border border-stone-300 rounded-md"
+              className="h-9 px-2 text-sm border border-border rounded-md"
               value={toIso(customRange.end)}
               onChange={(e) => setCustomRange({ ...customRange, end: new Date(e.target.value) })}
             />
@@ -1274,7 +1325,10 @@ function RnRFilterBar({
         />
 
         <Select value={cycle} onValueChange={(v) => setCycle(v as CycleFilter)}>
-          <SelectTrigger className="w-[160px] h-9 text-sm" data-testid="rnr-filter-cycle">
+          <SelectTrigger
+            className="w-[160px] h-9 text-sm rounded-full bg-white"
+            data-testid="rnr-filter-cycle"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -1284,7 +1338,11 @@ function RnRFilterBar({
           </SelectContent>
         </Select>
 
-        <span className="ml-auto text-xs text-stone-500">{formatRangeLabel(range)}</span>
+        <div className="ml-auto flex items-center gap-2 h-9 pl-3 pr-2.5 rounded-full border border-border bg-white text-sm text-muted-foreground">
+          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="whitespace-nowrap">{formatRangeLabel(range)}</span>
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        </div>
       </CardContent>
     </Card>
   );
@@ -1313,19 +1371,19 @@ function MultiSelectFilter({
         <Button
           variant="outline"
           size="sm"
-          className="h-9 text-sm font-normal"
+          className="h-9 text-sm font-normal rounded-full px-4"
           data-testid={testId}
         >
           {label}
-          <ChevronDown className="w-3.5 h-3.5 ml-2 text-stone-400" />
+          <ChevronDown className="w-3.5 h-3.5 ml-2 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="start">
         <div className="flex items-center justify-between px-2 pb-2">
-          <span className="text-xs font-medium text-stone-700">Select</span>
+          <span className="text-xs font-medium text-muted-foreground">Select</span>
           {selected.length > 0 && (
             <button
-              className="text-xs text-stone-500 hover:text-stone-900"
+              className="text-xs text-muted-foreground hover:text-foreground"
               onClick={() => onChange([])}
             >
               Clear
@@ -1336,13 +1394,13 @@ function MultiSelectFilter({
           {options.map((o) => (
             <label
               key={o.id}
-              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-stone-50 cursor-pointer"
+              className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-muted cursor-pointer"
             >
               <Checkbox
                 checked={selected.includes(o.id)}
                 onCheckedChange={() => toggle(o.id)}
               />
-              <span className="text-sm text-stone-700 truncate">{o.label}</span>
+              <span className="text-sm text-muted-foreground truncate">{o.label}</span>
             </label>
           ))}
         </div>
@@ -1375,22 +1433,19 @@ function TotalBudgetKpi({
 }) {
   const delta = totalBudget.deltaSpent;
   return (
-    <KpiCard label="Total budget" testId="rnr-kpi-budget">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">
-          {currency}
-          {totalBudget.allocated.toLocaleString()}
-        </p>
-        <Wallet className="w-4 h-4 text-stone-400" />
-      </div>
-      <p className="text-xs text-stone-500 mt-1">
+    <KpiCard label="Total budget" icon={Wallet} tint="green" testId="rnr-kpi-budget">
+      <p className="text-2xl font-bold text-foreground">
+        {currency}
+        {totalBudget.allocated.toLocaleString()}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
         {currency}
         {totalBudget.spent.toLocaleString()} spent ({totalBudget.pct}%)
       </p>
       {delta !== 0 && (
         <p
           className={`text-xs mt-0.5 flex items-center gap-1 ${
-            delta > 0 ? "text-stone-700" : "text-green-600"
+            delta > 0 ? "text-muted-foreground" : "text-green-600"
           }`}
         >
           {delta > 0 ? (
@@ -1409,12 +1464,9 @@ function TotalBudgetKpi({
 
 function ActiveProgramsKpi({ active }: { active: RnRStats["activePrograms"] }) {
   return (
-    <KpiCard label="Active programs" testId="rnr-kpi-active">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{active.count}</p>
-        <Trophy className="w-4 h-4 text-stone-400" />
-      </div>
-      <p className="text-xs text-stone-500 mt-1">
+    <KpiCard label="Active programs" icon={Trophy} tint="amber" testId="rnr-kpi-active">
+      <p className="text-2xl font-bold text-foreground">{active.count}</p>
+      <p className="text-xs text-muted-foreground mt-1">
         {active.endingThisWeek} ending this week
       </p>
     </KpiCard>
@@ -1422,14 +1474,11 @@ function ActiveProgramsKpi({ active }: { active: RnRStats["activePrograms"] }) {
 }
 
 function BudgetUtilKpi({ pct }: { pct: number }) {
-  const tint = pct > 90 ? "red" : pct > 70 ? "amber" : "green";
+  const tint: KpiTint = pct > 90 ? "rose" : pct > 70 ? "amber" : "green";
   return (
-    <KpiCard label="Budget utilization" tint={tint} testId="rnr-kpi-util">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{pct}%</p>
-        <Coins className="w-4 h-4 text-stone-400" />
-      </div>
-      <p className="text-xs text-stone-500 mt-1">Across active programs</p>
+    <KpiCard label="Budget utilization" icon={Coins} tint={tint} testId="rnr-kpi-util">
+      <p className="text-2xl font-bold text-foreground">{pct}%</p>
+      <p className="text-xs text-muted-foreground mt-1">Across active programs</p>
     </KpiCard>
   );
 }
@@ -1437,12 +1486,14 @@ function BudgetUtilKpi({ pct }: { pct: number }) {
 function PendingActionsKpi({ pending }: { pending: RnRStats["pendingActions"] }) {
   if (pending.total === 0) {
     return (
-      <KpiCard label="Pending actions" testId="rnr-kpi-pending">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold text-stone-900">0</p>
-          <CheckCircle2 className="w-4 h-4 text-green-500" />
-        </div>
-        <p className="text-xs text-stone-500 mt-1">Inbox is clear</p>
+      <KpiCard
+        label="Pending actions"
+        icon={CheckCircle2}
+        tint="green"
+        testId="rnr-kpi-pending"
+      >
+        <p className="text-2xl font-bold text-foreground">0</p>
+        <p className="text-xs text-muted-foreground mt-1">Inbox is clear</p>
       </KpiCard>
     );
   }
@@ -1450,19 +1501,16 @@ function PendingActionsKpi({ pending }: { pending: RnRStats["pendingActions"] })
     <Popover>
       <PopoverTrigger asChild>
         <button className="text-left">
-          <KpiCard label="Pending actions" tint="amber" testId="rnr-kpi-pending">
-            <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-stone-900">{pending.total}</p>
-              <Inbox className="w-4 h-4 text-stone-400" />
-            </div>
-            <p className="text-xs text-stone-600 mt-1 underline-offset-2 hover:underline">
+          <KpiCard label="Pending actions" icon={Inbox} tint="amber" testId="rnr-kpi-pending">
+            <p className="text-2xl font-bold text-foreground">{pending.total}</p>
+            <p className="text-xs text-muted-foreground mt-1 underline-offset-2 hover:underline">
               Click to view
             </p>
           </KpiCard>
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-3" align="start">
-        <p className="text-xs font-medium text-stone-700 mb-2">What's waiting</p>
+        <p className="text-xs font-medium text-muted-foreground mb-2">What's waiting</p>
         <PendingActionPopRow
           label="Manager approvals"
           count={pending.managerApprovals.length}
@@ -1495,12 +1543,12 @@ function PendingActionPopRow({
   return (
     <Link
       to={to}
-      className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-stone-50 text-sm"
+      className="flex items-center justify-between px-2 py-1.5 rounded hover:bg-muted text-sm"
     >
-      <span className="text-stone-700">{label}</span>
+      <span className="text-muted-foreground">{label}</span>
       <span className="flex items-center gap-1.5">
-        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{count}</Badge>
-        <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+        <Badge className="bg-primary/15 text-primary hover:bg-primary/15">{count}</Badge>
+        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
       </span>
     </Link>
   );
@@ -1509,14 +1557,11 @@ function PendingActionPopRow({
 function TotalNominationsKpi({ nominations }: { nominations: RnRStats["totalNominations"] }) {
   const delta = nominations.delta;
   return (
-    <KpiCard label="Total nominations" testId="rnr-kpi-noms">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">{nominations.count.toLocaleString()}</p>
-        <ListChecks className="w-4 h-4 text-stone-400" />
-      </div>
+    <KpiCard label="Total nominations" icon={ListChecks} tint="blue" testId="rnr-kpi-noms">
+      <p className="text-2xl font-bold text-foreground">{nominations.count.toLocaleString()}</p>
       <p
         className={`text-xs mt-1 flex items-center gap-1 ${
-          delta > 0 ? "text-green-600" : delta < 0 ? "text-red-600" : "text-stone-500"
+          delta > 0 ? "text-green-600" : delta < 0 ? "text-red-600" : "text-muted-foreground"
         }`}
       >
         {delta > 0 ? (
@@ -1536,15 +1581,12 @@ function ProgramsHittingTargetKpi({
   target: RnRStats["programsHittingTarget"];
 }) {
   return (
-    <KpiCard label="Hitting target" testId="rnr-kpi-target">
-      <div className="flex items-baseline gap-2">
-        <p className="text-2xl font-bold text-stone-900">
-          {target.count}
-          <span className="text-sm font-normal text-stone-400"> / {target.total}</span>
-        </p>
-        <Target className="w-4 h-4 text-stone-400" />
-      </div>
-      <p className="text-xs text-stone-500 mt-1">≥ {target.target} nominations</p>
+    <KpiCard label="Hitting target" icon={Target} tint="purple" testId="rnr-kpi-target">
+      <p className="text-2xl font-bold text-foreground">
+        {target.count}
+        <span className="text-sm font-normal text-muted-foreground"> / {target.total}</span>
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">≥ {target.target} nominations</p>
     </KpiCard>
   );
 }
@@ -1560,12 +1602,12 @@ function BudgetUtilizationCard({
 }) {
   const { toast } = useToast();
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">Budget utilization</CardTitle>
-        <p className="text-xs text-stone-500">Spend vs allocation per program</p>
+        <CardTitle className="text-sm font-semibold text-foreground">Budget utilization</CardTitle>
+        <p className="text-xs text-muted-foreground">Spend vs allocation per program</p>
       </CardHeader>
-      <CardContent>
+      <CardContent className={data.length === 0 ? "p-0" : undefined}>
         {data.length === 0 ? (
           <EmptyChart label="No active programs in scope" />
         ) : (
@@ -1574,20 +1616,20 @@ function BudgetUtilizationCard({
               const pctClamped = Math.min(100, row.pct);
               const fill =
                 row.pct > 90
-                  ? "bg-red-500"
+                  ? "bg-destructive"
                   : row.pct > 70
-                    ? "bg-amber-400"
-                    : "bg-green-500";
+                    ? "bg-primary/60"
+                    : "bg-success";
               return (
                 <div key={row.programId}>
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-base">{row.emoji}</span>
-                      <span className="text-sm font-medium text-stone-900 truncate">
+                      <span className="text-sm font-medium text-foreground truncate">
                         {row.programName}
                       </span>
                       {row.status === "ending-soon" && (
-                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-xs">
+                        <Badge className="bg-primary/15 text-primary hover:bg-primary/15 text-xs">
                           ending soon
                         </Badge>
                       )}
@@ -1606,13 +1648,13 @@ function BudgetUtilizationCard({
                       Top up
                     </Button>
                   </div>
-                  <div className="h-2.5 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className={`h-full ${fill}`}
                       style={{ width: `${pctClamped}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between mt-1.5 text-xs text-stone-500">
+                  <div className="flex items-center justify-between mt-1.5 text-xs text-muted-foreground">
                     <span>
                       {currency}
                       {row.spent.toLocaleString()} / {currency}
@@ -1639,10 +1681,10 @@ function winnerSelectionLink(item: { programId: string }): string {
 function PendingActionsCard({ pending }: { pending: RnRStats["pendingActions"] }) {
   if (pending.total === 0) {
     return (
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-stone-900">Pending actions</CardTitle>
-          <p className="text-xs text-stone-500">All caught up</p>
+          <CardTitle className="text-sm font-semibold text-foreground">Pending actions</CardTitle>
+          <p className="text-xs text-muted-foreground">All caught up</p>
         </CardHeader>
         <CardContent>
           <EmptyChart label="No items waiting" />
@@ -1651,10 +1693,10 @@ function PendingActionsCard({ pending }: { pending: RnRStats["pendingActions"] }
     );
   }
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">Pending actions</CardTitle>
-        <p className="text-xs text-stone-500">{pending.total} item{pending.total === 1 ? "" : "s"} waiting</p>
+        <CardTitle className="text-sm font-semibold text-foreground">Pending actions</CardTitle>
+        <p className="text-xs text-muted-foreground">{pending.total} item{pending.total === 1 ? "" : "s"} waiting</p>
       </CardHeader>
       <CardContent className="space-y-5">
         <PendingGroup
@@ -1694,7 +1736,7 @@ function PendingGroup({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide">{title}</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{title}</p>
         <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
           <Link to={inboxLink}>Go to inbox</Link>
         </Button>
@@ -1703,7 +1745,7 @@ function PendingGroup({
         {items.slice(0, 4).map((it) => (
           <div
             key={it.nominationId}
-            className="flex items-center gap-3 p-2 rounded-md border border-stone-100 hover:bg-stone-50"
+            className="flex items-center gap-3 p-2 rounded-md border border-border hover:bg-muted"
           >
             <Avatar className="h-7 w-7">
               <AvatarImage src={it.nomineeAvatar} alt={it.nomineeName} />
@@ -1712,25 +1754,25 @@ function PendingGroup({
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-stone-700 truncate">
-                <span className="font-medium text-stone-900">{it.nomineeName}</span>
-                <span className="text-stone-400"> · {it.programName}</span>
+              <p className="text-xs text-muted-foreground truncate">
+                <span className="font-medium text-foreground">{it.nomineeName}</span>
+                <span className="text-muted-foreground"> · {it.programName}</span>
                 {it.categoryName && (
-                  <span className="text-stone-400"> · {it.categoryName}</span>
+                  <span className="text-muted-foreground"> · {it.categoryName}</span>
                 )}
               </p>
-              <p className="text-xs text-stone-500 truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 Nominated by {it.nominatorName}
               </p>
             </div>
-            <span className="text-xs text-stone-400 whitespace-nowrap">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
               <TimerReset className="w-3 h-3 inline mr-0.5" />
               {it.daysWaiting === 0 ? "today" : `${it.daysWaiting}d`}
             </span>
           </div>
         ))}
         {items.length > 4 && (
-          <p className="text-xs text-stone-400 text-center pt-1">
+          <p className="text-xs text-muted-foreground text-center pt-1">
             +{items.length - 4} more in inbox
           </p>
         )}
@@ -1749,11 +1791,11 @@ function RecentWinnersStrip({
   currency: string;
 }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle className="text-sm font-semibold text-stone-900">Recent winners</CardTitle>
-          <p className="text-xs text-stone-500">Last {winners.length} across all programs</p>
+          <CardTitle className="text-sm font-semibold text-foreground">Recent winners</CardTitle>
+          <p className="text-xs text-muted-foreground">Last {winners.length} across all programs</p>
         </div>
         <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
           <Link to="/programs?tab=winners">View all winners</Link>
@@ -1768,11 +1810,11 @@ function RecentWinnersStrip({
               <Link
                 key={w.nominationId}
                 to={`/programs/${w.programId}`}
-                className="shrink-0 w-52 border border-stone-200 rounded-xl p-3 hover:bg-stone-50"
+                className="shrink-0 w-52 border border-border rounded-xl p-3 hover:bg-muted"
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">{w.programEmoji}</span>
-                  <span className="text-xs text-stone-500 truncate">{w.programName}</span>
+                  <span className="text-xs text-muted-foreground truncate">{w.programName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Avatar className="h-9 w-9">
@@ -1782,16 +1824,16 @@ function RecentWinnersStrip({
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-stone-900 truncate">
+                    <p className="text-sm font-semibold text-foreground truncate">
                       {w.nomineeName}
                     </p>
-                    <p className="text-xs text-stone-500 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       Won {w.decidedAt ? timeAgo(w.decidedAt) : "recently"}
                     </p>
                   </div>
                 </div>
                 {w.prizeAmount ? (
-                  <p className="text-xs text-stone-700 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     Prize: {currency}
                     {w.prizeAmount.toLocaleString()}
                   </p>
@@ -1823,10 +1865,10 @@ function NominationsTrendCard({
     series.every((s) => (row[s.programName] as number) === 0),
   );
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">Nominations over time</CardTitle>
-        <p className="text-xs text-stone-500">
+        <CardTitle className="text-sm font-semibold text-foreground">Nominations over time</CardTitle>
+        <p className="text-xs text-muted-foreground">
           {series.length === 0 ? "No programs in range" : `Top ${series.length} programs · last 6 months`}
         </p>
       </CardHeader>
@@ -1886,10 +1928,10 @@ function ApprovalFunnelPerProgramCard({
     Rejected: row.rejected,
   }));
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">Approval funnel</CardTitle>
-        <p className="text-xs text-stone-500">Status breakdown per program</p>
+        <CardTitle className="text-sm font-semibold text-foreground">Approval funnel</CardTitle>
+        <p className="text-xs text-muted-foreground">Status breakdown per program</p>
       </CardHeader>
       <CardContent>
         {chartData.length === 0 ? (
@@ -1941,10 +1983,10 @@ function ProgramsAtRiskCard({ data }: { data: RnRStats["programsAtRisk"] }) {
   const { toast } = useToast();
   if (data.length === 0) {
     return (
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-stone-900">Programs at risk</CardTitle>
-          <p className="text-xs text-stone-500">All cycles tracking healthy</p>
+          <CardTitle className="text-sm font-semibold text-foreground">Programs at risk</CardTitle>
+          <p className="text-xs text-muted-foreground">All cycles tracking healthy</p>
         </CardHeader>
         <CardContent>
           <EmptyChart label="Nothing flagged for this period" />
@@ -1953,10 +1995,10 @@ function ProgramsAtRiskCard({ data }: { data: RnRStats["programsAtRisk"] }) {
     );
   }
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-stone-900">Programs at risk</CardTitle>
-        <p className="text-xs text-stone-500">
+        <CardTitle className="text-sm font-semibold text-foreground">Programs at risk</CardTitle>
+        <p className="text-xs text-muted-foreground">
           Ending soon with low nomination counts
         </p>
       </CardHeader>
@@ -1977,16 +2019,16 @@ function ProgramsAtRiskCard({ data }: { data: RnRStats["programsAtRisk"] }) {
                 <TableCell className="py-2">
                   <div className="flex items-center gap-2">
                     <span className="text-base">{row.emoji}</span>
-                    <span className="text-sm text-stone-900">{row.programName}</span>
+                    <span className="text-sm text-foreground">{row.programName}</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 text-xs">
+                  <Badge className="bg-primary/15 text-primary hover:bg-primary/15 text-xs">
                     {row.daysLeft}d
                   </Badge>
                 </TableCell>
-                <TableCell className="text-xs text-stone-700">{row.current}</TableCell>
-                <TableCell className="text-xs text-stone-500">{row.expected}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{row.current}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{row.expected}</TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="outline"
@@ -2021,33 +2063,33 @@ function NonParticipantsCard({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <button
-            className="w-full flex items-center justify-between p-4 hover:bg-stone-50 text-left"
+            className="w-full flex items-center justify-between p-4 hover:bg-muted text-left"
             data-testid="non-participants-toggle"
           >
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600" />
+              <AlertCircle className="w-4 h-4 text-primary" />
               <div>
-                <p className="text-sm font-semibold text-stone-900">
+                <p className="text-sm font-semibold text-foreground">
                   People who haven't appreciated
                 </p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   {data.length} employee{data.length === 1 ? "" : "s"} sent zero badges and zero nominations in this period
                 </p>
               </div>
             </div>
             <ChevronDown
-              className={`w-4 h-4 text-stone-400 transition-transform ${open ? "rotate-180" : ""}`}
+              className={`w-4 h-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
             />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="border-t border-stone-100">
+          <div className="border-t border-border">
             {data.length === 0 ? (
-              <div className="p-6 text-center text-xs text-stone-500">
+              <div className="p-6 text-center text-xs text-muted-foreground">
                 Everyone participated in this period.
               </div>
             ) : (
@@ -2072,12 +2114,12 @@ function NonParticipantsCard({
                               {u.userName.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm text-stone-900">{u.userName}</span>
+                          <span className="text-sm text-foreground">{u.userName}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs text-stone-600">{u.userRole}</TableCell>
-                      <TableCell className="text-xs text-stone-600">{u.department}</TableCell>
-                      <TableCell className="text-xs text-stone-600">
+                      <TableCell className="text-xs text-muted-foreground">{u.userRole}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{u.department}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
                         {u.managerName ?? "—"}
                       </TableCell>
                       <TableCell className="text-right">
@@ -2101,7 +2143,7 @@ function NonParticipantsCard({
               </Table>
             )}
             {data.length > 25 && (
-              <p className="text-xs text-stone-400 text-center py-2">
+              <p className="text-xs text-muted-foreground text-center py-2">
                 Showing 25 of {data.length}
               </p>
             )}

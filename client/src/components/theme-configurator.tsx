@@ -194,7 +194,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
         <CardHeader className="flex flex-row items-center justify-between pb-4">
           <div className="flex items-center gap-2">
             <Palette className="w-5 h-5 text-primary" />
-            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+            <CardTitle className="text-xl font-bold text-foreground dark:text-white">
               Theme Configurator
             </CardTitle>
           </div>
@@ -220,13 +220,13 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center gap-3">
               {theme.darkMode ? (
-                <Moon className="w-5 h-5 text-gray-600" />
+                <Moon className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <Sun className="w-5 h-5 text-yellow-500" />
+                <Sun className="w-5 h-5 text-primary" />
               )}
               <div>
                 <Label className="text-sm font-normal">Dark Mode</Label>
-                <p className="text-xs text-gray-500">Toggle between light and dark themes</p>
+                <p className="text-xs text-muted-foreground">Toggle between light and dark themes</p>
               </div>
             </div>
             <Switch
@@ -254,7 +254,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
                   })}
                 >
                   <div 
-                    className="w-4 h-4 rounded-full border border-gray-300"
+                    className="w-4 h-4 rounded-full border border-border"
                     style={{ backgroundColor: `hsl(${color.value})` }}
                   />
                   <span className="text-xs">{color.name}</span>
@@ -309,7 +309,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               step={0.125}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>0rem (Square)</span>
               <span>2rem (Very Rounded)</span>
             </div>
@@ -321,7 +321,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="font-family" className="text-xs text-gray-600">Font Family</Label>
+                <Label htmlFor="font-family" className="text-xs text-muted-foreground">Font Family</Label>
                 <Select 
                   value={theme.fontFamily} 
                   onValueChange={(value) => handleThemeChange({ fontFamily: value })}
@@ -340,7 +340,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="font-size" className="text-xs text-gray-600">
+                <Label htmlFor="font-size" className="text-xs text-muted-foreground">
                   Base Font Size: {theme.fontSize}px
                 </Label>
                 <Slider
@@ -356,7 +356,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs text-gray-600">Normal Weight: {theme.fontWeight.normal}</Label>
+                <Label className="text-xs text-muted-foreground">Normal Weight: {theme.fontWeight.normal}</Label>
                 <Slider
                   value={[theme.fontWeight.normal]}
                   onValueChange={([value]) => handleThemeChange({ 
@@ -370,7 +370,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-xs text-gray-600">Medium Weight: {theme.fontWeight.medium}</Label>
+                <Label className="text-xs text-muted-foreground">Medium Weight: {theme.fontWeight.medium}</Label>
                 <Slider
                   value={[theme.fontWeight.medium]}
                   onValueChange={([value]) => handleThemeChange({ 
@@ -384,7 +384,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-xs text-gray-600">Semibold Weight: {theme.fontWeight.semibold}</Label>
+                <Label className="text-xs text-muted-foreground">Semibold Weight: {theme.fontWeight.semibold}</Label>
                 <Slider
                   value={[theme.fontWeight.semibold]}
                   onValueChange={([value]) => handleThemeChange({ 
@@ -398,7 +398,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-xs text-gray-600">Bold Weight: {theme.fontWeight.bold}</Label>
+                <Label className="text-xs text-muted-foreground">Bold Weight: {theme.fontWeight.bold}</Label>
                 <Slider
                   value={[theme.fontWeight.bold]}
                   onValueChange={([value]) => handleThemeChange({ 
@@ -429,7 +429,7 @@ export function ThemeConfigurator({ isOpen, onClose }: ThemeConfiguratorProps) {
               </div>
               <div className="space-y-2">
                 <h3 className="font-semibold">Sample Heading</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   This is a sample paragraph to demonstrate the typography settings.
                 </p>
               </div>

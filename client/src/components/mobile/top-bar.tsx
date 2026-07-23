@@ -48,16 +48,16 @@ export function MobileTopBar({ title, showBack, onBack, rightSlot }: Props) {
   const receiveBalance = useReceiveBalance();
 
   return (
-    <header className="sticky top-0 z-30 bg-stone-50/95 backdrop-blur supports-[backdrop-filter]:bg-stone-50/80 border-b border-stone-200/60">
+    <header className="sticky top-0 z-30 bg-muted/95 backdrop-blur supports-[backdrop-filter]:bg-muted/80 border-b border-border/60">
       <div className="h-14 px-5 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           {showBack ? (
             <button
               onClick={onBack}
-              className="-ml-2 p-2 rounded-full hover:bg-stone-100 transition-colors"
+              className="-ml-2 p-2 rounded-full hover:bg-muted transition-colors"
               aria-label="Back"
             >
-              <ChevronLeft className="w-5 h-5 text-stone-700" />
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
             </button>
           ) : (
             <img
@@ -67,7 +67,7 @@ export function MobileTopBar({ title, showBack, onBack, rightSlot }: Props) {
             />
           )}
           {title && (
-            <h1 className="font-mobile font-semibold text-base text-stone-900 truncate">
+            <h1 className="font-mobile font-semibold text-base text-foreground truncate">
               {title}
             </h1>
           )}
@@ -77,17 +77,17 @@ export function MobileTopBar({ title, showBack, onBack, rightSlot }: Props) {
             <Link
               to="/m/rewards"
               aria-label={`${receiveBalance} points available — open rewards`}
-              className="inline-flex items-center gap-1 h-8 px-2.5 rounded-full bg-amber-50 border border-amber-100 text-amber-900 text-xs font-mobile font-semibold hover:bg-amber-100 transition-colors"
+              className="inline-flex items-center gap-1 h-8 px-2.5 rounded-full bg-primary/10 border border-primary/15 text-primary text-xs font-mobile font-semibold hover:bg-primary/15 transition-colors"
             >
-              <span className="text-amber-700">★</span>
+              <span className="text-primary">★</span>
               {receiveBalance.toLocaleString()}
-              <span className="text-amber-700/70 font-medium">pts</span>
+              <span className="text-primary/70 font-medium">pts</span>
             </Link>
           )}
           {rightSlot ?? (
             <Link
               to="/m/notifications"
-              className="p-2 rounded-full hover:bg-stone-100 transition-colors"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
               aria-label="Notifications"
             >
               <img src="/m/icons/bell-notification.svg" alt="" className="w-6 h-6" />

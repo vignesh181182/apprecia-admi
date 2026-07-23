@@ -171,7 +171,7 @@ function AiShortlistMobile({
     return (
       <section
         className={cn(
-          "bg-white rounded-2xl border border-amber-200 mt-4 overflow-hidden",
+          "bg-white rounded-2xl border border-primary/20 mt-4 overflow-hidden",
           variant === "web" && "mt-0",
         )}
         data-testid="post-cycle-shortlist"
@@ -182,13 +182,13 @@ function AiShortlistMobile({
         >
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-amber-700" />
+              <Sparkles className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-mobile font-semibold text-stone-900">
+              <p className="font-mobile font-semibold text-foreground">
                 ✨ Cycle ended — ready to shortlist
               </p>
-              <p className="text-sm text-stone-700 mt-1 leading-snug">
+              <p className="text-sm text-muted-foreground mt-1 leading-snug">
                 Score {eligible.length} approved nomination
                 {eligible.length === 1 ? "" : "s"} and pre-pick the top{" "}
                 {Math.min(10, eligible.length)}. You can override before declaring
@@ -201,7 +201,7 @@ function AiShortlistMobile({
           <button
             type="button"
             onClick={() => setShortlistRun(true)}
-            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white font-mobile font-semibold transition-colors shadow-sm"
+            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-primary hover:bg-primary/90 text-white font-mobile font-semibold transition-colors shadow-sm"
             data-testid="run-shortlist"
           >
             <Sparkles className="w-4 h-4" />
@@ -215,7 +215,7 @@ function AiShortlistMobile({
   return (
     <section
       className={cn(
-        "bg-white rounded-2xl border border-amber-200 mt-4 overflow-hidden",
+        "bg-white rounded-2xl border border-primary/20 mt-4 overflow-hidden",
         variant === "web" && "mt-0",
       )}
       data-testid="post-cycle-shortlist"
@@ -226,13 +226,13 @@ function AiShortlistMobile({
       >
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-amber-700" />
+            <Sparkles className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-mobile font-semibold text-stone-900">
+            <p className="font-mobile font-semibold text-foreground">
               ✨ Cycle ended — AI shortlist ready
             </p>
-            <p className="text-sm text-stone-700 mt-1 leading-snug">
+            <p className="text-sm text-muted-foreground mt-1 leading-snug">
               {eligible.length} approved nomination{eligible.length === 1 ? "" : "s"} were
               scored. Review the top picks below.
             </p>
@@ -248,8 +248,8 @@ function AiShortlistMobile({
             <div key={cat.id}>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">{cat.emoji}</span>
-                <h4 className="font-mobile font-semibold text-stone-900">{cat.name}</h4>
-                <span className="ml-auto text-[11px] font-mobile font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
+                <h4 className="font-mobile font-semibold text-foreground">{cat.name}</h4>
+                <span className="ml-auto text-[11px] font-mobile font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                   Max winners: {cat.winnersCount}
                 </span>
               </div>
@@ -264,13 +264,13 @@ function AiShortlistMobile({
                         type="button"
                         key={entry.nominationId}
                         onClick={() => setOpenEntryId(entry.nominationId)}
-                        className="snap-start shrink-0 w-[280px] text-left bg-white border border-stone-200 rounded-2xl p-4 hover:border-amber-300 transition-colors"
+                        className="snap-start shrink-0 w-[280px] text-left bg-white border border-border rounded-2xl p-4 hover:border-primary/35 transition-colors"
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <span className="px-2 py-0.5 rounded-full bg-stone-900 text-white text-[11px] font-mobile font-semibold">
+                          <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-mobile font-semibold">
                             #{entry.rank}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100 text-[11px] font-mobile font-semibold tabular-nums">
+                          <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/15 text-[11px] font-mobile font-semibold tabular-nums">
                             {entry.score}/100
                           </span>
                         </div>
@@ -278,20 +278,20 @@ function AiShortlistMobile({
                           <img
                             src={nom.nomineeAvatar}
                             alt=""
-                            className="w-16 h-16 rounded-full object-cover border border-stone-200"
+                            className="w-16 h-16 rounded-full object-cover border border-border"
                           />
-                          <p className="mt-2 font-mobile font-semibold text-stone-900 truncate w-full">
+                          <p className="mt-2 font-mobile font-semibold text-foreground truncate w-full">
                             {nom.nomineeName}
                           </p>
-                          <p className="text-xs text-stone-500 truncate w-full">
+                          <p className="text-xs text-muted-foreground truncate w-full">
                             {nom.nomineeRole}
                             {nom.nomineeDepartment && ` · ${nom.nomineeDepartment}`}
                           </p>
                         </div>
-                        <p className="text-sm text-stone-700 mt-3 leading-snug line-clamp-3">
+                        <p className="text-sm text-muted-foreground mt-3 leading-snug line-clamp-3">
                           {entry.reasoning}
                         </p>
-                        <p className="mt-3 text-[11px] text-amber-800 font-mobile font-semibold inline-flex items-center gap-1">
+                        <p className="mt-3 text-[11px] text-primary font-mobile font-semibold inline-flex items-center gap-1">
                           Tap to expand <ChevronRight className="w-3 h-3" />
                         </p>
                       </button>
@@ -306,7 +306,7 @@ function AiShortlistMobile({
         <button
           type="button"
           onClick={() => navigate(`/m/programs/${program.id}/winner-selection`)}
-          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white font-mobile font-semibold transition-colors shadow-sm"
+          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-primary hover:bg-primary/90 text-white font-mobile font-semibold transition-colors shadow-sm"
           data-testid="review-and-select-winners"
         >
           <Trophy className="w-4 h-4" />
@@ -388,7 +388,7 @@ function WinnersDeclared({
     <>
       <section
         className={cn(
-          "bg-white rounded-2xl border border-stone-200 mt-4 overflow-hidden",
+          "bg-white rounded-2xl border border-border mt-4 overflow-hidden",
           variant === "web" && "mt-0",
         )}
         data-testid="post-cycle-winners"
@@ -405,13 +405,13 @@ function WinnersDeclared({
           </div>
           <div className="relative flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center shrink-0">
-              <Trophy className="w-4 h-4 text-amber-700" />
+              <Trophy className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-mobile font-semibold text-stone-900">
+              <p className="font-mobile font-semibold text-foreground">
                 🏆 Winners declared
               </p>
-              <p className="text-sm text-stone-700 mt-1 leading-snug">
+              <p className="text-sm text-muted-foreground mt-1 leading-snug">
                 {winners.length} winner{winners.length === 1 ? "" : "s"} across{" "}
                 {categoryCount} categor{categoryCount === 1 ? "y" : "ies"}
               </p>
@@ -427,7 +427,7 @@ function WinnersDeclared({
               <div key={cat.id}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-base">{cat.emoji}</span>
-                  <h4 className="font-mobile font-semibold text-stone-900">{cat.name}</h4>
+                  <h4 className="font-mobile font-semibold text-foreground">{cat.name}</h4>
                 </div>
                 <ul className="space-y-2">
                   {list.map((w) => (
@@ -459,11 +459,11 @@ function WinnersDeclared({
                   #{openWinner.finalRank ?? "—"} · {openWinner.nomineeName}
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-4 space-y-3 text-sm text-stone-700">
+              <div className="mt-4 space-y-3 text-sm text-muted-foreground">
                 <p className="leading-relaxed">{openWinner.reason}</p>
-                <p className="text-xs text-stone-500">
+                <p className="text-xs text-muted-foreground">
                   Nominated by{" "}
-                  <span className="font-medium text-stone-700">
+                  <span className="font-medium text-muted-foreground">
                     {openWinner.nominatorName}
                   </span>
                 </p>
@@ -493,7 +493,7 @@ function WinnerRow({
   const prizePoints = category.prizePoints || 0;
 
   return (
-    <div className="bg-white border border-stone-200 rounded-2xl p-3">
+    <div className="bg-white border border-border rounded-2xl p-3">
       <button
         type="button"
         onClick={onExpand}
@@ -502,26 +502,26 @@ function WinnerRow({
         <img
           src={winner.nomineeAvatar}
           alt=""
-          className="w-11 h-11 rounded-full object-cover shrink-0 border border-stone-200"
+          className="w-11 h-11 rounded-full object-cover shrink-0 border border-border"
         />
         <div className="min-w-0 flex-1">
-          <p className="font-mobile font-semibold text-stone-900 truncate">
+          <p className="font-mobile font-semibold text-foreground truncate">
             {winner.nomineeName}
           </p>
-          <p className="text-xs text-stone-500 truncate">
+          <p className="text-xs text-muted-foreground truncate">
             {winner.nomineeRole}
             {winner.nomineeDepartment && ` · ${winner.nomineeDepartment}`}
           </p>
-          <p className="text-[11px] text-stone-400 mt-0.5">
+          <p className="text-[11px] text-muted-foreground mt-0.5">
             Won {timeAgo(decided)}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className="px-2 py-0.5 rounded-full bg-stone-900 text-white text-[11px] font-mobile font-semibold">
+          <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-mobile font-semibold">
             #{winner.finalRank ?? "—"}
           </span>
           {monetaryEnabled && prizePoints > 0 && (
-            <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100 text-[11px] font-mobile font-semibold tabular-nums">
+            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/15 text-[11px] font-mobile font-semibold tabular-nums">
               {prizePoints} pts
             </span>
           )}
@@ -565,7 +565,7 @@ function PerWinnerActionRow() {
     },
   ];
   return (
-    <div className="overflow-x-auto -mx-3 px-3 pt-3 mt-3 border-t border-stone-100">
+    <div className="overflow-x-auto -mx-3 px-3 pt-3 mt-3 border-t border-border">
       <div className="flex gap-2">
         {items.map((it) => (
           <Tooltip key={it.label}>
@@ -574,7 +574,7 @@ function PerWinnerActionRow() {
                 type="button"
                 aria-label={it.ariaLabel}
                 onClick={() => fire(it.ariaLabel, it.body)}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-stone-200 bg-white text-stone-700 text-xs font-mobile font-semibold hover:bg-stone-50 active:bg-stone-100 transition-colors"
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-border bg-white text-muted-foreground text-xs font-mobile font-semibold hover:bg-muted active:bg-muted transition-colors"
               >
                 {it.icon}
                 {it.label}
@@ -596,10 +596,10 @@ function HrActionsCard() {
     toast({ title: label, description: body });
   }
   return (
-    <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 mt-2">
+    <div className="bg-muted border border-border rounded-2xl p-4 mt-2">
       <div className="flex items-center gap-2 mb-3">
-        <Lock className="w-3.5 h-3.5 text-stone-500" />
-        <h4 className="font-mobile font-semibold text-stone-900">HR actions</h4>
+        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+        <h4 className="font-mobile font-semibold text-foreground">HR actions</h4>
       </div>
 
       <div className="space-y-2">
@@ -610,7 +610,7 @@ function HrActionsCard() {
               onClick={() =>
                 fire("Publish to award night display", "Award-night display coming in Phase 3")
               }
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-stone-200 text-stone-800 text-sm font-mobile font-semibold hover:bg-stone-100 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-border text-foreground text-sm font-mobile font-semibold hover:bg-muted transition-colors"
             >
               <MonitorPlay className="w-4 h-4" />
               🎬 Publish to award night display
@@ -626,7 +626,7 @@ function HrActionsCard() {
               onClick={() =>
                 fire("Email announcement", "Email blast coming in Phase 3 (uses SendGrid)")
               }
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-stone-200 text-stone-800 text-sm font-mobile font-semibold hover:bg-stone-100 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-border text-foreground text-sm font-mobile font-semibold hover:bg-muted transition-colors"
             >
               <Mail className="w-4 h-4" />
               📧 Email announcement
@@ -639,7 +639,7 @@ function HrActionsCard() {
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-stone-200 text-stone-800 text-sm font-mobile font-semibold hover:bg-stone-100 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-full bg-white border border-border text-foreground text-sm font-mobile font-semibold hover:bg-muted transition-colors"
             >
               <Share2 className="w-4 h-4" />
               📱 Post to social channels
@@ -686,7 +686,7 @@ function SocialOption({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-stone-700 hover:bg-stone-100 transition-colors"
+      className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted transition-colors"
     >
       {icon}
       {label}

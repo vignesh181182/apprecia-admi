@@ -59,7 +59,7 @@ export function MiniChart({ data, labels, activeColor = "#3b82f6" }: MiniChartPr
         </ChartContainer>
       </div>
       
-      <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+      <div className="flex justify-between text-xs text-muted-foreground dark:text-muted-foreground">
         {labels.map((label, index) => (
           <span key={index} className="text-center flex-1">{label}</span>
         ))}

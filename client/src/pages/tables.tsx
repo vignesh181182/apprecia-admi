@@ -12,36 +12,36 @@ export default function Tables() {
     <div className="h-full overflow-y-auto p-6 custom-scrollbar">
       <div className="space-y-6">
         {/* Authors Table */}
-        <Card className="border-stone-200">
-          <CardHeader className="border-b border-stone-200">
-            <CardTitle className="text-lg font-semibold text-stone-900">Authors table</CardTitle>
+        <Card className="border-border">
+          <CardHeader className="border-b border-border">
+            <CardTitle className="text-lg font-semibold text-foreground">Authors table</CardTitle>
           </CardHeader>
           
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-stone-50">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       AUTHOR
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       FUNCTION
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       STATUS
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       EMPLOYED
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       ACTION
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-stone-200">
+                <tbody className="bg-white divide-y divide-border">
                   {authorsData.map((author) => (
-                    <tr key={author.id} className="hover:bg-stone-50">
+                    <tr key={author.id} className="hover:bg-muted">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <Avatar className="w-10 h-10">
@@ -51,28 +51,28 @@ export default function Tables() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-4">
-                            <div className="text-sm font-normal text-stone-900">{author.name}</div>
-                            <div className="text-sm text-stone-500">{author.email}</div>
+                            <div className="text-sm font-normal text-foreground">{author.name}</div>
+                            <div className="text-sm text-muted-foreground">{author.email}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-stone-900">{author.role}</div>
-                        <div className="text-sm text-stone-500">{author.department}</div>
+                        <div className="text-sm text-foreground">{author.role}</div>
+                        <div className="text-sm text-muted-foreground">{author.department}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge 
                           variant={author.status === 'online' ? 'default' : 'secondary'}
                           className={cn(
                             author.status === 'online' 
-                              ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                              : 'bg-stone-100 text-stone-800 hover:bg-stone-100'
+                              ? 'bg-success/15 text-success hover:bg-success/15' 
+                              : 'bg-muted text-foreground hover:bg-muted'
                           )}
                         >
                           {author.status === 'online' ? 'Online' : 'Offline'}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {author.employed}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-normal">
@@ -89,36 +89,36 @@ export default function Tables() {
         </Card>
 
         {/* Projects Table */}
-        <Card className="border-stone-200">
-          <CardHeader className="border-b border-stone-200">
-            <CardTitle className="text-lg font-semibold text-stone-900">Projects table</CardTitle>
+        <Card className="border-border">
+          <CardHeader className="border-b border-border">
+            <CardTitle className="text-lg font-semibold text-foreground">Projects table</CardTitle>
           </CardHeader>
           
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-stone-50">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       PROJECT
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       BUDGET
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       STATUS
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       COMPLETION
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-normal text-stone-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-normal text-muted-foreground uppercase tracking-wider">
                       ACTION
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-stone-200">
+                <tbody className="bg-white divide-y divide-border">
                   {projectsData.map((project) => (
-                    <tr key={project.id} className="hover:bg-stone-50">
+                    <tr key={project.id} className="hover:bg-muted">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className={cn(
@@ -127,19 +127,19 @@ export default function Tables() {
                           )}>
                             {project.icon.length === 1 ? project.icon : project.icon.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-normal text-stone-900">{project.name}</span>
+                          <span className="font-normal text-foreground">{project.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                         {project.budget}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge 
                           variant="secondary"
                           className={cn(
-                            project.status === 'working' && 'bg-blue-100 text-blue-800 hover:bg-blue-100',
-                            project.status === 'done' && 'bg-green-100 text-green-800 hover:bg-green-100',
-                            project.status === 'cancelled' && 'bg-red-100 text-red-800 hover:bg-red-100'
+                            project.status === 'working' && 'bg-info/15 text-info hover:bg-info/15',
+                            project.status === 'done' && 'bg-success/15 text-success hover:bg-success/15',
+                            project.status === 'cancelled' && 'bg-destructive/15 text-destructive hover:bg-destructive/15'
                           )}
                         >
                           {project.status === 'working' && 'Working'}
@@ -149,7 +149,7 @@ export default function Tables() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className="text-sm text-stone-600 mr-2">{project.completion}%</span>
+                          <span className="text-sm text-muted-foreground mr-2">{project.completion}%</span>
                           <Progress 
                             value={project.completion} 
                             className="w-32 h-2"

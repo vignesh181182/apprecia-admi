@@ -65,13 +65,13 @@ export function WalletCard() {
 
   if (!monetary) {
     return (
-      <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 flex items-start gap-3">
-        <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center shrink-0">
-          <Info className="w-4 h-4 text-stone-600" />
+      <div className="rounded-2xl border border-border bg-muted p-4 flex items-start gap-3">
+        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+          <Info className="w-4 h-4 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-sm font-mobile font-semibold text-stone-900">Monetary recognition is disabled</p>
-          <p className="text-xs text-stone-600 mt-0.5">
+          <p className="text-sm font-mobile font-semibold text-foreground">Monetary recognition is disabled</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Badges are recorded but no points are credited. Your HR admin will let you know when this changes.
           </p>
         </div>
@@ -88,37 +88,37 @@ export function WalletCard() {
   const resetAt = nextPeriodResetDate();
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white p-4 space-y-3">
+    <div className="rounded-2xl border border-border bg-white p-4 space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 flex flex-col gap-2">
+        <div className="rounded-xl bg-primary/10 border border-primary/15 p-3 flex flex-col gap-2">
           <div className="flex items-center gap-1.5">
-            <Gift className="w-3.5 h-3.5 text-amber-700" />
-            <p className="text-[11px] font-mobile font-semibold text-amber-800 uppercase tracking-wide">Receive</p>
+            <Gift className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[11px] font-mobile font-semibold text-primary uppercase tracking-wide">Receive</p>
           </div>
-          <p className="text-2xl font-mobile font-bold text-stone-900 leading-none">
+          <p className="text-2xl font-mobile font-bold text-foreground leading-none">
             {wallet.receiveBalance.toLocaleString()}
-            <span className="text-sm font-semibold text-stone-500 ml-1">pts</span>
+            <span className="text-sm font-semibold text-muted-foreground ml-1">pts</span>
           </p>
           <Link
             to="/m/rewards"
-            className="mt-1 inline-flex items-center justify-center h-8 rounded-full bg-[#a87a3a] text-white text-xs font-mobile font-semibold hover:bg-[#8e6730] transition-colors"
+            className="mt-1 inline-flex items-center justify-center h-8 rounded-full bg-primary text-white text-xs font-mobile font-semibold hover:bg-[#8e6730] transition-colors"
           >
             Redeem
           </Link>
         </div>
 
-        <div className="rounded-xl bg-stone-50 border border-stone-200 p-3 flex flex-col gap-2">
+        <div className="rounded-xl bg-muted border border-border p-3 flex flex-col gap-2">
           <div className="flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5 text-stone-600" />
-            <p className="text-[11px] font-mobile font-semibold text-stone-600 uppercase tracking-wide">Give this month</p>
+            <Wallet className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[11px] font-mobile font-semibold text-muted-foreground uppercase tracking-wide">Give this month</p>
           </div>
-          <p className="text-2xl font-mobile font-bold text-stone-900 leading-none">
+          <p className="text-2xl font-mobile font-bold text-foreground leading-none">
             {wallet.giveBalance.toLocaleString()}
-            <span className="text-sm font-semibold text-stone-500 ml-1">
+            <span className="text-sm font-semibold text-muted-foreground ml-1">
               / {wallet.giveAllowance.toLocaleString()}
             </span>
           </p>
-          <div className="h-1.5 rounded-full bg-stone-200 overflow-hidden">
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
             <div
               className="h-full bg-[#465853] transition-all"
               style={{ width: `${givePct}%` }}
@@ -127,8 +127,8 @@ export function WalletCard() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-stone-500">
-        <span>Lifetime received: <strong className="text-stone-700">{wallet.lifetimeReceived.toLocaleString()} pts</strong></span>
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span>Lifetime received: <strong className="text-muted-foreground">{wallet.lifetimeReceived.toLocaleString()} pts</strong></span>
         <span>Period resets {formatResetDate(resetAt)}</span>
       </div>
     </div>

@@ -101,10 +101,10 @@ export function ChartsShowcase() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
       {/* Area Chart */}
-      <Card className="border-gray-200">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Sales vs Expenses</CardTitle>
-          <p className="text-sm text-gray-500">Monthly comparison</p>
+          <CardTitle className="text-lg font-semibold text-foreground">Sales vs Expenses</CardTitle>
+          <p className="text-sm text-muted-foreground">Monthly comparison</p>
         </CardHeader>
         <CardContent>
           <ChartContainer config={areaChartConfig} className="h-[300px]">
@@ -158,10 +158,10 @@ export function ChartsShowcase() {
       </Card>
 
       {/* Line Chart */}
-      <Card className="border-gray-200">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">User Activity</CardTitle>
-          <p className="text-sm text-gray-500">Weekly trends</p>
+          <CardTitle className="text-lg font-semibold text-foreground">User Activity</CardTitle>
+          <p className="text-sm text-muted-foreground">Weekly trends</p>
         </CardHeader>
         <CardContent>
           <ChartContainer config={lineChartConfig} className="h-[300px]">
@@ -204,10 +204,10 @@ export function ChartsShowcase() {
       </Card>
 
       {/* Pie Chart */}
-      <Card className="border-gray-200">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Traffic Sources</CardTitle>
-          <p className="text-sm text-gray-500">Device breakdown</p>
+          <CardTitle className="text-lg font-semibold text-foreground">Traffic Sources</CardTitle>
+          <p className="text-sm text-muted-foreground">Device breakdown</p>
         </CardHeader>
         <CardContent>
           <ChartContainer config={pieChartConfig} className="h-[300px]">
@@ -235,10 +235,10 @@ export function ChartsShowcase() {
       </Card>
 
       {/* Bar Chart */}
-      <Card className="border-gray-200">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Quarterly Performance</CardTitle>
-          <p className="text-sm text-gray-500">Revenue and profit analysis</p>
+          <CardTitle className="text-lg font-semibold text-foreground">Quarterly Performance</CardTitle>
+          <p className="text-sm text-muted-foreground">Revenue and profit analysis</p>
         </CardHeader>
         <CardContent>
           <ChartContainer config={barChartConfig} className="h-[300px]">

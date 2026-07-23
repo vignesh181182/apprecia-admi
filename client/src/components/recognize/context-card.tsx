@@ -14,17 +14,17 @@ export function ContextCard({
       <div className="flex items-center gap-3">
         <img src={employee.avatar} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-wide text-stone-500 leading-tight">{verb}</p>
-          <p className="font-mobile font-semibold text-[#a87a3a] truncate leading-tight">
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground leading-tight">{verb}</p>
+          <p className="font-mobile font-semibold text-primary truncate leading-tight">
             {employee.name}
           </p>
-          <p className="text-xs text-stone-600 truncate">{employee.role}</p>
+          <p className="text-xs text-muted-foreground truncate">{employee.role}</p>
         </div>
       </div>
       {badge && (
-        <div className="flex items-center gap-3 pt-2 border-t border-stone-100">
+        <div className="flex items-center gap-3 pt-2 border-t border-border">
           <span className="w-10 flex justify-center text-xl shrink-0">{badge.emoji}</span>
-          <p className="font-mobile font-semibold text-[#a87a3a] truncate">{badge.label}</p>
+          <p className="font-mobile font-semibold text-primary truncate">{badge.label}</p>
         </div>
       )}
     </div>

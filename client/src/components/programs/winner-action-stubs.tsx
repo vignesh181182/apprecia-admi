@@ -70,14 +70,14 @@ function WinnerCard({ winner, currency }: { winner: Nomination; currency: string
   }
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <div className="flex flex-col items-center gap-1 shrink-0 w-14">
-            <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center">
               <Award className="w-4 h-4" />
             </div>
-            <Badge className="bg-stone-900 text-white hover:bg-stone-900 text-[10px]">
+            <Badge className="bg-primary text-primary-foreground hover:bg-stone-900 text-[10px]">
               #{winner.finalRank}
             </Badge>
           </div>
@@ -90,10 +90,10 @@ function WinnerCard({ winner, currency }: { winner: Nomination; currency: string
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="text-base font-semibold text-stone-900 truncate">
+                <p className="text-base font-semibold text-foreground truncate">
                   {winner.nomineeName}
                 </p>
-                <p className="text-xs text-stone-500 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {winner.nomineeRole}
                   {winner.nomineeDepartment && ` · ${winner.nomineeDepartment}`}
                 </p>
@@ -101,17 +101,17 @@ function WinnerCard({ winner, currency }: { winner: Nomination; currency: string
               {winner.prizeAmount && (
                 <Badge
                   variant="secondary"
-                  className="bg-amber-50 text-amber-800 ml-auto hidden sm:inline-flex"
+                  className="bg-primary/10 text-primary ml-auto hidden sm:inline-flex"
                 >
                   {currency}
                   {winner.prizeAmount.toLocaleString()}
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-stone-700 mt-3 leading-relaxed">{winner.reason}</p>
-            <p className="text-xs text-stone-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{winner.reason}</p>
+            <p className="text-xs text-muted-foreground mt-2">
               Nominated by{" "}
-              <span className="font-medium text-stone-700">{winner.nominatorName}</span>
+              <span className="font-medium text-muted-foreground">{winner.nominatorName}</span>
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2">
@@ -153,11 +153,11 @@ function AdminPublishingPanel({ program }: { program: StoredProgram }) {
   }
 
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-5 space-y-4">
         <div>
-          <h2 className="text-sm font-semibold text-stone-900">HR publishing</h2>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <h2 className="text-sm font-semibold text-foreground">HR publishing</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Push winners out to the rest of the organization.
           </p>
         </div>
@@ -176,7 +176,7 @@ function AdminPublishingPanel({ program }: { program: StoredProgram }) {
         </div>
 
         <div>
-          <p className="text-xs font-medium text-stone-700 mb-2">
+          <p className="text-xs font-medium text-muted-foreground mb-2">
             Post to social channels
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -203,7 +203,7 @@ function AdminPublishingPanel({ program }: { program: StoredProgram }) {
           </div>
         </div>
 
-        <p className="text-xs text-stone-400 italic pt-2 border-t border-stone-100">
+        <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
           {program.notifications?.announceWinnersToSlack
             ? "Slack winners auto-announce is enabled — Phase 3 will fire it on confirm."
             : "Hint: enable Slack winner announcements in the program settings."}
@@ -249,7 +249,7 @@ function SocialStub({
       <TooltipTrigger asChild>
         <button
           onClick={onAction}
-          className="flex items-center gap-2 p-2.5 border border-stone-200 rounded-md text-xs text-stone-700 hover:bg-stone-50 transition"
+          className="flex items-center gap-2 p-2.5 border border-border rounded-md text-xs text-muted-foreground hover:bg-muted transition"
         >
           {icon}
           <span>{label}</span>

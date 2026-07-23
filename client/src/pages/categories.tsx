@@ -38,7 +38,7 @@ const statusBadgeClass: Record<ProgramStatus, string> = {
   scheduled: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   active: "bg-green-100 text-green-800 hover:bg-green-100",
   "ending-soon": "bg-orange-100 text-orange-800 hover:bg-orange-100",
-  ended: "bg-stone-100 text-stone-700 hover:bg-stone-100",
+  ended: "bg-muted text-muted-foreground hover:bg-muted",
 };
 
 export default function Categories() {
@@ -109,8 +109,8 @@ export default function Categories() {
             onClick={() => setStatusFilter(f.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               statusFilter === f.id
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-white text-muted-foreground border-border hover:bg-muted"
             }`}
           >
             {f.label} ({counts[f.id] ?? 0})
@@ -127,7 +127,7 @@ export default function Categories() {
         />
       </div>
 
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -142,7 +142,7 @@ export default function Categories() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-sm text-stone-500 py-10">
+                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-10">
                     No categories yet. Create a program and add award categories to see them here.
                   </TableCell>
                 </TableRow>
@@ -157,11 +157,11 @@ export default function Categories() {
                             {r.category.emoji || "🏆"}
                           </span>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-stone-900 truncate">
+                            <p className="text-sm font-medium text-foreground truncate">
                               {r.category.name || "(unnamed)"}
                             </p>
                             {r.category.description && (
-                              <p className="text-xs text-stone-500 truncate">
+                              <p className="text-xs text-muted-foreground truncate">
                                 {r.category.description}
                               </p>
                             )}
@@ -172,7 +172,7 @@ export default function Categories() {
                         <div className="flex items-center gap-2 min-w-0">
                           <Link
                             to={`/programs/${r.program.id}`}
-                            className="text-sm text-stone-700 hover:text-stone-900 hover:underline truncate"
+                            className="text-sm text-muted-foreground hover:text-foreground hover:underline truncate"
                           >
                             {r.program.name}
                           </Link>
@@ -184,25 +184,25 @@ export default function Categories() {
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm text-stone-700">
+                      <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
                         {r.category.winnersCount}
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-sm">
-                        <span className="text-stone-900">
+                        <span className="text-foreground">
                           {currency}
                           {perWinnerMoney.toLocaleString()}
                         </span>
-                        <span className="text-stone-500">
+                        <span className="text-muted-foreground">
                           {" · "}
                           {r.category.prizePoints.toLocaleString()} pts
                         </span>
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-sm">
-                        <span className="text-stone-900 font-medium">
+                        <span className="text-foreground font-medium">
                           {currency}
                           {r.money.toLocaleString()}
                         </span>
-                        <span className="text-stone-500">
+                        <span className="text-muted-foreground">
                           {" · "}
                           {r.points.toLocaleString()} pts
                         </span>
@@ -221,10 +221,10 @@ export default function Categories() {
 
 function SummaryStat({ label, value }: { label: string; value: string | number }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
-        <p className="text-[11px] uppercase tracking-wide text-stone-500">{label}</p>
-        <p className="text-xl font-semibold text-stone-900 tabular-nums mt-1">{value}</p>
+        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-xl font-semibold text-foreground tabular-nums mt-1">{value}</p>
       </CardContent>
     </Card>
   );

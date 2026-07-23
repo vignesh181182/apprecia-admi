@@ -52,7 +52,7 @@ import { useToast } from "@/hooks/use-toast";
 const statusColors: Record<OneOnOneStatus, string> = {
   scheduled: "bg-amber-100 text-amber-700",
   completed: "bg-green-100 text-green-700",
-  cancelled: "bg-stone-100 text-stone-600",
+  cancelled: "bg-muted text-muted-foreground",
   overdue: "bg-red-100 text-red-700",
 };
 
@@ -160,21 +160,21 @@ export default function OneOnOnes() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Total meetings" value={counts.total} icon={<MessageSquare className="w-4 h-4" />} />
-        <KpiCard label="Scheduled" value={counts.scheduled} icon={<CalendarClock className="w-4 h-4" />} accent="text-amber-600" />
-        <KpiCard label="Completed this month" value={counts.completedThisMonth} icon={<CheckCircle2 className="w-4 h-4" />} accent="text-green-600" />
-        <KpiCard label="Overdue" value={counts.overdue} icon={<AlertTriangle className="w-4 h-4" />} accent="text-red-600" />
+        <KpiCard label="Scheduled" value={counts.scheduled} icon={<CalendarClock className="w-4 h-4" />} accent="text-primary" />
+        <KpiCard label="Completed this month" value={counts.completedThisMonth} icon={<CheckCircle2 className="w-4 h-4" />} accent="text-success" />
+        <KpiCard label="Overdue" value={counts.overdue} icon={<AlertTriangle className="w-4 h-4" />} accent="text-destructive" />
       </div>
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by manager or employee…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm border-stone-200"
+              className="pl-9 h-9 text-sm border-border"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -184,8 +184,8 @@ export default function OneOnOnes() {
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                   statusFilter === s
-                    ? "bg-stone-900 text-white border-stone-900"
-                    : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-white text-muted-foreground border-border hover:bg-muted"
                 }`}
               >
                 {s === "all" ? "All" : statusLabels[s as OneOnOneStatus]}
@@ -195,7 +195,7 @@ export default function OneOnOnes() {
         </div>
         <Button
           size="sm"
-          className="h-9 gap-2 bg-stone-900 hover:bg-stone-700 text-white"
+          className="h-9 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => setScheduleOpen(true)}
         >
           <Plus className="w-4 h-4" /> Schedule 1-on-1
@@ -203,47 +203,47 @@ export default function OneOnOnes() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-stone-200 overflow-hidden">
+      <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">Manager → Employee</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Date & Time</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Duration</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Agenda</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Action items</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="text-xs font-semibold text-muted-foreground">Manager → Employee</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Date & Time</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Duration</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Agenda</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Action items</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Status</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((m) => {
               const overdueActions = m.actionItems.filter((a) => !a.done && isOverdue(a.dueDate)).length;
               return (
-                <TableRow key={m.id} className="hover:bg-stone-50 cursor-pointer" onClick={() => setSelected(m)}>
+                <TableRow key={m.id} className="hover:bg-muted cursor-pointer" onClick={() => setSelected(m)}>
                   <TableCell>
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="font-medium text-stone-900">{m.managerName}</span>
-                      <ArrowRight className="w-3 h-3 text-stone-400" />
-                      <span className="font-medium text-stone-900">{m.employeeName}</span>
-                      <Badge variant="secondary" className="bg-stone-100 text-stone-600 text-xs ml-1">{m.department}</Badge>
+                      <span className="font-medium text-foreground">{m.managerName}</span>
+                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{m.employeeName}</span>
+                      <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs ml-1">{m.department}</Badge>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-stone-700 whitespace-nowrap">{fmtDateTime(m.scheduledAt)}</TableCell>
-                  <TableCell className="text-xs text-stone-700">{m.duration} min</TableCell>
+                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{fmtDateTime(m.scheduledAt)}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{m.duration} min</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700">
+                    <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
                       {m.agendaItems.length} {m.agendaItems.length === 1 ? "item" : "items"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-700">
+                      <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
                         {m.actionItems.length}
                       </Badge>
                       {overdueActions > 0 && (
-                        <span className="inline-flex items-center gap-1 text-xs text-red-600 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span className="inline-flex items-center gap-1 text-xs text-destructive font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
                           {overdueActions} overdue
                         </span>
                       )}
@@ -258,7 +258,7 @@ export default function OneOnOnes() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 px-2 text-xs text-stone-500 hover:text-stone-900"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => setSelected(m)}
                     >
                       View
@@ -269,7 +269,7 @@ export default function OneOnOnes() {
             })}
             {filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-sm text-stone-500 py-10">
+                <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-10">
                   No 1-on-1s match your filters.
                 </TableCell>
               </TableRow>
@@ -307,13 +307,13 @@ export default function OneOnOnes() {
   );
 }
 
-function KpiCard({ label, value, icon, accent = "text-stone-900" }: { label: string; value: number; icon: React.ReactNode; accent?: string }) {
+function KpiCard({ label, value, icon, accent = "text-foreground" }: { label: string; value: number; icon: React.ReactNode; accent?: string }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-          <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600">{icon}</div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
+          <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">{icon}</div>
         </div>
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       </CardContent>
@@ -368,53 +368,53 @@ function ViewSheet({
 
       {/* Agenda */}
       <div className="mt-6">
-        <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide mb-2">Agenda</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Agenda</p>
         <div className="space-y-1.5">
           {meeting.agendaItems.map((a) => (
-            <div key={a.id} className="flex items-start gap-2 rounded-lg border border-stone-200 px-3 py-2">
+            <div key={a.id} className="flex items-start gap-2 rounded-lg border border-border px-3 py-2">
               <Checkbox checked={a.checked} onCheckedChange={() => onToggleAgenda(a.id)} className="mt-0.5" />
               <div className="flex-1">
-                <p className={`text-sm ${a.checked ? "line-through text-stone-400" : "text-stone-700"}`}>{a.text}</p>
-                <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-600 mt-1">
+                <p className={`text-sm ${a.checked ? "line-through text-muted-foreground" : "text-muted-foreground"}`}>{a.text}</p>
+                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground mt-1">
                   Added by {a.addedBy}
                 </Badge>
               </div>
             </div>
           ))}
           {meeting.agendaItems.length === 0 && (
-            <p className="text-xs text-stone-500 italic">No agenda items yet.</p>
+            <p className="text-xs text-muted-foreground italic">No agenda items yet.</p>
           )}
         </div>
       </div>
 
       {/* Notes */}
       <div className="mt-5">
-        <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide mb-2">Notes</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</p>
         <Textarea
           value={notesDraft}
           onChange={(e) => setNotesDraft(e.target.value)}
           onBlur={() => onSaveNotes(notesDraft)}
           placeholder="Capture decisions, themes, follow-ups…"
           rows={4}
-          className="text-sm border-stone-200 resize-none"
+          className="text-sm border-border resize-none"
         />
-        <p className="text-xs text-stone-400 mt-1">Saved automatically when you leave the field.</p>
+        <p className="text-xs text-muted-foreground mt-1">Saved automatically when you leave the field.</p>
       </div>
 
       {/* Action items */}
       <div className="mt-6">
-        <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide mb-2">Action items</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Action items</p>
         <div className="space-y-1.5">
           {meeting.actionItems.map((a) => {
             const overdue = !a.done && isOverdue(a.dueDate);
             return (
-              <div key={a.id} className="flex items-center gap-2 rounded-lg border border-stone-200 px-3 py-2">
+              <div key={a.id} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
                 <Checkbox checked={a.done} onCheckedChange={() => onToggleAction(a.id)} />
                 <div className="flex-1 flex items-center justify-between gap-2">
-                  <p className={`text-sm ${a.done ? "line-through text-stone-400" : "text-stone-700"}`}>{a.text}</p>
+                  <p className={`text-sm ${a.done ? "line-through text-muted-foreground" : "text-muted-foreground"}`}>{a.text}</p>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-600">{a.owner}</Badge>
-                    <Badge variant="secondary" className={`text-xs ${overdue ? "bg-red-100 text-red-700" : "bg-stone-100 text-stone-600"}`}>
+                    <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">{a.owner}</Badge>
+                    <Badge variant="secondary" className={`text-xs ${overdue ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground"}`}>
                       {fmtDate(a.dueDate)}
                     </Badge>
                   </div>
@@ -423,24 +423,24 @@ function ViewSheet({
             );
           })}
           {meeting.actionItems.length === 0 && (
-            <p className="text-xs text-stone-500 italic">No action items yet.</p>
+            <p className="text-xs text-muted-foreground italic">No action items yet.</p>
           )}
         </div>
 
         {/* Add action item form */}
-        <form onSubmit={submitAction} className="mt-3 space-y-2 rounded-lg border border-dashed border-stone-300 p-3">
-          <div className="flex items-center gap-1.5 text-xs text-stone-600">
+        <form onSubmit={submitAction} className="mt-3 space-y-2 rounded-lg border border-dashed border-border p-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <ClipboardList className="w-3.5 h-3.5" /> Add an action item
           </div>
           <Input
             placeholder="What needs to happen?"
             value={newActionText}
             onChange={(e) => setNewActionText(e.target.value)}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
           <div className="grid grid-cols-2 gap-2">
             <Select value={newActionOwner} onValueChange={setNewActionOwner}>
-              <SelectTrigger className="h-9 text-sm border-stone-200">
+              <SelectTrigger className="h-9 text-sm border-border">
                 <SelectValue placeholder="Owner" />
               </SelectTrigger>
               <SelectContent>
@@ -452,10 +452,10 @@ function ViewSheet({
               type="date"
               value={newActionDue}
               onChange={(e) => setNewActionDue(e.target.value)}
-              className="h-9 text-sm border-stone-200"
+              className="h-9 text-sm border-border"
             />
           </div>
-          <Button type="submit" size="sm" className="h-9 w-full bg-stone-900 hover:bg-stone-700 text-white">
+          <Button type="submit" size="sm" className="h-9 w-full bg-primary hover:bg-primary/90 text-primary-foreground">
             Add action
           </Button>
         </form>
@@ -508,9 +508,9 @@ function ScheduleForm({ onSubmit }: { onSubmit: (m: OneOnOne) => void }) {
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Manager</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Manager</Label>
         <Select value={managerName} onValueChange={setManagerName}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             {employeesData.map((e) => (
               <SelectItem key={e.id} value={e.name}>{e.name} · {e.role}</SelectItem>
@@ -520,9 +520,9 @@ function ScheduleForm({ onSubmit }: { onSubmit: (m: OneOnOne) => void }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Employee</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Employee</Label>
         <Select value={employeeName} onValueChange={setEmployeeName}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             {employeesData.map((e) => (
               <SelectItem key={e.id} value={e.name}>{e.name} · {e.department}</SelectItem>
@@ -533,18 +533,18 @@ function ScheduleForm({ onSubmit }: { onSubmit: (m: OneOnOne) => void }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Date & time</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Date & time</Label>
           <Input
             type="datetime-local"
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Duration</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Duration</Label>
           <Select value={String(duration)} onValueChange={(v) => setDuration(Number(v) as 30 | 45 | 60)}>
-            <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="30">30 min</SelectItem>
               <SelectItem value="45">45 min</SelectItem>
@@ -555,20 +555,20 @@ function ScheduleForm({ onSubmit }: { onSubmit: (m: OneOnOne) => void }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Agenda items</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Agenda items</Label>
         <Input
           placeholder="Type and press Enter to add…"
           value={agendaText}
           onChange={(e) => setAgendaText(e.target.value)}
           onKeyDown={addAgenda}
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
         />
         {agenda.length > 0 && (
           <div className="space-y-1 mt-2">
             {agenda.map((a) => (
-              <div key={a.id} className="flex items-center justify-between rounded border border-stone-200 px-3 py-1.5">
-                <span className="text-sm text-stone-700">{a.text}</span>
-                <button type="button" onClick={() => removeAgenda(a.id)} className="text-stone-400 hover:text-red-600">
+              <div key={a.id} className="flex items-center justify-between rounded border border-border px-3 py-1.5">
+                <span className="text-sm text-muted-foreground">{a.text}</span>
+                <button type="button" onClick={() => removeAgenda(a.id)} className="text-muted-foreground hover:text-destructive">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -577,7 +577,7 @@ function ScheduleForm({ onSubmit }: { onSubmit: (m: OneOnOne) => void }) {
         )}
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Schedule meeting
       </Button>
     </form>

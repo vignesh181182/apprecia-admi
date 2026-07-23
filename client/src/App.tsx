@@ -62,6 +62,7 @@ import OnboardingReview from "@/pages/onboarding/review";
 import { isAuthenticated, getAccount, setAuthenticated, isAdmin, isSuperAdminAuthenticated } from "@/lib/account";
 import { processAppreciationAutoApprovals } from "@/lib/badges";
 import { transitionScheduledPrograms } from "@/lib/programs-data";
+import { applyBrandColor } from "@/lib/theme";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated()) return <Navigate to="/auth/sign-in" replace />;
@@ -126,7 +127,18 @@ function MobileRedirect() {
 
 function Layout({ children, title, description }: { children: React.ReactNode; title?: string; description?: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("engagex_sidebar_collapsed") === "1",
+  );
   const navigate = useNavigate();
+
+  function toggleCollapse() {
+    setCollapsed((v) => {
+      const next = !v;
+      localStorage.setItem("engagex_sidebar_collapsed", next ? "1" : "0");
+      return next;
+    });
+  }
 
   function signOut() {
     setAuthenticated(false);
@@ -134,7 +146,7 @@ function Layout({ children, title, description }: { children: React.ReactNode; t
   }
 
   return (
-    <div className="flex h-screen bg-stone-50 grain-texture">
+    <div className="flex h-screen bg-gradient-to-b from-[#fdf6ee] via-[#faf1e7] to-[#f6ecef]">
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
@@ -147,16 +159,21 @@ function Layout({ children, title, description }: { children: React.ReactNode; t
         transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
         transition-transform duration-300 ease-in-out
       `}>
-        <Sidebar onClose={() => setSidebarOpen(false)} onSignOut={signOut} />
+        <Sidebar
+          onClose={() => setSidebarOpen(false)}
+          onSignOut={signOut}
+          collapsed={collapsed}
+          onToggleCollapse={toggleCollapse}
+        />
       </div>
 
-      <main className="flex-1 overflow-y-auto p-3 lg:p-6 relative z-10 flex flex-col">
+      <main className="flex-1 overflow-y-auto p-3 lg:p-1 relative z-10 flex flex-col">
         <div className="lg:hidden mb-4 flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <Menu className="h-6 w-6" />
           </Button>
@@ -164,18 +181,18 @@ function Layout({ children, title, description }: { children: React.ReactNode; t
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <LogOut className="h-5 w-5" />
           </Button>
         </div>
 
-        <Card className="flex-1 border border-stone-200 bg-white relative z-20">
+        <Card className="flex-1 border border-border bg-white relative z-20">
           {title && (
             <div className="pt-6 px-3 lg:px-6 pb-4">
-              <h1 className="text-xl font-semibold text-stone-900 mb-1">{title}</h1>
-              {description && <p className="text-sm text-stone-600">{description}</p>}
-              <div className="border-b border-stone-200 mt-4"></div>
+              <h1 className="text-xl font-semibold text-foreground mb-1">{title}</h1>
+              {description && <p className="text-sm text-muted-foreground">{description}</p>}
+              <div className="border-b border-border mt-4"></div>
             </div>
           )}
           {children}
@@ -278,6 +295,16 @@ function AutoApprovalRunner() {
   return null;
 }
 
+// Applies the signed-in company's brand color to the theme tokens. Re-runs on
+// each navigation so it picks up the account right after sign-in/onboarding.
+function BrandTheme() {
+  const location = useLocation();
+  useEffect(() => {
+    applyBrandColor(getAccount()?.brandColor);
+  }, [location.pathname]);
+  return null;
+}
+
 function App() {
   return (
     <HashRouter>
@@ -285,6 +312,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <AutoApprovalRunner />
+          <BrandTheme />
           <MobileRedirect />
           <Router />
         </TooltipProvider>

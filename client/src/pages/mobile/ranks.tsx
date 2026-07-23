@@ -16,9 +16,9 @@ export default function MobileRanks() {
   return (
     <EmployeeLayout rightRail={<RanksRightRail />}>
       <div className="px-5 md:px-0 pt-3 md:pt-0 pb-44 md:pb-6">
-        <h2 className="font-mobile text-xl text-stone-900 mb-3 md:hidden">
+        <h2 className="font-mobile text-xl text-foreground mb-3 md:hidden">
           <span className="font-semibold">Top 10 Ranks</span>{" "}
-          <span className="text-stone-500 font-normal">This Month</span>
+          <span className="text-muted-foreground font-normal">This Month</span>
         </h2>
 
         <WinnerCard entry={winner} />
@@ -29,7 +29,7 @@ export default function MobileRanks() {
           ))}
         </div>
 
-        <ul className="mt-3 divide-y divide-stone-100">
+        <ul className="mt-3 divide-y divide-border">
           {rest.map((entry) => (
             <li key={entry.rank}>
               <RankRow entry={entry} />
@@ -38,7 +38,7 @@ export default function MobileRanks() {
         </ul>
 
         {!isMobile && (
-          <div className="mt-4 pt-4 border-t border-stone-200">
+          <div className="mt-4 pt-4 border-t border-border">
             <MyRankBanner inline />
           </div>
         )}

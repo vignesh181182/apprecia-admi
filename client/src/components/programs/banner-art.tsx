@@ -9,10 +9,11 @@ import { bannerById } from "@/lib/program-presets";
 type ArtProps = {
   bannerId?: string;
   customDataUrl?: string;
+  fallbackBackground?: string;
   className?: string;
 };
 
-export function BannerArt({ bannerId, customDataUrl, className }: ArtProps) {
+export function BannerArt({ bannerId, customDataUrl, fallbackBackground, className }: ArtProps) {
   if (customDataUrl) {
     return (
       <div
@@ -29,7 +30,7 @@ export function BannerArt({ bannerId, customDataUrl, className }: ArtProps) {
   return (
     <div
       className={`overflow-hidden ${className ?? ""}`}
-      style={{ background: preset?.background ?? "#fafaf9" }}
+      style={{ background: preset?.background ?? fallbackBackground ?? "#fafaf9" }}
     >
       <PatternSvg patternId={preset?.patternId} accent={preset?.accent ?? "#ffffff"} />
     </div>

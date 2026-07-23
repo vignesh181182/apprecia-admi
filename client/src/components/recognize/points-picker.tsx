@@ -11,7 +11,7 @@ export function PointsPicker({
 }) {
   return (
     <div>
-      <p className="text-sm font-mobile font-semibold text-stone-900 mb-2">Points</p>
+      <p className="text-sm font-mobile font-semibold text-foreground mb-2">Points</p>
       <div className="flex flex-wrap gap-2">
         {POINTS_PRESETS.map((preset) => {
           const selected = preset === value;
@@ -23,8 +23,8 @@ export function PointsPicker({
               className={cn(
                 "inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-mobile font-semibold transition-colors border",
                 selected
-                  ? "bg-[#a87a3a] text-white border-[#a87a3a]"
-                  : "bg-white text-stone-700 border-stone-200 hover:border-stone-300",
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-muted-foreground border-border hover:border-border",
               )}
             >
               <Sparkles className="w-3.5 h-3.5" />

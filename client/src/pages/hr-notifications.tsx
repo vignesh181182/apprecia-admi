@@ -76,7 +76,7 @@ export default function HRNotifications() {
       {/* Header actions */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-stone-700 font-medium">
+          <span className="text-sm text-muted-foreground font-medium">
             {unreadCount > 0 ? (
               <>{unreadCount} unread</>
             ) : (
@@ -84,14 +84,14 @@ export default function HRNotifications() {
             )}
           </span>
           {unreadCount > 0 && (
-            <Badge className="bg-stone-900 text-white text-xs">{unreadCount}</Badge>
+            <Badge className="bg-primary text-primary-foreground text-xs">{unreadCount}</Badge>
           )}
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
-            className={cn("h-8 text-xs border-stone-200", showUnread && "bg-stone-900 text-white border-stone-900")}
+            className={cn("h-8 text-xs border-border", showUnread && "bg-primary text-primary-foreground border-primary")}
             onClick={() => setShowUnread((v) => !v)}
           >
             Unread only
@@ -100,7 +100,7 @@ export default function HRNotifications() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 text-xs border-stone-200 gap-1"
+              className="h-8 text-xs border-border gap-1"
               onClick={markAllRead}
             >
               <Check className="w-3.5 h-3.5" /> Mark all read
@@ -118,8 +118,8 @@ export default function HRNotifications() {
             className={cn(
               "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
               catFilter === cat
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-white text-muted-foreground border-border hover:bg-muted"
             )}
           >
             {cat}
@@ -136,17 +136,17 @@ export default function HRNotifications() {
               key={notif.id}
               className={cn(
                 "border transition-all",
-                notif.isRead ? "border-stone-200 bg-white" : `${border} ${bg}`
+                notif.isRead ? "border-border bg-white" : `${border} ${bg}`
               )}
             >
               <CardContent className="p-4 flex items-start gap-3">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", notif.isRead ? "bg-stone-100" : bg)}>
-                  <Icon className={cn("w-4 h-4", notif.isRead ? "text-stone-500" : iconClass)} />
+                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", notif.isRead ? "bg-muted" : bg)}>
+                  <Icon className={cn("w-4 h-4", notif.isRead ? "text-muted-foreground" : iconClass)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={cn("text-sm font-medium", notif.isRead ? "text-stone-700" : "text-stone-900")}>
+                      <p className={cn("text-sm font-medium", notif.isRead ? "text-muted-foreground" : "text-foreground")}>
                         {notif.title}
                       </p>
                       {!notif.isRead && (
@@ -158,7 +158,7 @@ export default function HRNotifications() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-stone-400 hover:text-stone-700"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-muted-foreground"
                           onClick={() => markRead(notif.id)}
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -167,21 +167,21 @@ export default function HRNotifications() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-stone-400 hover:text-red-500"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                         onClick={() => dismiss(notif.id)}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
-                  <p className={cn("text-xs mt-0.5", notif.isRead ? "text-stone-500" : "text-stone-600")}>
+                  <p className={cn("text-xs mt-0.5", notif.isRead ? "text-muted-foreground" : "text-muted-foreground")}>
                     {notif.message}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge className={cn("text-xs px-1.5 py-0 h-4", badgeClass)} variant="secondary">
                       {notif.category}
                     </Badge>
-                    <span className="text-xs text-stone-400">{notif.time}</span>
+                    <span className="text-xs text-muted-foreground">{notif.time}</span>
                   </div>
                 </div>
               </CardContent>
@@ -191,8 +191,8 @@ export default function HRNotifications() {
 
         {filtered.length === 0 && (
           <div className="text-center py-16">
-            <CheckCircle2 className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-            <p className="text-sm text-stone-500">No notifications to show.</p>
+            <CheckCircle2 className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No notifications to show.</p>
           </div>
         )}
       </div>

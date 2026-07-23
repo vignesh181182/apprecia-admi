@@ -16,13 +16,13 @@ export function StatsGrid() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {/* Stats Cards */}
       {statsData.map((stat, index) => (
-        <Card key={index} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+        <Card key={index} className="bg-white dark:bg-stone-800 border border-border dark:border-stone-700">
           <CardContent className="p-6 flex flex-col h-full">
             <div className="mb-2">
-              <h3 className="text-sm font-semibold text-stone-900 dark:text-white mb-1">
+              <h3 className="text-sm font-semibold text-foreground dark:text-white mb-1">
                 {stat.title}
               </h3>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                 {stat.description}
               </p>
             </div>
@@ -35,8 +35,8 @@ export function StatsGrid() {
               />
             </div>
 
-            <div className="flex items-center text-xs text-stone-500 dark:text-stone-400">
-              <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-2" />
+            <div className="flex items-center text-xs text-muted-foreground dark:text-muted-foreground">
+              <div className="w-2 h-2 bg-success dark:bg-success/60 rounded-full mr-2" />
               {stat.lastUpdate}
             </div>
           </CardContent>
@@ -44,10 +44,10 @@ export function StatsGrid() {
       ))}
 
       {/* Orders Overview Card */}
-      <Card className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+      <Card className="bg-white dark:bg-stone-800 border border-border dark:border-stone-700">
         <CardContent className="p-6 flex flex-col h-full">
           <div className="mb-2">
-            <h3 className="text-sm font-semibold text-stone-900 dark:text-white mb-1">
+            <h3 className="text-sm font-semibold text-foreground dark:text-white mb-1">
               Orders Overview
             </h3>
           </div>
@@ -62,10 +62,10 @@ export function StatsGrid() {
                       <Icon className={`${order.iconColor} w-4 h-4`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-normal text-stone-900 dark:text-white truncate">
+                      <p className="text-sm font-normal text-foreground dark:text-white truncate">
                         {order.title}
                       </p>
-                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                      <p className="text-xs text-muted-foreground dark:text-muted-foreground mt-1">
                         {order.time}
                       </p>
                     </div>
@@ -76,7 +76,7 @@ export function StatsGrid() {
           </div>
 
           <div className="flex items-center">
-            <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full font-normal">
+            <span className="text-xs text-success dark:text-success bg-success/10 dark:bg-success/20 px-2 py-1 rounded-full font-normal">
               +24% this month
             </span>
           </div>

@@ -55,18 +55,18 @@ export function RichTextarea({
   return (
     <div
       className={cn(
-        "rounded-md border border-stone-200 bg-white focus-within:ring-1 focus-within:ring-stone-400 focus-within:border-stone-400 transition",
+        "rounded-md border border-border bg-white focus-within:ring-1 focus-within:ring-stone-400 focus-within:border-stone-400 transition",
         className,
       )}
     >
-      <div className="flex items-center gap-1 px-2 py-1.5 border-b border-stone-200 bg-stone-50">
+      <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border bg-muted">
         <ToolbarButton onClick={() => wrap("**")} label="Bold (Ctrl+B)">
           <Bold className="w-3.5 h-3.5" />
         </ToolbarButton>
         <ToolbarButton onClick={() => wrap("*")} label="Italic (Ctrl+I)">
           <Italic className="w-3.5 h-3.5" />
         </ToolbarButton>
-        <span className="text-[10px] text-stone-400 ml-auto pr-1">
+        <span className="text-[10px] text-muted-foreground ml-auto pr-1">
           Markdown — **bold**, *italic*
         </span>
       </div>
@@ -89,7 +89,7 @@ export function RichTextarea({
         }}
         rows={rows}
         placeholder={placeholder}
-        className="w-full resize-y bg-transparent px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none"
+        className="w-full resize-y bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
       />
     </div>
   );
@@ -110,7 +110,7 @@ function ToolbarButton({
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="inline-flex items-center justify-center h-6 w-6 rounded text-stone-600 hover:bg-stone-200 hover:text-stone-900 transition-colors"
+      className="inline-flex items-center justify-center h-6 w-6 rounded text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
     >
       {children}
     </button>

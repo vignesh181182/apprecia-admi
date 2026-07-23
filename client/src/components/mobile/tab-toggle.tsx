@@ -9,15 +9,15 @@ type Props = {
 
 export function MobileTabToggle({ value, onChange, rnrEnabled }: Props) {
   return (
-    <div className="flex bg-stone-100 rounded-full p-1">
+    <div className="flex bg-muted rounded-full p-1">
       <button
         type="button"
         onClick={() => onChange("appreciation")}
         className={cn(
           "flex-1 h-9 rounded-full text-sm font-mobile font-semibold transition-colors",
           value === "appreciation"
-            ? "bg-white text-stone-900 shadow-sm"
-            : "text-stone-500 hover:text-stone-700",
+            ? "bg-white text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-muted-foreground",
         )}
       >
         Appreciation
@@ -29,8 +29,8 @@ export function MobileTabToggle({ value, onChange, rnrEnabled }: Props) {
         className={cn(
           "flex-1 h-9 rounded-full text-sm font-mobile font-semibold transition-colors",
           value === "rnr" && rnrEnabled
-            ? "bg-white text-stone-900 shadow-sm"
-            : "text-stone-500 hover:text-stone-700",
+            ? "bg-white text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-muted-foreground",
           !rnrEnabled && "opacity-50 cursor-not-allowed",
         )}
         title={rnrEnabled ? undefined : "Rewards & Recognition isn't enabled for your company"}

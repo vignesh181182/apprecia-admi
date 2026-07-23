@@ -5,13 +5,38 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Building2, Upload, X } from "lucide-react";
+import { Building2, Upload, X, MapPin, Phone, ImageIcon, ShieldCheck, Users, TrendingUp } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { WizardLayout, ONBOARDING_STEPS } from "@/components/onboarding/wizard-layout";
 import { getAccount, updateAccount } from "@/lib/account";
 
-const COLOR_PRESETS = [
-  "#1c1917", "#0f172a", "#1e3a8a", "#7c2d12",
-  "#065f46", "#831843", "#5b21b6", "#9a3412",
+/** Gradient-border style for the logo upload button. */
+const GRADIENT_BORDER: React.CSSProperties = {
+  background:
+    "linear-gradient(#fff, #fff) padding-box, linear-gradient(90deg, #FF7A00, #E5397E, #5B5BEF) border-box",
+  border: "1.5px solid transparent",
+};
+
+/** Left-panel feature highlights for the company step. */
+const COMPANY_HIGHLIGHTS: { icon: LucideIcon; tint: string; title: string; desc: string }[] = [
+  {
+    icon: ShieldCheck,
+    tint: "bg-[#FDE7D6] text-[#F97316]",
+    title: "Build your identity",
+    desc: "Showcase your brand across the platform.",
+  },
+  {
+    icon: Users,
+    tint: "bg-[#EDE9FB] text-[#7C3AED]",
+    title: "Personalize experience",
+    desc: "Tailor recognition to reflect your culture.",
+  },
+  {
+    icon: TrendingUp,
+    tint: "bg-[#FDE7D6] text-[#F97316]",
+    title: "Drive impact",
+    desc: "Get insights that help you grow together.",
+  },
 ];
 
 export default function OnboardingCompany() {
@@ -22,7 +47,7 @@ export default function OnboardingCompany() {
   const [address, setAddress] = useState(account?.address ?? "");
   const [phone, setPhone] = useState(account?.phone ?? "");
   const [logo, setLogo] = useState<string | null>(account?.companyLogo ?? null);
-  const [brandColor, setBrandColor] = useState(account?.brandColor ?? "#1c1917");
+  const [brandColor] = useState(account?.brandColor ?? "#1c1917");
 
   if (!account) return null;
 
@@ -52,129 +77,135 @@ export default function OnboardingCompany() {
       steps={ONBOARDING_STEPS}
       currentKey="company"
       title="Tell us about your company"
-      description="This information appears on your portal, recognition emails, and reports."
       onBack={() => navigate("/onboarding/welcome")}
       onContinue={handleContinue}
       continueDisabled={!canContinue}
+      panelBg="bg-gradient-to-br from-[#FDF2E9] via-[#FDF1E8] to-[#F7EEF3]"
+      aside={
+        <div className="flex-1 flex flex-col justify-center">
+          {/* Full-bleed illustration — cancels the panel's side padding so there is no gap */}
+          <div className="-mx-8">
+            <img
+              src="/images/ftu-compnay.png"
+              alt="Set up your company"
+              className="w-full object-contain"
+              draggable={false}
+            />
+          </div>
+
+          {/* Heading + description, centered */}
+          <div className="-mt-2 text-center">
+            <h2 className="text-[1.5rem] font-bold text-foreground leading-[1.2] whitespace-nowrap">
+              Let&apos;s set up your company
+            </h2>
+            <p className="text-base text-muted-foreground mt-3 leading-relaxed max-w-md mx-auto">
+              This information appears on your portal,
+              <br />
+              recognition emails and reports.
+            </p>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="mt-10 grid grid-cols-3 gap-3">
+            {COMPANY_HIGHLIGHTS.map(({ icon: Icon, tint, title, desc }) => (
+              <div key={title} className="text-center">
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center mx-auto ${tint}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-bold text-foreground mt-2">{title}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-snug">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      }
     >
-      <div className="space-y-4">
-        <Card className="border border-stone-200">
-          <CardContent className="p-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Account ID</Label>
-                <Input
-                  value={account.accountId}
-                  readOnly
-                  className="h-9 text-sm border-stone-200 bg-stone-50 font-mono text-stone-500"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Admin email</Label>
-                <Input
-                  value={account.adminEmail}
-                  readOnly
-                  className="h-9 text-sm border-stone-200 bg-stone-50 text-stone-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-stone-700">
-                Company name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Acme Corp"
-                className="h-9 text-sm border-stone-200"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-stone-700">Company logo</Label>
+      <div className="space-y-5">
+        {/* Form */}
+        <Card className="border border-border">
+          <CardContent className="p-6 space-y-5">
+            {/* Company logo — dashed dropzone */}
+            <div className="rounded-2xl border-2 border-dashed border-border p-5 space-y-3">
+              <Label className="text-sm font-semibold text-foreground">Company logo</Label>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-lg border border-stone-200 bg-stone-50 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-20 h-20 rounded-xl border border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
                   {logo ? (
                     <img src={logo} alt="Company logo" className="w-full h-full object-contain" />
                   ) : (
-                    <Building2 className="w-6 h-6 text-stone-400" />
+                    <ImageIcon className="w-7 h-7 text-muted-foreground" />
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <label className="cursor-pointer">
-                    <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-                    <span className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium border border-stone-200 rounded-md hover:bg-stone-50 transition-colors">
-                      <Upload className="w-3.5 h-3.5" />
-                      {logo ? "Replace" : "Upload"}
-                    </span>
-                  </label>
-                  {logo && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setLogo(null)}
-                      className="text-stone-500 hover:text-stone-900 h-8 gap-1"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                      Remove
-                    </Button>
-                  )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                      <span
+                        style={GRADIENT_BORDER}
+                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold text-foreground hover:brightness-95 transition-all"
+                      >
+                        <Upload className="w-4 h-4 text-[#E5397E]" />
+                        {logo ? "Replace" : "Upload"}
+                      </span>
+                    </label>
+                    {logo && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setLogo(null)}
+                        className="text-muted-foreground hover:text-foreground h-9 gap-1"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG or SVG, square format works best. Stored locally for now.</p>
                 </div>
               </div>
-              <p className="text-xs text-stone-500">PNG or SVG, square format works best. Stored locally for now.</p>
             </div>
 
+            {/* Company name */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-stone-700">Address</Label>
-              <Textarea
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Street, city, state, postal code, country"
-                className="text-sm border-stone-200 min-h-[72px]"
-              />
+              <Label className="text-sm font-semibold text-foreground">
+                Company name <span className="text-[#E5397E]">*</span>
+              </Label>
+              <div className="relative">
+                <Building2 className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Input
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Acme Corp"
+                  className="h-11 pl-9 text-sm border-border"
+                />
+              </div>
             </div>
 
+            {/* Address */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-stone-700">Phone number</Label>
-              <Input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 (555) 000-0000"
-                className="h-9 text-sm border-stone-200"
-              />
+              <Label className="text-sm font-semibold text-foreground">Address</Label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-muted-foreground absolute left-3 top-3 pointer-events-none" />
+                <Textarea
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Street, city, state, postal code, country"
+                  className="text-sm pl-9 border-border min-h-[88px]"
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="border border-stone-200">
-          <CardContent className="p-5 space-y-3">
-            <div>
-              <p className="text-sm font-medium text-stone-900">Brand color</p>
-              <p className="text-xs text-stone-500 mt-0.5">Used for highlights in your portal and email headers.</p>
-            </div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {COLOR_PRESETS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setBrandColor(c)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    brandColor === c ? "border-stone-900 scale-110" : "border-stone-200"
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={`Pick color ${c}`}
+            {/* Phone number */}
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-foreground">Phone number</Label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="h-11 pl-9 text-sm border-border"
                 />
-              ))}
-              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-stone-200">
-                <input
-                  type="color"
-                  value={brandColor}
-                  onChange={(e) => setBrandColor(e.target.value)}
-                  className="w-8 h-8 rounded cursor-pointer border border-stone-200"
-                />
-                <span className="text-xs font-mono text-stone-500">{brandColor.toUpperCase()}</span>
               </div>
             </div>
           </CardContent>

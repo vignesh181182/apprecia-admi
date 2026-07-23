@@ -67,7 +67,7 @@ import { useToast } from "@/hooks/use-toast";
 const statusColors: Record<RewardStatus, string> = {
   Available: "bg-green-100 text-green-700",
   "Out of Stock": "bg-red-100 text-red-700",
-  Archived: "bg-stone-100 text-stone-500",
+  Archived: "bg-muted text-muted-foreground",
 };
 
 const redemptionStatusColors: Record<RedemptionStatus, string> = {
@@ -147,16 +147,16 @@ export default function Rewards() {
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex flex-wrap gap-2 flex-1">
           <div className="relative flex-1 min-w-48 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search rewards…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm border-stone-200"
+              className="pl-9 h-9 text-sm border-border"
             />
           </div>
           <Select value={catFilter} onValueChange={setCatFilter}>
-            <SelectTrigger className="h-9 w-40 text-sm border-stone-200">
+            <SelectTrigger className="h-9 w-40 text-sm border-border">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -164,7 +164,7 @@ export default function Rewards() {
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9 w-40 text-sm border-stone-200">
+            <SelectTrigger className="h-9 w-40 text-sm border-border">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -178,7 +178,7 @@ export default function Rewards() {
 
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9">
               <Plus className="w-4 h-4" /> Add Reward
             </Button>
           </SheetTrigger>
@@ -203,9 +203,9 @@ export default function Rewards() {
             <button
               key={s}
               onClick={() => setStatusFilter(statusFilter === s ? "all" : s)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${statusFilter === s ? "border-stone-800 bg-stone-900 text-white" : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${statusFilter === s ? "border-primary bg-primary text-primary-foreground" : "border-border bg-white text-muted-foreground hover:bg-muted"}`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${s === "Available" ? "bg-green-500" : s === "Out of Stock" ? "bg-red-500" : "bg-stone-400"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${s === "Available" ? "bg-success" : s === "Out of Stock" ? "bg-destructive" : "bg-stone-400"}`} />
               {count} {s}
             </button>
           );
@@ -221,40 +221,40 @@ export default function Rewards() {
             <Card
               key={reward.id}
               onClick={() => setSelectedReward(reward)}
-              className={`border border-stone-200 hover:border-stone-300 hover:shadow-sm transition-all cursor-pointer ${reward.status === "Archived" ? "opacity-60" : ""}`}
+              className={`border border-border hover:border-border hover:shadow-sm transition-all cursor-pointer ${reward.status === "Archived" ? "opacity-60" : ""}`}
             >
               <CardContent className="p-0">
                 {/* Icon area */}
-                <div className="h-28 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center rounded-t-xl border-b border-stone-100">
-                  <Icon className="w-10 h-10 text-stone-500" />
+                <div className="h-28 bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center rounded-t-xl border-b border-border">
+                  <Icon className="w-10 h-10 text-muted-foreground" />
                 </div>
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-sm font-semibold text-stone-900 leading-snug">{reward.name}</p>
+                    <p className="text-sm font-semibold text-foreground leading-snug">{reward.name}</p>
                     <Badge className={`text-xs shrink-0 ${statusColors[reward.status]}`} variant="secondary">
                       {reward.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-stone-500 line-clamp-2 mb-3">{reward.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{reward.description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 text-yellow-500" />
-                      <span className="text-sm font-bold text-stone-900">{reward.pointCost.toLocaleString()} pts</span>
+                      <Star className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-sm font-bold text-foreground">{reward.pointCost.toLocaleString()} pts</span>
                     </div>
-                    <span className="text-xs text-stone-500">
+                    <span className="text-xs text-muted-foreground">
                       {reward.stock > 0 ? `${reward.stock} left` : "0 left"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-stone-100">
-                    <span className="text-xs text-stone-400">{totalRedemptions} redeemed</span>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                    <span className="text-xs text-muted-foreground">{totalRedemptions} redeemed</span>
                     <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-500 hover:text-stone-700">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground">
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
                       {reward.status !== "Archived" && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-stone-500 hover:text-stone-700">
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-muted-foreground">
                               <Archive className="w-3.5 h-3.5" />
                             </Button>
                           </AlertDialogTrigger>
@@ -267,7 +267,7 @@ export default function Rewards() {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => archive(reward.id)} className="bg-stone-900 hover:bg-stone-700">
+                              <AlertDialogAction onClick={() => archive(reward.id)} className="bg-primary hover:bg-primary/90">
                                 Archive
                               </AlertDialogAction>
                             </AlertDialogFooter>
@@ -283,7 +283,7 @@ export default function Rewards() {
         })}
 
         {filtered.length === 0 && (
-          <div className="col-span-full text-center py-16 text-stone-500 text-sm">
+          <div className="col-span-full text-center py-16 text-muted-foreground text-sm">
             No rewards match your filters.
           </div>
         )}
@@ -343,13 +343,13 @@ function RedemptionHistorySheet({
       <SheetHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
-              <Icon className="w-6 h-6 text-stone-600" />
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
+              <Icon className="w-6 h-6 text-muted-foreground" />
             </div>
             <div className="min-w-0 flex-1">
               <SheetTitle className="text-base truncate">{reward.name}</SheetTitle>
               <SheetDescription className="text-xs">
-                <span className="font-semibold text-stone-700">{reward.pointCost.toLocaleString()} pts</span> · {reward.category}
+                <span className="font-semibold text-muted-foreground">{reward.pointCost.toLocaleString()} pts</span> · {reward.category}
               </SheetDescription>
               <Badge variant="secondary" className={`mt-1.5 text-xs ${statusColors[reward.status]}`}>
                 {reward.status}
@@ -359,7 +359,7 @@ function RedemptionHistorySheet({
           <Button
             size="sm"
             variant="outline"
-            className="h-9 gap-2 border-stone-200 text-stone-700 shrink-0"
+            className="h-9 gap-2 border-border text-muted-foreground shrink-0"
             onClick={onDownload}
             disabled={total === 0}
           >
@@ -371,14 +371,14 @@ function RedemptionHistorySheet({
       {/* Stats row */}
       <div className="mt-5 grid grid-cols-3 gap-2">
         <StatTile label="All-time" value={total} />
-        <StatTile label="Last 3 months" value={recent.length} accent={recent.length > 0 ? "text-green-600" : "text-stone-900"} />
+        <StatTile label="Last 3 months" value={recent.length} accent={recent.length > 0 ? "text-green-600" : "text-foreground"} />
         <StatTile label="Avg / month" value={monthlyAvg.toFixed(1)} />
       </div>
 
       {/* Banner */}
-      <div className="mt-4 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
-        <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-900">
+      <div className="mt-4 flex items-start gap-2 rounded-lg border border-info/15 bg-info/10 px-3 py-2">
+        <Info className="w-4 h-4 text-info shrink-0 mt-0.5" />
+        <p className="text-xs text-info">
           Showing <span className="font-semibold">{recent.length}</span> redemption{recent.length === 1 ? "" : "s"} from the last 3 months.
           {older.length > 0 && (
             <> {older.length} older record{older.length === 1 ? "" : "s"} available — use <span className="font-semibold">Download CSV</span> for the full history.</>
@@ -387,44 +387,44 @@ function RedemptionHistorySheet({
       </div>
 
       {/* Table */}
-      <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
+      <div className="mt-4 rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">Employee</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Department</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Redeemed on</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Points</TableHead>
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="text-xs font-semibold text-muted-foreground">Employee</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Department</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Redeemed on</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Status</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground text-right">Points</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {recent.map((r) => (
-              <TableRow key={r.id} className="hover:bg-stone-50">
+              <TableRow key={r.id} className="hover:bg-muted">
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={r.employeeAvatar} />
                       <AvatarFallback className="text-xs">{r.employeeName.split(" ").map((n) => n[0]).join("")}</AvatarFallback>
                     </Avatar>
-                    <span className="text-xs font-medium text-stone-900">{r.employeeName}</span>
+                    <span className="text-xs font-medium text-foreground">{r.employeeName}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-stone-700">{r.department}</TableCell>
-                <TableCell className="text-xs text-stone-700">{fmtDate(r.requestedAt)}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{r.department}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{fmtDate(r.requestedAt)}</TableCell>
                 <TableCell>
                   <Badge variant="secondary" className={`text-xs ${redemptionStatusColors[r.status]}`}>
                     {r.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right text-xs font-semibold text-stone-900 tabular-nums">
+                <TableCell className="text-right text-xs font-semibold text-foreground tabular-nums">
                   −{r.points.toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}
             {recent.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-stone-500 py-10">
+                <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-10">
                   {total === 0
                     ? "No redemptions for this reward yet."
                     : `No redemptions in the last 3 months. ${older.length} older record${older.length === 1 ? "" : "s"} available via Download.`}
@@ -438,10 +438,10 @@ function RedemptionHistorySheet({
   );
 }
 
-function StatTile({ label, value, accent = "text-stone-900" }: { label: string; value: string | number; accent?: string }) {
+function StatTile({ label, value, accent = "text-foreground" }: { label: string; value: string | number; accent?: string }) {
   return (
-    <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-      <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
+    <div className="rounded-lg border border-border bg-muted p-3">
+      <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
       <p className={`text-xl font-bold mt-0.5 ${accent}`}>{value}</p>
     </div>
   );
@@ -451,18 +451,18 @@ function NewRewardForm({ onSubmit }: { onSubmit: () => void }) {
   return (
     <form className="mt-6 space-y-4" onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Reward Name</Label>
-        <Input placeholder="e.g. $50 Amazon Gift Card" className="h-9 text-sm border-stone-200" />
+        <Label className="text-xs font-medium text-muted-foreground">Reward Name</Label>
+        <Input placeholder="e.g. $50 Amazon Gift Card" className="h-9 text-sm border-border" />
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Description</Label>
-        <Textarea placeholder="Brief description of the reward…" className="text-sm border-stone-200 resize-none" rows={3} />
+        <Label className="text-xs font-medium text-muted-foreground">Description</Label>
+        <Textarea placeholder="Brief description of the reward…" className="text-sm border-border resize-none" rows={3} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Category</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Category</Label>
           <Select>
-            <SelectTrigger className="h-9 text-sm border-stone-200">
+            <SelectTrigger className="h-9 text-sm border-border">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -473,15 +473,15 @@ function NewRewardForm({ onSubmit }: { onSubmit: () => void }) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Point Cost</Label>
-          <Input type="number" placeholder="e.g. 500" min={1} className="h-9 text-sm border-stone-200" />
+          <Label className="text-xs font-medium text-muted-foreground">Point Cost</Label>
+          <Input type="number" placeholder="e.g. 500" min={1} className="h-9 text-sm border-border" />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Stock Quantity</Label>
-        <Input type="number" placeholder="e.g. 25" min={0} className="h-9 text-sm border-stone-200" />
+        <Label className="text-xs font-medium text-muted-foreground">Stock Quantity</Label>
+        <Input type="number" placeholder="e.g. 25" min={0} className="h-9 text-sm border-border" />
       </div>
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Add Reward
       </Button>
     </form>

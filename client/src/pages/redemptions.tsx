@@ -51,19 +51,19 @@ export default function Redemptions() {
   if (!isMonetaryActive(account)) {
     return (
       <div className="p-6">
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="flex flex-col items-center text-center gap-3 py-14 px-6">
-            <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
-              <Ban className="w-5 h-5 text-stone-500" />
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <Ban className="w-5 h-5 text-muted-foreground" />
             </div>
-            <p className="text-base font-semibold text-stone-900">
+            <p className="text-base font-semibold text-foreground">
               Redemptions are disabled
             </p>
-            <p className="text-sm text-stone-600 max-w-md">
+            <p className="text-sm text-muted-foreground max-w-md">
               Monetary recognition is currently off at the org level. Re-enable it in{" "}
               <Link
                 to="/appreciation-policy"
-                className="text-stone-900 underline underline-offset-2 font-medium"
+                className="text-foreground underline underline-offset-2 font-medium"
               >
                 Appreciation → Appreciation Policy
               </Link>{" "}
@@ -238,8 +238,8 @@ export default function Redemptions() {
             onClick={() => setRange(r.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               range === r.id
-                ? "bg-stone-900 text-white border-stone-900"
-                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-white text-muted-foreground border-border hover:bg-muted"
             }`}
           >
             {r.label}
@@ -250,19 +250,19 @@ export default function Redemptions() {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {kpis.map(({ label, value, icon: Icon, sub }) => (
-          <Card key={label} className="border border-stone-200">
+          <Card key={label} className="border border-border">
             <CardContent className="p-4 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
-                <Icon className="w-5 h-5 text-stone-600" />
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                <Icon className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
                   {label}
                 </p>
-                <p className="text-xl font-semibold text-stone-900 tabular-nums leading-tight mt-0.5">
+                <p className="text-xl font-semibold text-foreground tabular-nums leading-tight mt-0.5">
                   {value}
                 </p>
-                <p className="text-xs text-stone-500 mt-0.5 truncate">{sub}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">{sub}</p>
               </div>
             </CardContent>
           </Card>
@@ -271,19 +271,19 @@ export default function Redemptions() {
 
       {/* Top products + Top redeemers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-0">
-            <div className="px-4 py-3 border-b border-stone-200">
-              <p className="text-sm font-semibold text-stone-900">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-sm font-semibold text-foreground">
                 Most redeemed products
               </p>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-muted-foreground">
                 Ranked by number of redemptions
               </p>
             </div>
             <Table>
               <TableHeader>
-                <TableRow className="bg-stone-50 hover:bg-stone-50">
+                <TableRow className="bg-muted hover:bg-muted">
                   <TableHead className="text-xs">Product</TableHead>
                   <TableHead className="text-xs text-right">Redeemed</TableHead>
                   <TableHead className="text-xs text-right">Value</TableHead>
@@ -294,7 +294,7 @@ export default function Redemptions() {
                   <TableRow>
                     <TableCell
                       colSpan={3}
-                      className="text-center text-sm text-stone-500 py-8"
+                      className="text-center text-sm text-muted-foreground py-8"
                     >
                       No redemptions in this range.
                     </TableCell>
@@ -304,14 +304,14 @@ export default function Redemptions() {
                     <TableRow key={p.id}>
                       <TableCell>
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs tabular-nums text-stone-400 w-4">
+                          <span className="text-xs tabular-nums text-muted-foreground w-4">
                             {i + 1}
                           </span>
                           <div className="min-w-0">
-                            <p className="text-sm text-stone-900 truncate">
+                            <p className="text-sm text-foreground truncate">
                               {p.name}
                             </p>
-                            <p className="text-xs text-stone-500 truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                               {p.category}
                             </p>
                           </div>
@@ -321,11 +321,11 @@ export default function Redemptions() {
                         {p.count}×
                       </TableCell>
                       <TableCell className="text-right text-sm tabular-nums">
-                        <span className="text-stone-900 font-medium">
+                        <span className="text-foreground font-medium">
                           {currency}
                           {p.money.toLocaleString()}
                         </span>
-                        <span className="text-stone-500">
+                        <span className="text-muted-foreground">
                           {" · "}
                           {p.points.toLocaleString()} pts
                         </span>
@@ -338,19 +338,19 @@ export default function Redemptions() {
           </CardContent>
         </Card>
 
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-0">
-            <div className="px-4 py-3 border-b border-stone-200">
-              <p className="text-sm font-semibold text-stone-900">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-sm font-semibold text-foreground">
                 Top redeemers
               </p>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-muted-foreground">
                 Ranked by total points redeemed
               </p>
             </div>
             <Table>
               <TableHeader>
-                <TableRow className="bg-stone-50 hover:bg-stone-50">
+                <TableRow className="bg-muted hover:bg-muted">
                   <TableHead className="text-xs">Employee</TableHead>
                   <TableHead className="text-xs text-right">Count</TableHead>
                   <TableHead className="text-xs text-right">Spent</TableHead>
@@ -361,7 +361,7 @@ export default function Redemptions() {
                   <TableRow>
                     <TableCell
                       colSpan={3}
-                      className="text-center text-sm text-stone-500 py-8"
+                      className="text-center text-sm text-muted-foreground py-8"
                     >
                       No redemptions in this range.
                     </TableCell>
@@ -371,7 +371,7 @@ export default function Redemptions() {
                     <TableRow key={emp.id}>
                       <TableCell>
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-xs tabular-nums text-stone-400 w-4">
+                          <span className="text-xs tabular-nums text-muted-foreground w-4">
                             {i + 1}
                           </span>
                           <Avatar className="h-7 w-7">
@@ -384,24 +384,24 @@ export default function Redemptions() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
-                            <p className="text-sm text-stone-900 truncate">
+                            <p className="text-sm text-foreground truncate">
                               {emp.name}
                             </p>
-                            <p className="text-xs text-stone-500 truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                               {emp.department}
                             </p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right text-sm tabular-nums text-stone-700">
+                      <TableCell className="text-right text-sm tabular-nums text-muted-foreground">
                         {emp.count}
                       </TableCell>
                       <TableCell className="text-right text-sm tabular-nums">
-                        <span className="text-stone-900 font-medium">
+                        <span className="text-foreground font-medium">
                           {currency}
                           {emp.money.toLocaleString()}
                         </span>
-                        <span className="text-stone-500">
+                        <span className="text-muted-foreground">
                           {" · "}
                           {emp.points.toLocaleString()} pts
                         </span>
@@ -432,16 +432,16 @@ export default function Redemptions() {
       </div>
 
       {/* Recent activity */}
-      <Card className="border border-stone-200">
+      <Card className="border border-border">
         <CardContent className="p-0">
-          <div className="px-4 py-3 border-b border-stone-200">
-            <p className="text-sm font-semibold text-stone-900">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm font-semibold text-foreground">
               Recent redemptions
             </p>
           </div>
           <Table>
             <TableHeader>
-              <TableRow className="bg-stone-50 hover:bg-stone-50">
+              <TableRow className="bg-muted hover:bg-muted">
                 <TableHead className="text-xs">Employee</TableHead>
                 <TableHead className="text-xs">Reward</TableHead>
                 <TableHead className="text-xs">Category</TableHead>
@@ -454,7 +454,7 @@ export default function Redemptions() {
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="text-center text-sm text-stone-500 py-6"
+                    className="text-center text-sm text-muted-foreground py-6"
                   >
                     No redemptions in this range.
                   </TableCell>
@@ -473,28 +473,28 @@ export default function Redemptions() {
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <p className="text-xs text-stone-900 truncate">
+                        <p className="text-xs text-foreground truncate">
                           {r.employeeName}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs text-stone-700 truncate max-w-[180px]">
+                    <TableCell className="text-xs text-muted-foreground truncate max-w-[180px]">
                       {r.rewardName}
                     </TableCell>
-                    <TableCell className="text-xs text-stone-600">
+                    <TableCell className="text-xs text-muted-foreground">
                       {r.rewardCategory}
                     </TableCell>
                     <TableCell className="text-right text-xs tabular-nums">
-                      <span className="text-stone-900 font-medium">
+                      <span className="text-foreground font-medium">
                         {currency}
                         {Math.round(r.points * pointRate).toLocaleString()}
                       </span>
-                      <span className="text-stone-500">
+                      <span className="text-muted-foreground">
                         {" · "}
                         {r.points.toLocaleString()}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs text-stone-600">
+                    <TableCell className="text-xs text-muted-foreground">
                       {formatDate(r.fulfilledAt ?? r.requestedAt)}
                     </TableCell>
                   </TableRow>
@@ -520,11 +520,11 @@ function BreakdownCard({
   currency: string;
 }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4 space-y-3">
-        <p className="text-sm font-semibold text-stone-900">{title}</p>
+        <p className="text-sm font-semibold text-foreground">{title}</p>
         {rows.length === 0 ? (
-          <p className="text-sm text-stone-500 py-4 text-center">
+          <p className="text-sm text-muted-foreground py-4 text-center">
             No data in this range.
           </p>
         ) : (
@@ -534,19 +534,19 @@ function BreakdownCard({
               return (
                 <div key={row.name}>
                   <div className="flex items-baseline justify-between text-xs mb-1">
-                    <span className="text-stone-700 truncate">{row.name}</span>
+                    <span className="text-muted-foreground truncate">{row.name}</span>
                     <span className="tabular-nums shrink-0">
-                      <span className="text-stone-900 font-medium">
+                      <span className="text-foreground font-medium">
                         {currency}
                         {row.money.toLocaleString()}
                       </span>
-                      <span className="text-stone-500">
+                      <span className="text-muted-foreground">
                         {" · "}
                         {row.count}×
                       </span>
                     </span>
                   </div>
-                  <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full bg-stone-700 rounded-full"
                       style={{ width: `${pct}%` }}

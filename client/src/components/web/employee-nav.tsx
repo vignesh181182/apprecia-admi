@@ -107,7 +107,7 @@ export function WebEmployeeNav() {
 
       {isAdmin(account) && (
         <>
-          <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.12em] text-stone-400 uppercase">
+          <div className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             Insights
           </div>
           <ul className="space-y-1">
@@ -123,7 +123,7 @@ export function WebEmployeeNav() {
         </>
       )}
 
-      <div className="border-t border-stone-200" />
+      <div className="border-t border-border" />
       <ul className="space-y-1">
         {SECONDARY.map((item) => (
           <NavItem key={item.to} item={item} />
@@ -155,7 +155,7 @@ function NavItem({ item }: { item: Item }) {
             <span
               className={cn(
                 "flex items-center gap-3 h-11 px-3.5 rounded-full text-sm font-medium transition-colors",
-                isActive ? "bg-[#a87a3a] text-white" : "text-stone-700 hover:bg-stone-100",
+                isActive ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted",
               )}
             >
               <Icon className="w-5 h-5 shrink-0" />

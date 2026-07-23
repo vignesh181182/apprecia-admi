@@ -43,10 +43,10 @@ export default function Notifications() {
       <div className="max-w-4xl mx-auto space-y-6">
 
         {/* Recent Notifications */}
-        <Card className="border-stone-200">
-          <CardHeader className="border-b border-stone-200">
+        <Card className="border-border">
+          <CardHeader className="border-b border-border">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold text-stone-900">Recent Notifications</CardTitle>
+              <CardTitle className="text-lg font-semibold text-foreground">Recent Notifications</CardTitle>
               <Button variant="secondary" size="sm">
                 Mark all as read
               </Button>
@@ -54,12 +54,12 @@ export default function Notifications() {
           </CardHeader>
           
           <CardContent className="p-0">
-            <div className="divide-y divide-stone-200">
+            <div className="divide-y divide-border">
               {notificationsData.map((notification) => {
                 const Icon = iconMap[notification.type];
                 
                 return (
-                  <div key={notification.id} className="p-6 hover:bg-stone-50 transition-colors duration-200">
+                  <div key={notification.id} className="p-6 hover:bg-muted transition-colors duration-200">
                     <div className="flex">
                       <div className="flex-shrink-0">
                         <div className={cn(
@@ -71,13 +71,13 @@ export default function Notifications() {
                       </div>
                       <div className="ml-4 flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-normal text-stone-900">{notification.title}</p>
-                          <span className="text-xs text-stone-500">{notification.time}</span>
+                          <p className="text-sm font-normal text-foreground">{notification.title}</p>
+                          <span className="text-xs text-muted-foreground">{notification.time}</span>
                         </div>
-                        <p className="text-sm text-stone-600 mt-1">{notification.message}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
                       </div>
                       {!notification.isRead && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 ml-2" />
+                        <div className="w-2 h-2 bg-info rounded-full mt-2 ml-2" />
                       )}
                     </div>
                   </div>
@@ -88,16 +88,16 @@ export default function Notifications() {
         </Card>
 
         {/* Notification Settings */}
-        <Card className="border-stone-200">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-stone-900">Notification Settings</CardTitle>
+            <CardTitle className="text-lg font-semibold text-foreground">Notification Settings</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-normal text-stone-900">Email notifications</p>
-                  <p className="text-sm text-stone-500">Receive notifications via email</p>
+                  <p className="text-sm font-normal text-foreground">Email notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive notifications via email</p>
                 </div>
                 <Switch 
                   checked={notificationSettings.emailNotifications}
@@ -107,8 +107,8 @@ export default function Notifications() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-normal text-stone-900">Push notifications</p>
-                  <p className="text-sm text-stone-500">Receive push notifications in browser</p>
+                  <p className="text-sm font-normal text-foreground">Push notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive push notifications in browser</p>
                 </div>
                 <Switch 
                   checked={notificationSettings.pushNotifications}
@@ -118,8 +118,8 @@ export default function Notifications() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-normal text-stone-900">SMS notifications</p>
-                  <p className="text-sm text-stone-500">Receive important updates via SMS</p>
+                  <p className="text-sm font-normal text-foreground">SMS notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive important updates via SMS</p>
                 </div>
                 <Switch 
                   checked={notificationSettings.smsNotifications}

@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Trophy } from "lucide-react";
 import {
+  formatProgramDate,
   getNominationsForProgram,
   getProgramById,
+  getProgramWindow,
   type Nomination,
   type StoredProgram,
 } from "@/lib/programs-data";
@@ -29,7 +31,7 @@ export default function ProgramWinners() {
   if (!programId || !program) {
     return (
       <div className="p-6">
-        <p className="text-sm text-stone-500">Program not found.</p>
+        <p className="text-sm text-muted-foreground">Program not found.</p>
         <Button asChild variant="ghost" size="sm" className="mt-3">
           <Link to="/programs">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to programs
@@ -49,8 +51,8 @@ export default function ProgramWinners() {
             </Link>
           </Button>
           <div className="flex-1">
-            <h1 className="text-xl font-semibold text-stone-900">Winners declared</h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <h1 className="text-xl font-semibold text-foreground">Winners declared</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {program.name} · {winners.length} winner{winners.length === 1 ? "" : "s"}{" "}
               this cycle
             </p>
@@ -65,7 +67,7 @@ export default function ProgramWinners() {
           </Button>
         </div>
 
-        <Card className="border border-stone-200 overflow-hidden">
+        <Card className="border border-border overflow-hidden">
           <div className="relative h-32 flex items-end p-4">
             <BannerArt
               bannerId={program.bannerId}
@@ -79,10 +81,7 @@ export default function ProgramWinners() {
               <div className="text-white drop-shadow">
                 <p className="text-base font-semibold">{program.name}</p>
                 <p className="text-xs opacity-90">
-                  Cycle ended{" "}
-                  {program.endDate
-                    ? new Date(program.endDate).toLocaleDateString()
-                    : "—"}
+                  Cycle ended {formatProgramDate(getProgramWindow(program).end)}
                 </p>
               </div>
             </div>
@@ -90,13 +89,13 @@ export default function ProgramWinners() {
         </Card>
 
         {winners.length === 0 ? (
-          <Card className="border border-dashed border-stone-300 bg-stone-50">
+          <Card className="border border-dashed border-border bg-muted">
             <CardContent className="p-10 text-center">
-              <Trophy className="w-9 h-9 text-stone-400 mx-auto mb-3" />
-              <p className="text-sm font-semibold text-stone-900 mb-1">
+              <Trophy className="w-9 h-9 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-semibold text-foreground mb-1">
                 No winners declared yet
               </p>
-              <p className="text-xs text-stone-500 mb-4">
+              <p className="text-xs text-muted-foreground mb-4">
                 Run the AI shortlister to pick winners for this cycle.
               </p>
               <Button asChild>

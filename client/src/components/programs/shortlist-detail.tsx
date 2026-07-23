@@ -19,21 +19,21 @@ export function ShortlistDetail({
       <SheetHeader className="text-left">
         <SheetTitle className="font-mobile">
           #{entry.rank} · {nomination.nomineeName}
-          <span className="ml-2 text-sm font-normal text-stone-500 tabular-nums">
+          <span className="ml-2 text-sm font-normal text-muted-foreground tabular-nums">
             {entry.score}/100
           </span>
         </SheetTitle>
       </SheetHeader>
 
-      <div className="mt-4 space-y-4 text-sm text-stone-700">
+      <div className="mt-4 space-y-4 text-sm text-muted-foreground">
         <section>
-          <p className="font-mobile font-semibold text-stone-900 mb-1">Reasoning</p>
+          <p className="font-mobile font-semibold text-foreground mb-1">Reasoning</p>
           <p className="leading-relaxed">{entry.reasoning}</p>
         </section>
 
         {entry.highlights.length > 0 && (
           <section>
-            <p className="font-mobile font-semibold text-stone-900 mb-1">Highlights</p>
+            <p className="font-mobile font-semibold text-foreground mb-1">Highlights</p>
             <ul className="list-disc pl-5 space-y-1">
               {entry.highlights.map((h, i) => (
                 <li key={i}>{h}</li>
@@ -44,28 +44,28 @@ export function ShortlistDetail({
 
         {entry.criteriaBreakdown.length > 0 && (
           <section>
-            <p className="font-mobile font-semibold text-stone-900 mb-2">
+            <p className="font-mobile font-semibold text-foreground mb-2">
               Scored against the rubric
             </p>
             <ul className="space-y-2">
               {entry.criteriaBreakdown.map((c) => (
                 <li key={c.criterionId}>
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-stone-700">
+                    <span className="text-muted-foreground">
                       {c.label}{" "}
-                      <span className="text-stone-400">· weight {c.weight}</span>
+                      <span className="text-muted-foreground">· weight {c.weight}</span>
                     </span>
-                    <span className="tabular-nums text-stone-900 font-medium">
+                    <span className="tabular-nums text-foreground font-medium">
                       {c.score}/100
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <div
                       className={`h-full rounded-full ${
                         c.score >= 70
-                          ? "bg-emerald-500"
+                          ? "bg-success"
                           : c.score >= 40
-                            ? "bg-amber-500"
+                            ? "bg-primary"
                             : "bg-stone-400"
                       }`}
                       style={{ width: `${c.score}%` }}
@@ -79,12 +79,12 @@ export function ShortlistDetail({
 
         {nomination.managerName && (
           <section>
-            <p className="font-mobile font-semibold text-stone-900 mb-1">
+            <p className="font-mobile font-semibold text-foreground mb-1">
               Manager review
             </p>
             <p>
               Approved by{" "}
-              <span className="font-medium text-stone-900">{nomination.managerName}</span>
+              <span className="font-medium text-foreground">{nomination.managerName}</span>
               {nomination.decidedAt &&
                 ` on ${new Date(nomination.decidedAt).toLocaleDateString()}`}
               .
@@ -94,7 +94,7 @@ export function ShortlistDetail({
 
         {panelSize > 0 && (
           <section>
-            <p className="font-mobile font-semibold text-stone-900 mb-1">
+            <p className="font-mobile font-semibold text-foreground mb-1">
               Panel vote tally
             </p>
             <p>
@@ -104,14 +104,14 @@ export function ShortlistDetail({
           </section>
         )}
 
-        <section className="pt-2 border-t border-stone-100">
-          <p className="font-mobile font-semibold text-stone-900 mb-1">
+        <section className="pt-2 border-t border-border">
+          <p className="font-mobile font-semibold text-foreground mb-1">
             Original nomination
           </p>
           <p className="leading-relaxed">{nomination.reason}</p>
-          <p className="text-xs text-stone-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             Nominated by{" "}
-            <span className="font-medium text-stone-700">{nomination.nominatorName}</span>
+            <span className="font-medium text-muted-foreground">{nomination.nominatorName}</span>
           </p>
         </section>
       </div>

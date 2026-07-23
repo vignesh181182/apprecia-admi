@@ -23,7 +23,7 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
     <div
       className={cn(
         "min-h-full flex flex-col transition-colors duration-500 relative overflow-hidden",
-        status === "approved" ? "bg-amber-50/60" : "bg-stone-100",
+        status === "approved" ? "bg-primary/60" : "bg-muted",
       )}
     >
       {status === "approved" && <Confetti />}
@@ -36,16 +36,16 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
           )}
         >
           {status === "approved" ? (
-            <PartyPopper className="w-7 h-7 text-amber-700" />
+            <PartyPopper className="w-7 h-7 text-primary" />
           ) : (
             <PendingIcon />
           )}
         </div>
 
-        <h2 className="font-mobile font-semibold text-stone-900 text-xl text-center">
+        <h2 className="font-mobile font-semibold text-foreground text-xl text-center">
           {status === "approved" ? "You just made someone's day!" : "Good vibes sent! ✌️"}
         </h2>
-        <p className="text-sm text-stone-600 text-center mt-2 max-w-xs">
+        <p className="text-sm text-muted-foreground text-center mt-2 max-w-xs">
           {status === "approved"
             ? `Your ${points != null ? "recognition" : "appreciation"} is live and the team can now see it.`
             : `Your ${points != null ? "recognition" : "appreciation"} is under review and will go live soon.`}
@@ -56,17 +56,17 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
             className={cn(
               "px-4 py-2.5 flex items-center justify-between border-b transition-colors",
               status === "approved"
-                ? "bg-amber-50 border-amber-100"
-                : "bg-sky-50 border-sky-100",
+                ? "bg-primary/10 border-primary/15"
+                : "bg-info/10 border-info/15",
             )}
           >
-            <span className="text-xs text-stone-700 font-medium">Approval Status:</span>
+            <span className="text-xs text-muted-foreground font-medium">Approval Status:</span>
             <span
               className={cn(
                 "inline-flex items-center text-xs font-mobile font-semibold rounded-full px-2.5 py-0.5 transition-colors",
                 status === "approved"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-sky-100 text-sky-800",
+                  ? "bg-success/15 text-success"
+                  : "bg-info/15 text-info",
               )}
             >
               {status === "approved" ? "Approved" : "Pending"}
@@ -74,23 +74,23 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
           </div>
 
           <header className="flex items-center gap-3 px-4 py-3">
-            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-900 font-mobile font-semibold text-sm shrink-0">
+            <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center text-primary font-mobile font-semibold text-sm shrink-0">
               Y
             </div>
-            <p className="flex-1 text-sm text-stone-900 truncate">
+            <p className="flex-1 text-sm text-foreground truncate">
               <span className="font-mobile font-semibold">You</span>
-              <span className="text-stone-500"> appreciated </span>
+              <span className="text-muted-foreground"> appreciated </span>
               <span className="font-mobile font-semibold">{employee.name}</span>
             </p>
-            <button className="p-1 -mr-1 text-stone-400" aria-label="More">
+            <button className="p-1 -mr-1 text-muted-foreground" aria-label="More">
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </header>
 
-          <div className="border-t border-stone-100 px-4 py-2.5 flex items-center">
+          <div className="border-t border-border px-4 py-2.5 flex items-center">
             <img src={employee.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
-            <p className="flex-1 ml-3 text-sm text-stone-700 truncate">{employee.name}</p>
-            <span className="text-xs text-stone-400 shrink-0">Just now</span>
+            <p className="flex-1 ml-3 text-sm text-muted-foreground truncate">{employee.name}</p>
+            <span className="text-xs text-muted-foreground shrink-0">Just now</span>
           </div>
 
           <div className="px-4 pt-2 pb-1 flex justify-center">
@@ -102,14 +102,14 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
           </div>
 
           <div className="px-5 pb-5 pt-1 text-center">
-            <h3 className="font-mobile font-semibold text-amber-700 text-lg">{badge.label}</h3>
+            <h3 className="font-mobile font-semibold text-primary text-lg">{badge.label}</h3>
             {points != null && (
-              <p className="text-xs text-amber-700 font-semibold mt-1">+{points.toLocaleString()} points</p>
+              <p className="text-xs text-primary font-semibold mt-1">+{points.toLocaleString()} points</p>
             )}
             {reason && (
               <>
-                <div className="border-t border-stone-100 my-3" />
-                <p className="text-sm text-stone-600 leading-relaxed">{reason}</p>
+                <div className="border-t border-border my-3" />
+                <p className="text-sm text-muted-foreground leading-relaxed">{reason}</p>
               </>
             )}
           </div>
@@ -123,8 +123,8 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
           className={cn(
             "w-full h-12 rounded-full font-mobile font-semibold text-sm transition-colors",
             status === "approved"
-              ? "bg-amber-100 text-amber-900 hover:bg-amber-200"
-              : "bg-stone-200 text-stone-700 hover:bg-stone-300",
+              ? "bg-primary/15 text-primary hover:bg-primary/20"
+              : "bg-muted text-muted-foreground hover:bg-stone-300",
           )}
         >
           DONE
@@ -136,7 +136,7 @@ export function SentConfirmation({ employee, badge, reason, points, onDone }: Pr
 
 function PendingIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-sky-700">
+    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-info">
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
       <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>

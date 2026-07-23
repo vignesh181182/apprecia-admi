@@ -71,7 +71,7 @@ export const CATEGORY_STYLES: Record<string, CategoryStyle> = {
   "Collaboration & Culture":   { color: "text-green-700",   bg: "bg-green-100",   chip: "bg-green-100 text-green-700",     emoji: "🤝" },
   "Growth & Learning":         { color: "text-emerald-700", bg: "bg-emerald-100", chip: "bg-emerald-100 text-emerald-700", emoji: "📈" },
   "Creativity & Expression":   { color: "text-pink-700",    bg: "bg-pink-100",    chip: "bg-pink-100 text-pink-700",       emoji: "🎨" },
-  "Reliability & Trust":       { color: "text-slate-700",   bg: "bg-slate-100",   chip: "bg-slate-100 text-slate-700",     emoji: "🛡️" },
+  "Reliability & Trust":       { color: "text-muted-foreground",   bg: "bg-muted",   chip: "bg-muted text-muted-foreground",     emoji: "🛡️" },
   "Wellbeing & Human":         { color: "text-rose-700",    bg: "bg-rose-100",    chip: "bg-rose-100 text-rose-700",       emoji: "❤️" },
   "Managers / Leaders":        { color: "text-purple-700",  bg: "bg-purple-100",  chip: "bg-purple-100 text-purple-700",   emoji: "🧭" },
   "Celebrations & Lightweight":{ color: "text-orange-700",  bg: "bg-orange-100",  chip: "bg-orange-100 text-orange-700",   emoji: "🎉" },
@@ -79,9 +79,9 @@ export const CATEGORY_STYLES: Record<string, CategoryStyle> = {
 
 export function getCategoryStyle(category: string): CategoryStyle {
   return CATEGORY_STYLES[category] ?? {
-    color: "text-stone-700",
-    bg: "bg-stone-100",
-    chip: "bg-stone-100 text-stone-700",
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+    chip: "bg-muted text-muted-foreground",
     emoji: "🏅",
   };
 }

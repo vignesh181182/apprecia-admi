@@ -18,7 +18,7 @@ export function ProfileTabs({
   counts?: Partial<Record<ProfileTab, number>>;
 }) {
   return (
-    <div className="flex border-b border-stone-200">
+    <div className="flex border-b border-border">
       {TABS.map((t) => {
         const active = value === t.key;
         return (
@@ -28,7 +28,7 @@ export function ProfileTabs({
             onClick={() => onChange(t.key)}
             className={cn(
               "relative h-11 px-4 text-sm font-mobile font-semibold transition-colors",
-              active ? "text-[#a87a3a]" : "text-stone-600 hover:text-stone-900",
+              active ? "text-primary" : "text-muted-foreground hover:text-foreground",
             )}
           >
             <span>{t.label}</span>
@@ -36,7 +36,7 @@ export function ProfileTabs({
               <span
                 className={cn(
                   "ml-1.5 text-xs font-medium",
-                  active ? "text-[#a87a3a]" : "text-stone-400",
+                  active ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 {counts[t.key]}
@@ -45,7 +45,7 @@ export function ProfileTabs({
             <span
               className={cn(
                 "absolute left-2 right-2 -bottom-px h-0.5 rounded-full transition-all",
-                active ? "bg-[#a87a3a]" : "bg-transparent",
+                active ? "bg-primary" : "bg-transparent",
               )}
             />
           </button>

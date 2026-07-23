@@ -11,10 +11,10 @@ export function ProgramsRow({ layout = "scroll" }: { layout?: "scroll" | "grid" 
     <section>
       <header className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="font-mobile font-semibold text-stone-900">Programs</h2>
-          <p className="text-xs text-stone-500 mt-0.5">{programs.length} active</p>
+          <h2 className="font-mobile font-semibold text-foreground">Programs</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{programs.length} active</p>
         </div>
-        <Link to="/programs" className="text-xs text-stone-500 hover:text-stone-900 inline-flex items-center gap-0.5">
+        <Link to="/programs" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-0.5">
           See all <ArrowRight className="w-3 h-3" />
         </Link>
       </header>
@@ -46,7 +46,7 @@ function ProgramCard({ program, currency }: { program: Program; currency: string
   return (
     <Link
       to={`/m/programs/${program.id}`}
-      className="block bg-white rounded-2xl border border-stone-200 p-4 hover:border-stone-300 transition-colors h-full"
+      className="block bg-white rounded-2xl border border-border p-4 hover:border-border transition-colors h-full"
     >
       <div className="flex items-start gap-3">
         <span
@@ -56,25 +56,25 @@ function ProgramCard({ program, currency }: { program: Program; currency: string
           {program.emoji}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="font-mobile font-semibold text-stone-900 leading-tight truncate">{program.name}</p>
+          <p className="font-mobile font-semibold text-foreground leading-tight truncate">{program.name}</p>
           {program.topNominee && (
-            <p className="text-sm text-stone-700 truncate mt-0.5">{program.topNominee.name}</p>
+            <p className="text-sm text-muted-foreground truncate mt-0.5">{program.topNominee.name}</p>
           )}
-          <p className="text-xs text-stone-500 mt-0.5">{program.nominations} nominations</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{program.nominations} nominations</p>
         </div>
       </div>
 
       <div className="mt-3">
         <div className="flex items-center justify-between text-xs mb-1.5">
-          <span className="text-stone-700 font-medium">{usedPct}% budget used</span>
-          <span className="text-stone-500">
+          <span className="text-muted-foreground font-medium">{usedPct}% budget used</span>
+          <span className="text-muted-foreground">
             {currency}
             {program.budgetAllocated.toLocaleString()}
           </span>
         </div>
-        <div className="h-1.5 rounded-full bg-stone-100 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-amber-400 to-amber-700"
+            className="h-full bg-gradient-to-r from-primary/60 to-primary"
             style={{ width: `${usedPct}%` }}
           />
         </div>
@@ -82,7 +82,7 @@ function ProgramCard({ program, currency }: { program: Program; currency: string
 
       <p
         className={`text-xs mt-2.5 ${
-          program.status === "ending-soon" ? "text-rose-700 font-semibold" : "text-stone-500"
+          program.status === "ending-soon" ? "text-rose-700 font-semibold" : "text-muted-foreground"
         }`}
       >
         {program.daysLeft} days remaining

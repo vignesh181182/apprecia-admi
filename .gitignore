@@ -21,6 +21,9 @@ vite.config.ts.*
 # Original mobile asset drop (already copied into client/public/m)
 /mobile
 
+# Local backup archives
+/Bkup
+
 # Test artifacts
 /tmp
 .ghpush

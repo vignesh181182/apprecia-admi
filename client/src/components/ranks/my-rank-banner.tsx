@@ -6,8 +6,8 @@ export function MyRankBanner({ inline }: { inline?: boolean }) {
   const initial = (account?.adminName?.[0] || "Y").toUpperCase();
 
   const banner = (
-    <div className="bg-[#a87a3a] rounded-full px-3 py-2 flex items-center gap-3 text-white shadow-md">
-      <span className="w-9 h-9 rounded-full bg-white text-[#a87a3a] text-sm font-mobile font-semibold flex items-center justify-center shrink-0">
+    <div className="bg-primary rounded-full px-3 py-2 flex items-center gap-3 text-white shadow-md">
+      <span className="w-9 h-9 rounded-full bg-white text-primary text-sm font-mobile font-semibold flex items-center justify-center shrink-0">
         {MY_RANK.rank}
       </span>
       <div className="flex-1 flex items-center gap-2 min-w-0">

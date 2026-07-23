@@ -101,13 +101,13 @@ export default function MobileProfile() {
           </div>
         </div>
 
-        <div className="md:hidden rounded-2xl border border-stone-200 bg-white divide-y divide-stone-100">
+        <div className="md:hidden rounded-2xl border border-border bg-white divide-y divide-border">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-700 hover:bg-stone-50"
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground hover:bg-muted"
               >
-                <Monitor className="w-4 h-4 text-stone-500" />
+                <Monitor className="w-4 h-4 text-muted-foreground" />
                 Switch to admin web
               </button>
             </AlertDialogTrigger>
@@ -123,7 +123,7 @@ export default function MobileProfile() {
                 <AlertDialogCancel>Stay in mobile</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => navigate("/")}
-                  className="bg-[#a87a3a] hover:bg-[#8e6630]"
+                  className="bg-primary hover:bg-primary/90"
                 >
                   Continue to admin
                 </AlertDialogAction>
@@ -132,7 +132,7 @@ export default function MobileProfile() {
           </AlertDialog>
           <button
             onClick={signOut}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-4 h-4" />
             Sign out
@@ -145,8 +145,8 @@ export default function MobileProfile() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center">
-      <p className="text-sm text-stone-600">{message}</p>
+    <div className="bg-white rounded-2xl border border-border p-8 text-center">
+      <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }

@@ -46,7 +46,7 @@ const statusColors: Record<OKRStatus, string> = {
   "on-track": "bg-green-100 text-green-700",
   "at-risk": "bg-amber-100 text-amber-700",
   "off-track": "bg-red-100 text-red-700",
-  completed: "bg-stone-100 text-stone-700",
+  completed: "bg-muted text-muted-foreground",
 };
 
 const statusLabels: Record<OKRStatus, string> = {
@@ -64,9 +64,9 @@ const statusDot: Record<OKRStatus, string> = {
 };
 
 const typeColors: Record<OKRType, string> = {
-  company: "bg-stone-900 text-white",
-  team: "bg-stone-200 text-stone-800",
-  individual: "bg-stone-100 text-stone-600",
+  company: "bg-primary text-primary-foreground",
+  team: "bg-muted text-foreground",
+  individual: "bg-muted text-muted-foreground",
 };
 
 const typeLabels: Record<OKRType, string> = {
@@ -121,13 +121,13 @@ export default function OKRs() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Total OKRs" value={counts.total} icon={<Target className="w-4 h-4" />} />
-        <KpiCard label="On track" value={counts.onTrack} icon={<TrendingUp className="w-4 h-4" />} accent="text-green-600" />
-        <KpiCard label="At risk" value={counts.atRisk} icon={<AlertTriangle className="w-4 h-4" />} accent="text-amber-600" />
+        <KpiCard label="On track" value={counts.onTrack} icon={<TrendingUp className="w-4 h-4" />} accent="text-success" />
+        <KpiCard label="At risk" value={counts.atRisk} icon={<AlertTriangle className="w-4 h-4" />} accent="text-primary" />
         <KpiCard label="Avg progress" value={`${counts.avgProgress}%`} icon={<Activity className="w-4 h-4" />} />
       </div>
 
       <Tabs defaultValue="list">
-        <TabsList className="bg-stone-100">
+        <TabsList className="bg-muted">
           <TabsTrigger value="list" className="text-xs">List view</TabsTrigger>
           <TabsTrigger value="tree" className="text-xs">Alignment tree</TabsTrigger>
         </TabsList>
@@ -137,12 +137,12 @@ export default function OKRs() {
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
               <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search OKRs…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 text-sm border-stone-200"
+                  className="pl-9 h-9 text-sm border-border"
                 />
               </div>
               <div className="flex gap-1.5 flex-wrap">
@@ -152,8 +152,8 @@ export default function OKRs() {
                     onClick={() => setStatusFilter(s)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                       statusFilter === s
-                        ? "bg-stone-900 text-white border-stone-900"
-                        : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-white text-muted-foreground border-border hover:bg-muted"
                     }`}
                   >
                     {s === "all" ? "All" : statusLabels[s as OKRStatus]}
@@ -161,7 +161,7 @@ export default function OKRs() {
                 ))}
               </div>
               <Select value={quarter} onValueChange={setQuarter}>
-                <SelectTrigger className="h-9 w-32 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 w-32 text-sm border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All quarters</SelectItem>
                   <SelectItem value="Q1 2026">Q1 2026</SelectItem>
@@ -169,7 +169,7 @@ export default function OKRs() {
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
-                <SelectTrigger className="h-9 w-32 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 w-32 text-sm border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All types</SelectItem>
                   <SelectItem value="company">Company</SelectItem>
@@ -178,7 +178,7 @@ export default function OKRs() {
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" className="h-9 gap-2 bg-stone-900 hover:bg-stone-700 text-white" onClick={() => setCreateOpen(true)}>
+            <Button size="sm" className="h-9 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setCreateOpen(true)}>
               <Plus className="w-4 h-4" /> Add OKR
             </Button>
           </div>
@@ -188,12 +188,12 @@ export default function OKRs() {
             {filtered.map((o) => {
               const isOpen = expanded.includes(o.id);
               return (
-                <Card key={o.id} className="border border-stone-200">
+                <Card key={o.id} className="border border-border">
                   <button
                     onClick={() => toggleExpand(o.id)}
-                    className="w-full text-left p-4 flex items-start gap-3 hover:bg-stone-50 transition-colors rounded-lg"
+                    className="w-full text-left p-4 flex items-start gap-3 hover:bg-muted transition-colors rounded-lg"
                   >
-                    <div className="mt-0.5 text-stone-400">
+                    <div className="mt-0.5 text-muted-foreground">
                       {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -201,16 +201,16 @@ export default function OKRs() {
                         <Badge className={`text-xs ${typeColors[o.type]}`} variant="secondary">
                           {typeLabels[o.type]}
                         </Badge>
-                        <p className="text-sm font-semibold text-stone-900">{o.title}</p>
+                        <p className="text-sm font-semibold text-foreground">{o.title}</p>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-stone-500">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <span>{o.owner} · {o.ownerDept}</span>
                         <span>·</span>
                         <span>{o.quarter}</span>
                         {o.linkedRecognitions > 0 && (
                           <>
                             <span>·</span>
-                            <span className="flex items-center gap-1 text-amber-600">
+                            <span className="flex items-center gap-1 text-primary">
                               <Sparkles className="w-3 h-3" /> {o.linkedRecognitions} linked recognitions
                             </span>
                           </>
@@ -219,9 +219,9 @@ export default function OKRs() {
                       <div className="flex items-center gap-2 mt-2">
                         <Progress
                           value={o.progress}
-                          className={`h-1.5 flex-1 ${o.status === "off-track" ? "[&>div]:bg-red-500" : o.status === "at-risk" ? "[&>div]:bg-amber-500" : ""}`}
+                          className={`h-1.5 flex-1 ${o.status === "off-track" ? "[&>div]:bg-destructive" : o.status === "at-risk" ? "[&>div]:bg-primary" : ""}`}
                         />
-                        <span className="text-xs font-semibold text-stone-700 tabular-nums w-10 text-right">{o.progress}%</span>
+                        <span className="text-xs font-semibold text-muted-foreground tabular-nums w-10 text-right">{o.progress}%</span>
                       </div>
                     </div>
                     <Badge variant="secondary" className={`text-xs ${statusColors[o.status]} shrink-0`}>
@@ -230,22 +230,22 @@ export default function OKRs() {
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-stone-200 px-4 py-3 space-y-2 bg-stone-50/50">
-                      <p className="text-xs font-semibold text-stone-700 uppercase tracking-wide">Key results</p>
+                    <div className="border-t border-border px-4 py-3 space-y-2 bg-muted/50">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Key results</p>
                       {o.keyResults.map((kr) => (
-                        <div key={kr.id} className="flex items-center gap-3 rounded border border-stone-200 bg-white p-2.5">
+                        <div key={kr.id} className="flex items-center gap-3 rounded border border-border bg-white p-2.5">
                           <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot[kr.status]}`} />
-                          <p className="text-sm text-stone-900 flex-1 truncate">{kr.title}</p>
-                          <span className="text-xs text-stone-600 tabular-nums shrink-0 w-32 text-right">
+                          <p className="text-sm text-foreground flex-1 truncate">{kr.title}</p>
+                          <span className="text-xs text-muted-foreground tabular-nums shrink-0 w-32 text-right">
                             {kr.current.toLocaleString()} / {kr.target.toLocaleString()} {kr.unit}
                           </span>
                           <div className="w-24 shrink-0">
                             <Progress
                               value={kr.progress}
-                              className={`h-1.5 ${kr.status === "off-track" ? "[&>div]:bg-red-500" : kr.status === "at-risk" ? "[&>div]:bg-amber-500" : ""}`}
+                              className={`h-1.5 ${kr.status === "off-track" ? "[&>div]:bg-destructive" : kr.status === "at-risk" ? "[&>div]:bg-primary" : ""}`}
                             />
                           </div>
-                          <span className="text-xs font-medium text-stone-700 tabular-nums shrink-0 w-10 text-right">{kr.progress}%</span>
+                          <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0 w-10 text-right">{kr.progress}%</span>
                         </div>
                       ))}
                     </div>
@@ -254,7 +254,7 @@ export default function OKRs() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="text-center text-sm text-stone-500 py-10">No OKRs match your filters.</div>
+              <div className="text-center text-sm text-muted-foreground py-10">No OKRs match your filters.</div>
             )}
           </div>
         </TabsContent>
@@ -265,7 +265,7 @@ export default function OKRs() {
               <TreeNode key={co.id} okr={co} depth={0} childrenOf={childrenOf} />
             ))}
             {companyOKRs.length === 0 && (
-              <div className="text-center text-sm text-stone-500 py-10">No company OKRs to align under.</div>
+              <div className="text-center text-sm text-muted-foreground py-10">No company OKRs to align under.</div>
             )}
           </div>
         </TabsContent>
@@ -285,13 +285,13 @@ export default function OKRs() {
   );
 }
 
-function KpiCard({ label, value, icon, accent = "text-stone-900" }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
+function KpiCard({ label, value, icon, accent = "text-foreground" }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-          <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600">{icon}</div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
+          <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">{icon}</div>
         </div>
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       </CardContent>
@@ -303,8 +303,8 @@ function TreeNode({ okr, depth, childrenOf }: { okr: OKR; depth: number; childre
   const kids = childrenOf(okr.id);
   const cardBg =
     depth === 0 ? "bg-stone-900 text-stone-50 border-stone-900" :
-    depth === 1 ? "bg-stone-100 border-stone-200" :
-                  "bg-white border-stone-200";
+    depth === 1 ? "bg-muted border-border" :
+                  "bg-white border-border";
 
   return (
     <div style={{ marginLeft: depth * 24 }}>
@@ -317,17 +317,17 @@ function TreeNode({ okr, depth, childrenOf }: { okr: OKR; depth: number; childre
                 <Badge variant="secondary" className={`text-xs ${depth === 0 ? "bg-stone-700 text-white" : typeColors[okr.type]}`}>
                   {typeLabels[okr.type]}
                 </Badge>
-                <p className={`text-sm font-semibold ${depth === 0 ? "text-stone-50" : "text-stone-900"}`}>{okr.title}</p>
+                <p className={`text-sm font-semibold ${depth === 0 ? "text-stone-50" : "text-foreground"}`}>{okr.title}</p>
               </div>
-              <p className={`text-xs ${depth === 0 ? "text-stone-400" : "text-stone-500"}`}>
+              <p className={`text-xs ${depth === 0 ? "text-muted-foreground" : "text-muted-foreground"}`}>
                 {okr.owner} · {okr.ownerDept} · {okr.quarter}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <Progress
                   value={okr.progress}
-                  className={`h-1.5 flex-1 ${depth === 0 ? "bg-stone-700 [&>div]:bg-white" : okr.status === "off-track" ? "[&>div]:bg-red-500" : okr.status === "at-risk" ? "[&>div]:bg-amber-500" : ""}`}
+                  className={`h-1.5 flex-1 ${depth === 0 ? "bg-stone-700 [&>div]:bg-white" : okr.status === "off-track" ? "[&>div]:bg-destructive" : okr.status === "at-risk" ? "[&>div]:bg-primary" : ""}`}
                 />
-                <span className={`text-xs font-semibold tabular-nums w-10 text-right ${depth === 0 ? "text-stone-50" : "text-stone-700"}`}>{okr.progress}%</span>
+                <span className={`text-xs font-semibold tabular-nums w-10 text-right ${depth === 0 ? "text-stone-50" : "text-muted-foreground"}`}>{okr.progress}%</span>
                 <Badge variant="secondary" className={`text-xs ${statusColors[okr.status]} shrink-0`}>
                   {statusLabels[okr.status]}
                 </Badge>
@@ -413,20 +413,20 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Title</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Title</Label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Reduce p99 latency by 50%"
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Type</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Type</Label>
           <Select value={type} onValueChange={(v) => setType(v as OKRType)}>
-            <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="company">Company</SelectItem>
               <SelectItem value="team">Team</SelectItem>
@@ -435,9 +435,9 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Quarter</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Quarter</Label>
           <Select value={quarter} onValueChange={(v) => setQuarter(v as typeof quarter)}>
-            <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Q1 2026">Q1 2026</SelectItem>
               <SelectItem value="Q2 2026">Q2 2026</SelectItem>
@@ -447,9 +447,9 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Owner</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Owner</Label>
         <Select value={owner} onValueChange={handleOwnerChange}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             {employeesData.map((e) => (
               <SelectItem key={e.id} value={e.name}>{e.name} · {e.department}</SelectItem>
@@ -459,9 +459,9 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Parent OKR (optional)</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Parent OKR (optional)</Label>
         <Select value={parentId} onValueChange={setParentId}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">No parent</SelectItem>
             {okrs
@@ -477,16 +477,16 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
 
       {/* Key results builder */}
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Key results</Label>
-        <div className="rounded-lg border border-stone-200 p-3 space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Key results</Label>
+        <div className="rounded-lg border border-border p-3 space-y-2">
           {krs.length > 0 && (
             <div className="space-y-1">
               {krs.map((kr) => (
-                <div key={kr.id} className="flex items-center justify-between rounded border border-stone-200 px-2.5 py-1.5">
-                  <span className="text-xs text-stone-700 flex-1 truncate">
-                    {kr.title} <span className="text-stone-400">· {kr.current}/{kr.target} {kr.unit}</span>
+                <div key={kr.id} className="flex items-center justify-between rounded border border-border px-2.5 py-1.5">
+                  <span className="text-xs text-muted-foreground flex-1 truncate">
+                    {kr.title} <span className="text-muted-foreground">· {kr.current}/{kr.target} {kr.unit}</span>
                   </span>
-                  <button type="button" onClick={() => removeKR(kr.id)} className="text-stone-400 hover:text-red-600">
+                  <button type="button" onClick={() => removeKR(kr.id)} className="text-muted-foreground hover:text-destructive">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -497,7 +497,7 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
             value={krDraft.title}
             onChange={(e) => setKrDraft((p) => ({ ...p, title: e.target.value }))}
             placeholder="Key result title…"
-            className="h-9 text-sm border-stone-200"
+            className="h-9 text-sm border-border"
           />
           <div className="grid grid-cols-3 gap-2">
             <Input
@@ -505,29 +505,29 @@ function CreateForm({ okrs, onSubmit }: { okrs: OKR[]; onSubmit: (o: OKR) => voi
               onChange={(e) => setKrDraft((p) => ({ ...p, target: e.target.value }))}
               placeholder="Target"
               type="number"
-              className="h-9 text-sm border-stone-200"
+              className="h-9 text-sm border-border"
             />
             <Input
               value={krDraft.current}
               onChange={(e) => setKrDraft((p) => ({ ...p, current: e.target.value }))}
               placeholder="Current"
               type="number"
-              className="h-9 text-sm border-stone-200"
+              className="h-9 text-sm border-border"
             />
             <Input
               value={krDraft.unit}
               onChange={(e) => setKrDraft((p) => ({ ...p, unit: e.target.value }))}
               placeholder="Unit (e.g. users)"
-              className="h-9 text-sm border-stone-200"
+              className="h-9 text-sm border-border"
             />
           </div>
-          <Button type="button" size="sm" variant="outline" className="h-9 w-full border-stone-200" onClick={addKR}>
+          <Button type="button" size="sm" variant="outline" className="h-9 w-full border-border" onClick={addKR}>
             Add key result
           </Button>
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Create OKR
       </Button>
     </form>

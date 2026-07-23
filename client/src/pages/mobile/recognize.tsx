@@ -76,19 +76,19 @@ function MobileFlow() {
 
   return (
     <EmployeeLayout hideTopBar hideBottomNav showRightRail={false}>
-      <div className="min-h-screen bg-stone-100 flex flex-col">
+      <div className="min-h-screen bg-muted flex flex-col">
         <header className="px-5 pt-3 pb-2 flex items-center gap-3">
           {step === "pick-person" ? (
-            <button onClick={close} aria-label="Close" className="-ml-2 p-2 rounded-full hover:bg-stone-200">
-              <X className="w-5 h-5 text-stone-700" />
+            <button onClick={close} aria-label="Close" className="-ml-2 p-2 rounded-full hover:bg-muted">
+              <X className="w-5 h-5 text-muted-foreground" />
             </button>
           ) : (
-            <button onClick={() => setStep(step === "pick-badge" ? "pick-person" : "pick-badge")} aria-label="Back" className="-ml-2 p-2 rounded-full hover:bg-stone-200">
-              <ArrowLeft className="w-5 h-5 text-stone-700" />
+            <button onClick={() => setStep(step === "pick-badge" ? "pick-person" : "pick-badge")} aria-label="Back" className="-ml-2 p-2 rounded-full hover:bg-muted">
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </button>
           )}
           {step === "pick-person" && (
-            <h1 className="font-mobile font-semibold text-stone-900 text-xl">{s.verb}</h1>
+            <h1 className="font-mobile font-semibold text-foreground text-xl">{s.verb}</h1>
           )}
           {step !== "pick-person" && s.employee && (
             <div className="flex-1 min-w-0">
@@ -99,7 +99,7 @@ function MobileFlow() {
 
         {step === "pick-person" && (
           <div className="flex-1 px-5 pb-6 space-y-3">
-            <p className="text-sm text-stone-600">Choose a person to {s.verb.toLowerCase()}</p>
+            <p className="text-sm text-muted-foreground">Choose a person to {s.verb.toLowerCase()}</p>
             <PersonPicker
               selectedId={s.employee?.id}
               onSelect={(emp) => {
@@ -113,8 +113,8 @@ function MobileFlow() {
         {step === "pick-badge" && (
           <div className="flex-1 px-5 pb-6">
             <div className="flex items-center justify-between mb-3 mt-2">
-              <h2 className="font-mobile font-semibold text-stone-900">Select a badge</h2>
-              <button className="p-1 text-stone-500" aria-label="Search badges">
+              <h2 className="font-mobile font-semibold text-foreground">Select a badge</h2>
+              <button className="p-1 text-muted-foreground" aria-label="Search badges">
                 <Search className="w-4 h-4" />
               </button>
             </div>
@@ -131,14 +131,14 @@ function MobileFlow() {
         {step === "reason" && (
           <div className="flex-1 flex flex-col px-5 pb-[max(20px,env(safe-area-inset-bottom))]">
             <div className="mt-2">
-              <p className="text-sm font-mobile font-semibold text-stone-900 mb-2">
-                Reason <span className="text-stone-400 font-normal">(Optional)</span>
+              <p className="text-sm font-mobile font-semibold text-foreground mb-2">
+                Reason <span className="text-muted-foreground font-normal">(Optional)</span>
               </p>
               <textarea
                 value={s.reason}
                 onChange={(e) => s.setReason(e.target.value)}
                 placeholder="Enter reason..."
-                className="w-full min-h-[120px] p-4 rounded-2xl bg-white border border-stone-200 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-300"
+                className="w-full min-h-[120px] p-4 rounded-2xl bg-white border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border"
               />
             </div>
 
@@ -176,7 +176,7 @@ function WebSinglePage() {
   if (sent && s.employee && s.badge) {
     return (
       <EmployeeLayout showRightRail={false}>
-        <div className="md:max-w-2xl mx-auto bg-white rounded-3xl border border-stone-200 overflow-hidden">
+        <div className="md:max-w-2xl mx-auto bg-white rounded-3xl border border-border overflow-hidden">
           <SentConfirmation
             employee={s.employee}
             badge={s.badge}
@@ -215,7 +215,7 @@ function WebSinglePage() {
             value={s.reason}
             onChange={(e) => s.setReason(e.target.value)}
             placeholder="Enter reason... (optional)"
-            className="w-full min-h-[100px] p-4 rounded-2xl bg-white border border-stone-200 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-300"
+            className="w-full min-h-[100px] p-4 rounded-2xl bg-white border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border"
           />
           {s.kind === "rnr" && (
             <div className="mt-4">
@@ -244,10 +244,10 @@ function WebSinglePage() {
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white rounded-2xl border border-stone-200 p-5">
+    <section className="bg-white rounded-2xl border border-border p-5">
       <header className="mb-3">
-        <h2 className="font-mobile font-semibold text-stone-900">{title}</h2>
-        {subtitle && <p className="text-xs text-stone-500 mt-0.5">{subtitle}</p>}
+        <h2 className="font-mobile font-semibold text-foreground">{title}</h2>
+        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
       </header>
       {children}
     </section>
@@ -267,11 +267,11 @@ function PreviewRail({
 }) {
   return (
     <aside className="sticky top-[80px] py-2 space-y-4">
-      <div className="bg-white rounded-2xl border border-stone-200 p-4">
-        <p className="text-xs text-stone-500 uppercase tracking-wide font-mobile font-semibold mb-3">Preview</p>
+      <div className="bg-white rounded-2xl border border-border p-4">
+        <p className="text-xs text-muted-foreground uppercase tracking-wide font-mobile font-semibold mb-3">Preview</p>
         {!employee && !badge ? (
           <div className="py-6 text-center">
-            <p className="text-sm text-stone-500">Choose a person and badge to see the preview here.</p>
+            <p className="text-sm text-muted-foreground">Choose a person and badge to see the preview here.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -279,29 +279,29 @@ function PreviewRail({
               <div className="flex items-center gap-2.5">
                 <img src={employee.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
                 <div className="min-w-0">
-                  <p className="text-sm font-mobile font-semibold text-stone-900 truncate">
+                  <p className="text-sm font-mobile font-semibold text-foreground truncate">
                     To: {employee.name}
                   </p>
-                  <p className="text-xs text-stone-500 truncate">{employee.role}</p>
+                  <p className="text-xs text-muted-foreground truncate">{employee.role}</p>
                 </div>
               </div>
             )}
             {badge && (
-              <div className="rounded-xl bg-stone-50 border border-stone-100 p-3 flex items-center gap-3">
+              <div className="rounded-xl bg-muted border border-border p-3 flex items-center gap-3">
                 <span className="text-2xl">{badge.emoji}</span>
                 <div className="min-w-0">
-                  <p className="text-sm font-mobile font-semibold text-amber-800 truncate">{badge.label}</p>
-                  <p className="text-xs text-stone-500 truncate">{badge.description}</p>
+                  <p className="text-sm font-mobile font-semibold text-primary truncate">{badge.label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{badge.description}</p>
                 </div>
               </div>
             )}
             {points != null && (
-              <p className="text-sm font-mobile font-semibold text-amber-800 inline-flex items-center gap-1">
+              <p className="text-sm font-mobile font-semibold text-primary inline-flex items-center gap-1">
                 + {points.toLocaleString()} points
               </p>
             )}
             {reason && (
-              <p className="text-sm text-stone-600 leading-snug border-t border-stone-100 pt-3">
+              <p className="text-sm text-muted-foreground leading-snug border-t border-border pt-3">
                 "{reason}"
               </p>
             )}

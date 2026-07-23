@@ -3,6 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Plus, Trash2 } from "lucide-react";
 import type { RecognitionCategory, RecognitionCategoryColor } from "@/lib/account";
 
@@ -36,6 +44,13 @@ type Props = {
 export function CategoryEditor({ categories, onChange, min = 3, max = 12 }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Add-category slide-in panel state
+  const [addOpen, setAddOpen] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [draftDescription, setDraftDescription] = useState("");
+  const [draftEmoji, setDraftEmoji] = useState("⭐");
+  const [draftColor, setDraftColor] = useState<RecognitionCategoryColor>("blue");
+
   function update(id: string, patch: Partial<RecognitionCategory>) {
     onChange(categories.map((c) => (c.id === id ? { ...c, ...patch } : c)));
   }
@@ -46,18 +61,32 @@ export function CategoryEditor({ categories, onChange, min = 3, max = 12 }: Prop
     if (expandedId === id) setExpandedId(null);
   }
 
-  function add() {
+  function openAdd() {
     if (categories.length >= max) return;
-    const newCat: RecognitionCategory = {
-      id: generateCategoryId(),
-      name: "",
-      description: "",
-      emoji: "⭐",
-      color: COLOR_OPTIONS[categories.length % COLOR_OPTIONS.length].value,
-    };
-    onChange([...categories, newCat]);
-    setExpandedId(newCat.id);
+    setDraftName("");
+    setDraftDescription("");
+    setDraftEmoji("⭐");
+    setDraftColor(COLOR_OPTIONS[categories.length % COLOR_OPTIONS.length].value);
+    setAddOpen(true);
   }
+
+  function commitAdd() {
+    const name = draftName.trim();
+    if (!name || categories.length >= max) return;
+    onChange([
+      ...categories,
+      {
+        id: generateCategoryId(),
+        name,
+        description: draftDescription.trim(),
+        emoji: draftEmoji,
+        color: draftColor,
+      },
+    ]);
+    setAddOpen(false);
+  }
+
+  const draftColorOpt = COLOR_OPTIONS.find((c) => c.value === draftColor) ?? COLOR_OPTIONS[0];
 
   return (
     <div className="space-y-3">
@@ -193,7 +222,7 @@ export function CategoryEditor({ categories, onChange, min = 3, max = 12 }: Prop
           type="button"
           variant="outline"
           size="sm"
-          onClick={add}
+          onClick={openAdd}
           className="w-full border-dashed border-stone-300 text-stone-600 gap-1.5"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -206,6 +235,111 @@ export function CategoryEditor({ categories, onChange, min = 3, max = 12 }: Prop
           At least {min} categories are required ({min - categories.length} more needed).
         </p>
       )}
+
+      {/* Add-category slide-in panel (from the right) */}
+      <Sheet open={addOpen} onOpenChange={setAddOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
+          <SheetHeader className="p-6 pb-4 border-b border-stone-100">
+            <SheetTitle>Add category</SheetTitle>
+            <SheetDescription>
+              Create a recognition category mapped to one of your company values.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            {/* Live preview */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-100">
+              <span
+                className={`w-10 h-10 rounded-lg ${draftColorOpt.bg} flex items-center justify-center text-xl shrink-0`}
+              >
+                {draftEmoji}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-stone-900 truncate">
+                  {draftName.trim() || "Untitled category"}
+                </p>
+                {draftDescription.trim() && (
+                  <p className="text-xs text-stone-500 truncate">{draftDescription}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-stone-700">Name</label>
+              <Input
+                autoFocus
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                placeholder="e.g. Innovation"
+                className="h-9 text-sm border-stone-200"
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), commitAdd())}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-stone-700">Description</label>
+              <Textarea
+                value={draftDescription}
+                onChange={(e) => setDraftDescription(e.target.value)}
+                placeholder="Short description of this value"
+                className="text-sm border-stone-200 resize-none min-h-[60px]"
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-stone-700">Emoji</label>
+              <div className="grid grid-cols-8 gap-1.5">
+                {EMOJI_OPTIONS.map((em) => (
+                  <button
+                    key={em}
+                    type="button"
+                    className={`w-8 h-8 rounded-md text-base flex items-center justify-center transition-all ${
+                      draftEmoji === em
+                        ? "bg-stone-200 ring-2 ring-stone-400"
+                        : "bg-stone-50 hover:bg-stone-100"
+                    }`}
+                    onClick={() => setDraftEmoji(em)}
+                  >
+                    {em}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-stone-700">Color</label>
+              <div className="flex gap-2">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    className={`w-7 h-7 rounded-full ${c.bg} transition-all ${
+                      draftColor === c.value ? `ring-2 ${c.ring} ring-offset-1` : ""
+                    }`}
+                    onClick={() => setDraftColor(c.value)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <SheetFooter className="p-6 pt-4 border-t border-stone-100 flex-row justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={commitAdd}
+              disabled={!draftName.trim()}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              Add category
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

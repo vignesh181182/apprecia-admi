@@ -53,7 +53,7 @@ export default function WinnerSelection() {
   if (!programId || !program) {
     return (
       <div className="p-6">
-        <p className="text-sm text-stone-500">Program not found.</p>
+        <p className="text-sm text-muted-foreground">Program not found.</p>
         <Button asChild variant="ghost" size="sm" className="mt-3">
           <Link to="/programs">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to programs
@@ -74,12 +74,12 @@ export default function WinnerSelection() {
               </Link>
             </Button>
             <div className="flex-1">
-              <h1 className="text-xl font-semibold text-stone-900">Winner selection</h1>
-              <p className="text-sm text-stone-500 mt-0.5">
+              <h1 className="text-xl font-semibold text-foreground">Winner selection</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {program.name} · {eligibleCount} eligible
               </p>
             </div>
-            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 capitalize">
+            <Badge className="bg-primary/15 text-primary hover:bg-primary/15 capitalize">
               {program.status}
             </Badge>
           </div>

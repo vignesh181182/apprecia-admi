@@ -15,19 +15,19 @@ export default function MobileRewards() {
 
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="search"
               placeholder="Search rewards…"
-              className="w-full h-11 pl-10 pr-4 rounded-full bg-amber-50/40 border border-stone-200 focus:bg-white focus:border-stone-300 focus:outline-none text-sm text-stone-800 placeholder:text-stone-400 transition-colors"
+              className="w-full h-11 pl-10 pr-4 rounded-full bg-primary/40 border border-border focus:bg-white focus:border-border focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-colors"
             />
           </div>
           <button
             type="button"
-            className="w-11 h-11 rounded-full bg-amber-50/40 border border-stone-200 hover:bg-white hover:border-stone-300 flex items-center justify-center transition-colors"
+            className="w-11 h-11 rounded-full bg-primary/40 border border-border hover:bg-white hover:border-border flex items-center justify-center transition-colors"
             aria-label="Filters"
           >
-            <SlidersHorizontal className="w-4 h-4 text-stone-700" />
+            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 

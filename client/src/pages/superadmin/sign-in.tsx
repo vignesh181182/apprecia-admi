@@ -50,59 +50,59 @@ export default function SuperAdminSignIn() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-stone-50 grain-texture px-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-muted grain-texture px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <EngageXLogo size={56} />
           </div>
-          <h1 className="text-2xl font-bold text-stone-900">{BRAND.name}</h1>
-          <p className="text-sm text-stone-500 mt-1 flex items-center justify-center gap-1.5">
+          <h1 className="text-2xl font-bold text-foreground">{BRAND.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5" />
             Super Admin Console
           </p>
         </div>
 
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-100">
-          <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900">
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/10 border border-primary/15">
+          <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-xs text-primary">
             <p className="font-medium">Internal-only access</p>
-            <p className="text-amber-800 mt-0.5">
+            <p className="text-primary mt-0.5">
               This page provisions customer accounts for the {BRAND.name} platform. Sign in with your super admin credentials.
             </p>
           </div>
         </div>
 
-        <Card className="border border-stone-200 shadow-sm">
+        <Card className="border border-border shadow-sm">
           <CardContent className="p-6 space-y-5">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Super admin email</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Super admin email</Label>
                 <Input
                   type="email"
                   placeholder="superadmin@engagex.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-9 text-sm border-stone-200"
+                  className="h-9 text-sm border-border"
                   autoComplete="email"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-stone-700">Password</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Password</Label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-9 text-sm border-stone-200 pr-9"
+                    className="h-9 text-sm border-border pr-9"
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -110,7 +110,7 @@ export default function SuperAdminSignIn() {
               </div>
 
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                <p className="text-xs text-destructive bg-destructive/10 border border-destructive/15 rounded-lg px-3 py-2">
                   {error}
                 </p>
               )}
@@ -118,15 +118,15 @@ export default function SuperAdminSignIn() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-9 bg-stone-900 hover:bg-stone-700 text-white text-sm"
+                className="w-full h-9 bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
               >
                 {loading ? "Signing in…" : "Sign in to Super Admin"}
               </Button>
             </form>
 
-            <div className="pt-3 border-t border-stone-200">
-              <p className="text-xs text-stone-500 mb-2">Demo credentials</p>
-              <div className="space-y-1 text-xs font-mono text-stone-700 bg-stone-50 border border-stone-200 rounded-lg p-2.5">
+            <div className="pt-3 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-2">Demo credentials</p>
+              <div className="space-y-1 text-xs font-mono text-muted-foreground bg-muted border border-border rounded-lg p-2.5">
                 <p>Email: {SUPERADMIN_CREDENTIALS.email}</p>
                 <p>Password: {SUPERADMIN_CREDENTIALS.password}</p>
               </div>
@@ -135,7 +135,7 @@ export default function SuperAdminSignIn() {
                 variant="ghost"
                 size="sm"
                 onClick={fillDemoCredentials}
-                className="w-full mt-2 h-8 text-xs text-stone-600 hover:text-stone-900"
+                className="w-full mt-2 h-8 text-xs text-muted-foreground hover:text-foreground"
               >
                 Fill demo credentials
               </Button>
@@ -143,7 +143,7 @@ export default function SuperAdminSignIn() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-stone-500">
+        <p className="text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} {BRAND.copyright}. {BRAND.tagline}.
         </p>
       </div>

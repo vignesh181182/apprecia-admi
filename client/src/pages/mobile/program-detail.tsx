@@ -33,8 +33,8 @@ export default function ProgramDetail() {
     return (
       <EmployeeLayout showRightRail={false}>
         <div className="px-5 md:px-0 pt-3 md:pt-0 pb-6 text-center">
-          <p className="text-sm text-stone-700 mb-2">Program not found.</p>
-          <Link to="/m" className="text-sm text-amber-800 underline">Back to home</Link>
+          <p className="text-sm text-muted-foreground mb-2">Program not found.</p>
+          <Link to="/m" className="text-sm text-primary underline">Back to home</Link>
         </div>
       </EmployeeLayout>
     );
@@ -46,7 +46,7 @@ export default function ProgramDetail() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen flex flex-col bg-stone-50">
+      <div className="min-h-screen flex flex-col bg-muted">
         <CompactHero program={program} onBack={() => navigate(-1)} />
         <ProgramTabs value={tab} onChange={setTab} />
         <main className="flex-1 px-5 pb-32 pt-4">
@@ -69,7 +69,7 @@ export default function ProgramDetail() {
       <div className="space-y-4 pb-12">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
@@ -100,7 +100,7 @@ function EmployeeView({ program }: { program: Program }) {
       <div className="min-h-screen flex flex-col" style={{ background: program.themeBg }}>
         <header className="px-5 pt-3 pb-2 flex items-center">
           <button onClick={() => navigate(-1)} aria-label="Back" className="-ml-2 p-2 rounded-full hover:bg-black/5 transition-colors">
-            <ChevronLeft className="w-5 h-5 text-stone-800" />
+            <ChevronLeft className="w-5 h-5 text-foreground" />
           </button>
         </header>
 
@@ -119,11 +119,11 @@ function EmployeeView({ program }: { program: Program }) {
   return (
     <EmployeeLayout showRightRail={false}>
       <div className="space-y-4 pb-12">
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-900">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="w-4 h-4" />
           Back
         </button>
-        <div className="rounded-3xl overflow-hidden border border-stone-200" style={{ background: program.themeBg }}>
+        <div className="rounded-3xl overflow-hidden border border-border" style={{ background: program.themeBg }}>
           <div className="px-6 pt-6 pb-2"><Hero program={program} statusLabel={statusLabel} /></div>
           <div className="px-6 pb-6"><StatRow program={program} /></div>
         </div>
@@ -143,19 +143,19 @@ function CompactHero({ program, onBack, variant = "mobile" }: { program: Program
   return (
     <div
       className={cn(
-        variant === "mobile" ? "px-5 pt-2 pb-5" : "rounded-3xl px-6 py-5 border border-stone-200",
+        variant === "mobile" ? "px-5 pt-2 pb-5" : "rounded-3xl px-6 py-5 border border-border",
       )}
       style={{ background: program.themeBg }}
     >
       {onBack && (
         <button onClick={onBack} aria-label="Back" className="-ml-2 p-2 mb-1 rounded-full hover:bg-black/5 inline-flex">
-          <ChevronLeft className="w-5 h-5 text-stone-800" />
+          <ChevronLeft className="w-5 h-5 text-foreground" />
         </button>
       )}
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="font-mobile text-xl md:text-2xl font-semibold text-stone-900 leading-tight">{program.name}</h1>
-          <p className="text-sm text-stone-700 mt-1.5 leading-snug">{program.shortDesc}</p>
+          <h1 className="font-mobile text-xl md:text-2xl font-semibold text-foreground leading-tight">{program.name}</h1>
+          <p className="text-sm text-muted-foreground mt-1.5 leading-snug">{program.shortDesc}</p>
         </div>
         <div className="shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white/40 flex items-center justify-center text-3xl md:text-4xl">
           {program.emoji}
@@ -173,7 +173,7 @@ function ProgramTabs({ value, onChange, variant = "mobile" }: { value: AdminTab;
   ];
   return (
     <div className={cn("flex items-center gap-2", variant === "mobile" ? "px-5 mt-3" : "mt-1")}>
-      <div className="flex-1 inline-flex bg-stone-100 rounded-full p-1 gap-1">
+      <div className="flex-1 inline-flex bg-muted rounded-full p-1 gap-1">
         {tabs.map((t) => {
           const active = t.key === value;
           return (
@@ -183,7 +183,7 @@ function ProgramTabs({ value, onChange, variant = "mobile" }: { value: AdminTab;
               onClick={() => onChange(t.key)}
               className={cn(
                 "flex-1 h-9 rounded-full text-sm font-mobile font-semibold transition-colors",
-                active ? "bg-[#a87a3a] text-white shadow-sm" : "text-stone-600 hover:text-stone-900",
+                active ? "bg-primary text-white shadow-sm" : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t.label}
@@ -194,7 +194,7 @@ function ProgramTabs({ value, onChange, variant = "mobile" }: { value: AdminTab;
       <button
         type="button"
         aria-label="Program settings"
-        className="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors"
+        className="w-9 h-9 rounded-full bg-muted hover:bg-muted flex items-center justify-center text-muted-foreground transition-colors"
       >
         <Settings className="w-4 h-4" />
       </button>
@@ -206,12 +206,12 @@ function Hero({ program, statusLabel }: { program: Program; statusLabel: string 
   return (
     <div className="flex items-center gap-4">
       <div className="flex-1 min-w-0">
-        <span className="inline-flex items-center gap-1.5 bg-amber-50/90 border border-amber-100 rounded-full px-3 py-1 text-xs font-mobile font-semibold text-amber-800">
+        <span className="inline-flex items-center gap-1.5 bg-primary/90 border border-primary/15 rounded-full px-3 py-1 text-xs font-mobile font-semibold text-primary">
           <Award className="w-3.5 h-3.5" />
           {statusLabel}
         </span>
-        <h1 className="font-mobile text-2xl md:text-3xl font-semibold text-stone-900 mt-3 leading-tight">{program.name}</h1>
-        <p className="text-sm text-stone-700 mt-2 leading-relaxed">{program.shortDesc}</p>
+        <h1 className="font-mobile text-2xl md:text-3xl font-semibold text-foreground mt-3 leading-tight">{program.name}</h1>
+        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{program.shortDesc}</p>
       </div>
       <div className="shrink-0 w-28 h-28 md:w-36 md:h-36 rounded-2xl bg-white/40 flex items-center justify-center text-6xl md:text-7xl">
         {program.emoji}
@@ -233,12 +233,12 @@ function StatRow({ program }: { program: Program }) {
 function StatTile({ Icon, value, label }: { Icon: React.FC<{ className?: string }>; value: number; label: string }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="w-9 h-9 rounded-xl bg-white border border-stone-200 flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-stone-700" />
+      <span className="w-9 h-9 rounded-xl bg-white border border-border flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-muted-foreground" />
       </span>
       <div className="min-w-0">
-        <p className="font-mobile text-lg md:text-xl font-semibold text-stone-900 leading-none tabular-nums">{value}</p>
-        <p className="text-xs text-stone-600 mt-0.5">{label}</p>
+        <p className="font-mobile text-lg md:text-xl font-semibold text-foreground leading-none tabular-nums">{value}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
       </div>
     </div>
   );
@@ -251,7 +251,7 @@ function NominateCta({ program: _, fixed }: { program: Program; fixed?: boolean 
       trigger={
         <button
           type="button"
-          className="w-full inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-[#a87a3a] hover:bg-[#8e6630] text-white font-mobile font-semibold transition-colors shadow-sm"
+          className="w-full inline-flex items-center justify-center gap-2 h-13 py-3.5 rounded-full bg-primary hover:bg-primary/90 text-white font-mobile font-semibold transition-colors shadow-sm"
         >
           <Edit3 className="w-4 h-4" />
           Nominate a Peer

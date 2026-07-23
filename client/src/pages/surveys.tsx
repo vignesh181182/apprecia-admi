@@ -34,8 +34,8 @@ import { useToast } from "@/hooks/use-toast";
 
 const statusColors: Record<SurveyStatus, string> = {
   active: "bg-green-100 text-green-700",
-  completed: "bg-stone-100 text-stone-700",
-  draft: "bg-stone-100 text-stone-500",
+  completed: "bg-muted text-muted-foreground",
+  draft: "bg-muted text-muted-foreground",
   scheduled: "bg-amber-100 text-amber-700",
 };
 
@@ -50,9 +50,9 @@ function fmtDate(s: string) {
 }
 
 function scoreColor(score: number) {
-  if (score >= 70) return "bg-green-100 text-green-700";
-  if (score >= 50) return "bg-amber-100 text-amber-700";
-  return "bg-red-100 text-red-700";
+  if (score >= 70) return "bg-success/15 text-success";
+  if (score >= 50) return "bg-primary/15 text-primary";
+  return "bg-destructive/15 text-destructive";
 }
 
 export default function Surveys() {
@@ -104,7 +104,7 @@ export default function Surveys() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard label="Total surveys" value={counts.total} icon={<BarChart3 className="w-4 h-4" />} />
-        <KpiCard label="Active now" value={counts.active} icon={<Activity className="w-4 h-4" />} accent="text-green-600" />
+        <KpiCard label="Active now" value={counts.active} icon={<Activity className="w-4 h-4" />} accent="text-success" />
         <KpiCard label="Avg response rate" value={`${counts.avgResponseRate}%`} icon={<Send className="w-4 h-4" />} />
         <KpiCard
           label="Avg engagement score"
@@ -115,7 +115,7 @@ export default function Surveys() {
       </div>
 
       <Tabs defaultValue="surveys">
-        <TabsList className="bg-stone-100">
+        <TabsList className="bg-muted">
           <TabsTrigger value="surveys" className="text-xs">Surveys</TabsTrigger>
           <TabsTrigger value="templates" className="text-xs">Templates</TabsTrigger>
         </TabsList>
@@ -125,12 +125,12 @@ export default function Surveys() {
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-2 flex-1 w-full sm:w-auto">
               <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search surveys…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9 text-sm border-stone-200"
+                  className="pl-9 h-9 text-sm border-border"
                 />
               </div>
               <div className="flex gap-1.5 flex-wrap">
@@ -140,8 +140,8 @@ export default function Surveys() {
                     onClick={() => setStatusFilter(s)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors capitalize ${
                       statusFilter === s
-                        ? "bg-stone-900 text-white border-stone-900"
-                        : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-white text-muted-foreground border-border hover:bg-muted"
                     }`}
                   >
                     {s}
@@ -149,7 +149,7 @@ export default function Surveys() {
                 ))}
               </div>
               <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
-                <SelectTrigger className="h-9 w-36 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9 w-36 text-sm border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All types</SelectItem>
                   <SelectItem value="pulse">Pulse</SelectItem>
@@ -158,7 +158,7 @@ export default function Surveys() {
                 </SelectContent>
               </Select>
             </div>
-            <Button size="sm" className="h-9 gap-2 bg-stone-900 hover:bg-stone-700 text-white" onClick={() => setCreateOpen(true)}>
+            <Button size="sm" className="h-9 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setCreateOpen(true)}>
               <Plus className="w-4 h-4" /> Create survey
             </Button>
           </div>
@@ -168,14 +168,14 @@ export default function Surveys() {
             {filtered.map((s) => {
               const responsePct = s.audienceSize > 0 ? Math.round((s.responseCount / s.audienceSize) * 100) : 0;
               return (
-                <Card key={s.id} className="border border-stone-200 hover:shadow-sm transition-shadow">
+                <Card key={s.id} className="border border-border hover:shadow-sm transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex flex-col gap-1.5">
                         <Badge variant="secondary" className={`text-xs w-fit capitalize ${typeColors[s.type]}`}>
                           {s.type}
                         </Badge>
-                        <p className="text-sm font-semibold text-stone-900">{s.title}</p>
+                        <p className="text-sm font-semibold text-foreground">{s.title}</p>
                       </div>
                       <Badge variant="secondary" className={`text-xs capitalize ${statusColors[s.status]}`}>
                         {s.status}
@@ -183,14 +183,14 @@ export default function Surveys() {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0 space-y-3">
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-muted-foreground">
                       {fmtDate(s.launchDate)} → {fmtDate(s.closeDate)}
                     </p>
 
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-stone-600">Responses</span>
-                        <span className="text-xs font-medium text-stone-700">
+                        <span className="text-xs text-muted-foreground">Responses</span>
+                        <span className="text-xs font-medium text-muted-foreground">
                           {s.responseCount} / {s.audienceSize} · {responsePct}%
                         </span>
                       </div>
@@ -203,12 +203,12 @@ export default function Surveys() {
                           Score: {s.overallScore}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-stone-400">No score yet</span>
+                        <span className="text-xs text-muted-foreground">No score yet</span>
                       )}
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2 text-xs text-stone-700 hover:text-stone-900"
+                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                         onClick={() => setSelected(s)}
                       >
                         View results →
@@ -219,7 +219,7 @@ export default function Surveys() {
               );
             })}
             {filtered.length === 0 && (
-              <div className="col-span-full text-center text-sm text-stone-500 py-10">
+              <div className="col-span-full text-center text-sm text-muted-foreground py-10">
                 No surveys match your filters.
               </div>
             )}
@@ -229,19 +229,19 @@ export default function Surveys() {
         <TabsContent value="templates" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {surveyTemplates.map((t) => (
-              <Card key={t.id} className="border border-stone-200 hover:shadow-sm transition-shadow">
+              <Card key={t.id} className="border border-border hover:shadow-sm transition-shadow">
                 <CardContent className="p-4 space-y-2">
-                  <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-600">
+                  <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
                     {t.category}
                   </Badge>
-                  <p className="text-sm font-semibold text-stone-900">{t.name}</p>
-                  <p className="text-xs text-stone-500">{t.description}</p>
+                  <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.description}</p>
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-stone-500">{t.questionCount} questions</span>
+                    <span className="text-xs text-muted-foreground">{t.questionCount} questions</span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-xs text-stone-700 hover:text-stone-900"
+                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                       onClick={() => useTemplate(t.name)}
                     >
                       Use template →
@@ -275,13 +275,13 @@ export default function Surveys() {
   );
 }
 
-function KpiCard({ label, value, icon, accent = "text-stone-900" }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
+function KpiCard({ label, value, icon, accent = "text-foreground" }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
   return (
-    <Card className="border border-stone-200">
+    <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">{label}</p>
-          <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600">{icon}</div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{label}</p>
+          <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">{icon}</div>
         </div>
         <p className={`text-2xl font-bold ${accent}`}>{value}</p>
       </CardContent>
@@ -306,21 +306,21 @@ function ResultsSheet({ survey }: { survey: Survey }) {
 
       {/* Stats */}
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">Response rate</p>
-          <p className="text-2xl font-bold text-stone-900 mt-1">{responsePct}%</p>
-          <p className="text-xs text-stone-500">{survey.responseCount} of {survey.audienceSize}</p>
+        <div className="rounded-lg border border-border bg-muted p-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Response rate</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{responsePct}%</p>
+          <p className="text-xs text-muted-foreground">{survey.responseCount} of {survey.audienceSize}</p>
         </div>
-        <div className="rounded-lg border border-stone-200 bg-stone-50 p-3">
-          <p className="text-xs text-stone-500 uppercase tracking-wide font-medium">Overall score</p>
+        <div className="rounded-lg border border-border bg-muted p-3">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Overall score</p>
           {survey.overallScore > 0 ? (
-            <p className={`text-2xl font-bold mt-1 ${survey.overallScore >= 70 ? "text-green-600" : survey.overallScore >= 50 ? "text-amber-600" : "text-red-600"}`}>
+            <p className={`text-2xl font-bold mt-1 ${survey.overallScore >= 70 ? "text-success" : survey.overallScore >= 50 ? "text-primary" : "text-destructive"}`}>
               {survey.overallScore}
             </p>
           ) : (
-            <p className="text-2xl font-bold text-stone-400 mt-1">—</p>
+            <p className="text-2xl font-bold text-muted-foreground mt-1">—</p>
           )}
-          <p className="text-xs text-stone-500">out of 100</p>
+          <p className="text-xs text-muted-foreground">out of 100</p>
         </div>
       </div>
 
@@ -329,13 +329,13 @@ function ResultsSheet({ survey }: { survey: Survey }) {
         {survey.questions.map((q, qi) => {
           const r = survey.results.find((x) => x.questionId === q.id);
           return (
-            <div key={q.id} className="rounded-lg border border-stone-200 p-3">
+            <div key={q.id} className="rounded-lg border border-border p-3">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <p className="text-sm text-stone-900 flex-1">
-                  <span className="text-stone-400 mr-1.5">Q{qi + 1}.</span>
+                <p className="text-sm text-foreground flex-1">
+                  <span className="text-muted-foreground mr-1.5">Q{qi + 1}.</span>
                   {q.text}
                 </p>
-                <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-600 capitalize shrink-0">
+                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground capitalize shrink-0">
                   {q.type === "yesno" ? "Yes/No" : q.type}
                 </Badge>
               </div>
@@ -347,15 +347,15 @@ function ResultsSheet({ survey }: { survey: Survey }) {
                     const pct = row && total > 0 ? Math.round((row.count / total) * 100) : 0;
                     return (
                       <div key={score} className="flex items-center gap-2 text-xs">
-                        <span className="w-3 text-stone-500">{score}</span>
-                        <div className="flex-1 h-2 rounded-full bg-stone-100 overflow-hidden">
+                        <span className="w-3 text-muted-foreground">{score}</span>
+                        <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                           <div className="h-full bg-stone-700" style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="w-10 text-right text-stone-600 tabular-nums">{row?.count ?? 0}</span>
+                        <span className="w-10 text-right text-muted-foreground tabular-nums">{row?.count ?? 0}</span>
                       </div>
                     );
                   })}
-                  <p className="text-xs text-stone-500 mt-2">Avg: <span className="font-semibold text-stone-700">{r.avgScore.toFixed(1)}</span></p>
+                  <p className="text-xs text-muted-foreground mt-2">Avg: <span className="font-semibold text-muted-foreground">{r.avgScore.toFixed(1)}</span></p>
                 </div>
               )}
               {r && q.type === "yesno" && r.responses.length > 0 && (
@@ -368,11 +368,11 @@ function ResultsSheet({ survey }: { survey: Survey }) {
                     const pct = total > 0 ? Math.round((row.count / total) * 100) : 0;
                     return (
                       <div key={row.label} className="flex items-center gap-2 text-xs">
-                        <span className="w-8 text-stone-500">{row.label}</span>
-                        <div className="flex-1 h-2 rounded-full bg-stone-100 overflow-hidden">
+                        <span className="w-8 text-muted-foreground">{row.label}</span>
+                        <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                           <div className={`h-full ${row.color}`} style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="w-10 text-right text-stone-600 tabular-nums">{row.count}</span>
+                        <span className="w-10 text-right text-muted-foreground tabular-nums">{row.count}</span>
                       </div>
                     );
                   })}
@@ -381,15 +381,15 @@ function ResultsSheet({ survey }: { survey: Survey }) {
               {r && q.type === "text" && r.textResponses && r.textResponses.length > 0 && (
                 <div className="space-y-2 mt-3">
                   {r.textResponses.map((t, i) => (
-                    <div key={i} className="rounded border border-stone-200 bg-stone-50 p-2.5">
-                      <p className="text-xs text-stone-600 italic">"{t}"</p>
-                      <p className="text-xs text-stone-400 mt-1">— Anonymous respondent</p>
+                    <div key={i} className="rounded border border-border bg-muted p-2.5">
+                      <p className="text-xs text-muted-foreground italic">"{t}"</p>
+                      <p className="text-xs text-muted-foreground mt-1">— Anonymous respondent</p>
                     </div>
                   ))}
                 </div>
               )}
               {(!r || (r.responses.length === 0 && (!r.textResponses || r.textResponses.length === 0))) && (
-                <p className="text-xs text-stone-400 italic">No responses yet.</p>
+                <p className="text-xs text-muted-foreground italic">No responses yet.</p>
               )}
             </div>
           );
@@ -441,19 +441,19 @@ function CreateForm({ onSubmit }: { onSubmit: (s: Survey) => void }) {
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Title</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Title</Label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. Q2 Manager Effectiveness"
-          className="h-9 text-sm border-stone-200"
+          className="h-9 text-sm border-border"
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Type</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Type</Label>
         <Select value={type} onValueChange={(v) => setType(v as SurveyType)}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="pulse">Pulse</SelectItem>
             <SelectItem value="lifecycle">Lifecycle</SelectItem>
@@ -463,9 +463,9 @@ function CreateForm({ onSubmit }: { onSubmit: (s: Survey) => void }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Audience</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Audience</Label>
         <Select value={audience} onValueChange={(v) => setAudience(v as typeof audience)}>
-          <SelectTrigger className="h-9 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 text-sm border-border"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All employees</SelectItem>
             <SelectItem value="department">By department</SelectItem>
@@ -476,34 +476,34 @@ function CreateForm({ onSubmit }: { onSubmit: (s: Survey) => void }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Launch date</Label>
-          <Input type="date" value={launchDate} onChange={(e) => setLaunchDate(e.target.value)} className="h-9 text-sm border-stone-200" />
+          <Label className="text-xs font-medium text-muted-foreground">Launch date</Label>
+          <Input type="date" value={launchDate} onChange={(e) => setLaunchDate(e.target.value)} className="h-9 text-sm border-border" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-stone-700">Close date</Label>
-          <Input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} className="h-9 text-sm border-stone-200" />
+          <Label className="text-xs font-medium text-muted-foreground">Close date</Label>
+          <Input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} className="h-9 text-sm border-border" />
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-stone-700">Questions</Label>
-        <div className="rounded-lg border border-stone-200 p-3 space-y-2">
+        <Label className="text-xs font-medium text-muted-foreground">Questions</Label>
+        <div className="rounded-lg border border-border p-3 space-y-2">
           <div className="flex gap-2">
             <Input
               value={newQ}
               onChange={(e) => setNewQ(e.target.value)}
               placeholder="Question text…"
-              className="h-9 text-sm border-stone-200 flex-1"
+              className="h-9 text-sm border-border flex-1"
             />
             <Select value={newQType} onValueChange={(v) => setNewQType(v as SurveyQuestionType)}>
-              <SelectTrigger className="h-9 w-28 text-sm border-stone-200"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-28 text-sm border-border"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="rating">Rating 1–5</SelectItem>
                 <SelectItem value="yesno">Yes/No</SelectItem>
                 <SelectItem value="text">Text</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="button" size="sm" variant="outline" className="h-9 border-stone-200" onClick={addQuestion}>
+            <Button type="button" size="sm" variant="outline" className="h-9 border-border" onClick={addQuestion}>
               Add
             </Button>
           </div>
@@ -511,16 +511,16 @@ function CreateForm({ onSubmit }: { onSubmit: (s: Survey) => void }) {
           {questions.length > 0 && (
             <div className="space-y-1">
               {questions.map((q, i) => (
-                <div key={q.id} className="flex items-center justify-between rounded border border-stone-200 px-2.5 py-1.5">
-                  <span className="text-xs text-stone-700">
-                    <span className="text-stone-400 mr-1.5">Q{i + 1}.</span>
+                <div key={q.id} className="flex items-center justify-between rounded border border-border px-2.5 py-1.5">
+                  <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground mr-1.5">Q{i + 1}.</span>
                     {q.text}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <Badge variant="secondary" className="text-xs bg-stone-100 text-stone-600 capitalize">
+                    <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground capitalize">
                       {q.type === "yesno" ? "Yes/No" : q.type}
                     </Badge>
-                    <button type="button" onClick={() => removeQuestion(q.id)} className="text-stone-400 hover:text-red-600">
+                    <button type="button" onClick={() => removeQuestion(q.id)} className="text-muted-foreground hover:text-destructive">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -531,7 +531,7 @@ function CreateForm({ onSubmit }: { onSubmit: (s: Survey) => void }) {
         </div>
       </div>
 
-      <Button type="submit" className="w-full bg-stone-900 hover:bg-stone-700 text-white">
+      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
         Create draft survey
       </Button>
     </form>

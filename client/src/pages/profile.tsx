@@ -74,30 +74,30 @@ export default function Profile() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Platform Settings */}
-          <Card className="border-stone-200">
+          <Card className="border-border">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-stone-900">Platform Settings</CardTitle>
+              <CardTitle className="text-lg font-semibold text-foreground">Platform Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="text-sm font-normal text-stone-900 mb-3">ACCOUNT</h4>
+                <h4 className="text-sm font-normal text-foreground mb-3">ACCOUNT</h4>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">Email me when someone follows me</span>
+                    <span className="text-sm text-muted-foreground">Email me when someone follows me</span>
                     <Switch 
                       checked={settings.emailOnFollow}
                       onCheckedChange={() => handleSettingChange('emailOnFollow')}
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">Email me when someone answers on my post</span>
+                    <span className="text-sm text-muted-foreground">Email me when someone answers on my post</span>
                     <Switch 
                       checked={settings.emailOnReply}
                       onCheckedChange={() => handleSettingChange('emailOnReply')}
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">Email me when someone mentions me</span>
+                    <span className="text-sm text-muted-foreground">Email me when someone mentions me</span>
                     <Switch 
                       checked={settings.emailOnMention}
                       onCheckedChange={() => handleSettingChange('emailOnMention')}
@@ -107,24 +107,24 @@ export default function Profile() {
               </div>
 
               <div>
-                <h4 className="text-sm font-normal text-stone-900 mb-3">APPLICATION</h4>
+                <h4 className="text-sm font-normal text-foreground mb-3">APPLICATION</h4>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">New launches and projects</span>
+                    <span className="text-sm text-muted-foreground">New launches and projects</span>
                     <Switch 
                       checked={settings.newLaunches}
                       onCheckedChange={() => handleSettingChange('newLaunches')}
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">Monthly product updates</span>
+                    <span className="text-sm text-muted-foreground">Monthly product updates</span>
                     <Switch 
                       checked={settings.monthlyUpdates}
                       onCheckedChange={() => handleSettingChange('monthlyUpdates')}
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-stone-700">Subscribe to newsletter</span>
+                    <span className="text-sm text-muted-foreground">Subscribe to newsletter</span>
                     <Switch 
                       checked={settings.newsletter}
                       onCheckedChange={() => handleSettingChange('newsletter')}
@@ -136,44 +136,44 @@ export default function Profile() {
           </Card>
 
           {/* Profile Information */}
-          <Card className="border-stone-200">
+          <Card className="border-border">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold text-stone-900">Profile Information</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">Profile Information</CardTitle>
                 <Button variant="ghost" size="sm" className="text-primary-500 hover:text-primary-600">
                   <Edit className="w-4 h-4" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-sm text-gray-600 mb-6">
+              <div className="text-sm text-muted-foreground mb-6">
                 {userProfile.bio}
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-normal text-gray-900">First Name:</label>
-                  <p className="text-sm text-gray-600 mt-1">{userProfile.firstName}</p>
+                  <label className="text-sm font-normal text-foreground">First Name:</label>
+                  <p className="text-sm text-muted-foreground mt-1">{userProfile.firstName}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-gray-900">Mobile:</label>
-                  <p className="text-sm text-gray-600 mt-1">{userProfile.mobile}</p>
+                  <label className="text-sm font-normal text-foreground">Mobile:</label>
+                  <p className="text-sm text-muted-foreground mt-1">{userProfile.mobile}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-gray-900">Email:</label>
-                  <p className="text-sm text-gray-600 mt-1">{userProfile.email}</p>
+                  <label className="text-sm font-normal text-foreground">Email:</label>
+                  <p className="text-sm text-muted-foreground mt-1">{userProfile.email}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-gray-900">Location:</label>
-                  <p className="text-sm text-gray-600 mt-1">{userProfile.location}</p>
+                  <label className="text-sm font-normal text-foreground">Location:</label>
+                  <p className="text-sm text-muted-foreground mt-1">{userProfile.location}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-normal text-gray-900">Social:</label>
+                  <label className="text-sm font-normal text-foreground">Social:</label>
                   <div className="flex space-x-3 mt-1">
-                    <Button variant="ghost" size="sm" className="p-1 h-auto text-blue-600 hover:text-blue-700">
+                    <Button variant="ghost" size="sm" className="p-1 h-auto text-info hover:text-info">
                       <Facebook className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="p-1 h-auto text-blue-400 hover:text-blue-500">
+                    <Button variant="ghost" size="sm" className="p-1 h-auto text-info hover:text-info">
                       <Twitter className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="sm" className="p-1 h-auto text-pink-600 hover:text-pink-700">
@@ -186,9 +186,9 @@ export default function Profile() {
           </Card>
 
           {/* Messages */}
-          <Card className="border-gray-200">
+          <Card className="border-border">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900">Platform Settings</CardTitle>
+              <CardTitle className="text-lg font-semibold text-foreground">Platform Settings</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -202,8 +202,8 @@ export default function Profile() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="ml-3">
-                        <p className="text-sm font-normal text-gray-900">{message.sender}</p>
-                        <p className="text-xs text-gray-500">{message.preview}</p>
+                        <p className="text-sm font-normal text-foreground">{message.sender}</p>
+                        <p className="text-xs text-muted-foreground">{message.preview}</p>
                       </div>
                     </div>
                     <Button 

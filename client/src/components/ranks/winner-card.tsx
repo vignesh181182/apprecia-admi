@@ -13,17 +13,17 @@ export function WinnerCard({ entry }: { entry: LeaderboardEntry }) {
         />
         <div className="flex-1 min-w-0">
           <div className="inline-flex items-center gap-1.5 mb-1">
-            <CrownIcon className="w-5 h-5 text-amber-700" />
-            <span className="font-mobile font-semibold text-[#a87a3a] text-sm">
+            <CrownIcon className="w-5 h-5 text-primary" />
+            <span className="font-mobile font-semibold text-primary text-sm">
               No.1
             </span>
           </div>
-          <p className="font-mobile font-semibold text-stone-900 text-base leading-tight truncate">
+          <p className="font-mobile font-semibold text-foreground text-base leading-tight truncate">
             {entry.name}
           </p>
-          <p className="text-xs text-stone-700/80 mt-0.5 truncate">{entry.role}</p>
-          <p className="font-mobile font-semibold text-stone-900 text-base mt-1.5">
-            {entry.points} <span className="text-xs font-normal text-stone-600">pts</span>
+          <p className="text-xs text-muted-foreground/80 mt-0.5 truncate">{entry.role}</p>
+          <p className="font-mobile font-semibold text-foreground text-base mt-1.5">
+            {entry.points} <span className="text-xs font-normal text-muted-foreground">pts</span>
           </p>
         </div>
       </div>

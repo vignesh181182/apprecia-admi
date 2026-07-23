@@ -24,9 +24,11 @@ import { ScoreDistributionCard } from "@/components/programs/score-distribution-
 import { AiShortlistPanel } from "@/components/programs/ai-shortlist-panel";
 import { WinnerActionStubs } from "@/components/programs/winner-action-stubs";
 import {
+  formatProgramDate,
   getAllProgramPanelMembers,
   getNominationsForProgram,
   getProgramById,
+  getProgramWindow,
   type Nomination,
   type ProgramStatus,
   type StoredProgram,
@@ -45,7 +47,7 @@ const STATUS_BADGE: Record<ProgramStatus, string> = {
   scheduled: "bg-blue-100 text-blue-800 hover:bg-blue-100",
   active: "bg-green-100 text-green-800 hover:bg-green-100",
   "ending-soon": "bg-orange-100 text-orange-800 hover:bg-orange-100",
-  ended: "bg-stone-100 text-stone-700 hover:bg-stone-100",
+  ended: "bg-muted text-muted-foreground hover:bg-muted",
 };
 
 const SHORTLIST_EXIST_PROGRAM_STATUSES: ProgramStatus[] = [
@@ -76,7 +78,7 @@ export default function ProgramDetailAdmin() {
   if (!program) {
     return (
       <div className="p-6">
-        <p className="text-sm text-stone-500">Program not found.</p>
+        <p className="text-sm text-muted-foreground">Program not found.</p>
         <Button asChild variant="ghost" size="sm" className="mt-3">
           <Link to="/programs">
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to programs
@@ -106,16 +108,40 @@ export default function ProgramDetailAdmin() {
 }
 
 function Header({ program }: { program: StoredProgram }) {
+  const programWindow = getProgramWindow(program);
   return (
-    <Card className="border border-stone-200 overflow-hidden">
-      <div className="relative h-28 lg:h-32">
-        <BannerArt
-          bannerId={program.bannerId}
-          customDataUrl={program.customBannerDataUrl}
-          className="absolute inset-0"
-        />
-        <div className="relative z-10 h-full flex items-center justify-between gap-4 px-5">
-          <div className="flex items-center gap-3 min-w-0">
+    <div className="space-y-4">
+      {/* Top header: back link, status, and edit */}
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          to="/programs"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4" /> All programs
+        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge className={cn("text-xs capitalize", STATUS_BADGE[program.status])}>
+            {program.status}
+          </Badge>
+          <Button asChild variant="outline" size="sm" className="h-8">
+            <Link to={`/programs/${program.id}/edit`}>
+              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <Card className="border border-border overflow-hidden">
+        <div className="relative h-28 lg:h-32">
+          <BannerArt
+            bannerId={program.bannerId}
+            customDataUrl={program.customBannerDataUrl}
+            fallbackBackground={program.themeBg}
+            className="absolute inset-0"
+          />
+          {/* Scrim so white header text stays legible on light or missing banners */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/25 to-black/10" />
+          <div className="relative z-10 h-full flex items-center gap-3 px-5">
             <span className="text-3xl drop-shadow">
               {program.iconEmoji ?? program.emoji ?? "🏆"}
             </span>
@@ -126,43 +152,17 @@ function Header({ program }: { program: StoredProgram }) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge className={cn("text-xs capitalize", STATUS_BADGE[program.status])}>
-              {program.status}
-            </Badge>
-            <Button
-              asChild
-              variant="secondary"
-              size="sm"
-              className="h-8 bg-white/85 hover:bg-white text-stone-800"
-            >
-              <Link to={`/programs/${program.id}/edit`}>
-                <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-              </Link>
-            </Button>
-          </div>
         </div>
-      </div>
-      <CardContent className="p-4 flex items-center gap-4 text-xs text-stone-600 flex-wrap">
-        <span className="inline-flex items-center gap-1.5">
-          <Calendar className="w-3.5 h-3.5" />
-          {program.startDate
-            ? new Date(program.startDate).toLocaleDateString()
-            : "—"}{" "}
-          →{" "}
-          {program.endDate ? new Date(program.endDate).toLocaleDateString() : "—"}
-        </span>
-        <span className="w-1 h-1 rounded-full bg-stone-300" />
-        <span>{program.daysLeft} days left</span>
-        <span className="w-1 h-1 rounded-full bg-stone-300" />
-        <Link
-          to="/programs"
-          className="inline-flex items-center gap-1 text-stone-600 hover:text-stone-900"
-        >
-          <ArrowLeft className="w-3 h-3" /> All programs
-        </Link>
-      </CardContent>
-    </Card>
+        <CardContent className="p-4 flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            {formatProgramDate(programWindow.start)} → {formatProgramDate(programWindow.end)}
+          </span>
+          <span className="w-1 h-1 rounded-full bg-stone-300" />
+          <span>{program.daysLeft} days left</span>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -173,7 +173,7 @@ function Tabs({ value, onChange }: { value: Tab; onChange: (t: Tab) => void }) {
     { key: "details", label: "Details" },
   ];
   return (
-    <div className="inline-flex bg-stone-100 rounded-full p-1 gap-1">
+    <div className="inline-flex bg-muted rounded-full p-1 gap-1">
       {tabs.map((t) => {
         const active = t.key === value;
         return (
@@ -185,8 +185,8 @@ function Tabs({ value, onChange }: { value: Tab; onChange: (t: Tab) => void }) {
             className={cn(
               "h-9 px-4 rounded-full text-sm font-semibold transition-colors",
               active
-                ? "bg-[#a87a3a] text-white shadow-sm"
-                : "text-stone-600 hover:text-stone-900",
+                ? "bg-primary text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t.label}
@@ -244,18 +244,18 @@ function DashboardAdminTab({
       )}
 
       {hasWinners && (
-        <Card className="border border-stone-200" data-focus="winners">
+        <Card className="border border-border" data-focus="winners">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-semibold text-stone-900">
+                <h2 className="text-sm font-semibold text-foreground">
                   Winners declared
                 </h2>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Phase-3 publishing actions appear as stubs.
                 </p>
               </div>
-              <Trophy className="w-4 h-4 text-amber-700" />
+              <Trophy className="w-4 h-4 text-primary" />
             </div>
             <WinnerActionStubs program={program} />
           </CardContent>
@@ -290,25 +290,25 @@ function ShortlistSection({
   if (!shortlistRun) {
     return (
       <Card
-        className="border border-amber-200 bg-amber-50/40"
+        className="border border-primary/20 bg-primary/40"
         data-focus="shortlist"
       >
         <CardContent className="p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5 text-amber-700" />
+          <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-stone-900">
+            <p className="text-sm font-semibold text-foreground">
               Post-cycle AI shortlister
             </p>
-            <p className="text-xs text-stone-600 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Score every approved nomination and pre-pick the top {Math.min(10, program.nominations || 10)}. The panel lead can override before declaring winners.
             </p>
           </div>
           <Button
             size="sm"
             onClick={onRun}
-            className="bg-stone-900 hover:bg-stone-700 text-white shrink-0"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
             data-testid="run-shortlist"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Run AI shortlist
@@ -320,25 +320,25 @@ function ShortlistSection({
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className="border border-stone-200" data-focus="shortlist">
+      <Card className="border border-border" data-focus="shortlist">
         <CollapsibleTrigger asChild>
           <button className="w-full px-5 py-4 flex items-center justify-between text-left">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-amber-700" />
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-stone-900">
+                <p className="text-sm font-semibold text-foreground">
                   AI shortlist & winner selection
                 </p>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {shortlist.length} scored · top picks pre-selected
                 </p>
               </div>
             </div>
             <ChevronDown
               className={cn(
-                "w-4 h-4 text-stone-500 transition-transform",
+                "w-4 h-4 text-muted-foreground transition-transform",
                 open && "rotate-180",
               )}
             />

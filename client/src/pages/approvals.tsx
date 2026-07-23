@@ -41,7 +41,7 @@ export default function Approvals() {
     <div className="px-6 pt-3 pb-6">
       <Tabs defaultValue="pending">
         <div className="mb-4">
-          <TabsList className="bg-stone-100 h-9">
+          <TabsList className="bg-muted h-9">
             <TabsTrigger value="pending" className="text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
               <CheckSquare className="w-3.5 h-3.5 mr-1.5" />
               Pending Approvals
@@ -111,41 +111,41 @@ function ApprovalPanel() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-4">
-            <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">Total Approvers</p>
-            <p className="text-2xl font-bold text-stone-900">{approvers.length}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Total Approvers</p>
+            <p className="text-2xl font-bold text-foreground">{approvers.length}</p>
           </CardContent>
         </Card>
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-4">
-            <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">Departments Covered</p>
-            <p className="text-2xl font-bold text-stone-900">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Departments Covered</p>
+            <p className="text-2xl font-bold text-foreground">
               {new Set(approvers.map((e) => e.department)).size}
             </p>
           </CardContent>
         </Card>
-        <Card className="border border-stone-200">
+        <Card className="border border-border">
           <CardContent className="p-4">
-            <p className="text-xs text-stone-500 uppercase tracking-wide font-medium mb-1">Eligible Employees</p>
-            <p className="text-2xl font-bold text-stone-900">{employeesData.length}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-1">Eligible Employees</p>
+            <p className="text-2xl font-bold text-foreground">{employeesData.length}</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative flex-1 max-w-xs w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search approvers…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm border-stone-200"
+            className="pl-9 h-9 text-sm border-border"
           />
         </div>
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button size="sm" className="bg-stone-900 hover:bg-stone-700 text-white gap-2 h-9">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 h-9">
               <Plus className="w-4 h-4" /> Add Approver
             </Button>
           </SheetTrigger>
@@ -161,37 +161,37 @@ function ApprovalPanel() {
         </Sheet>
       </div>
 
-      <div className="rounded-lg border border-stone-200 overflow-hidden">
+      <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-stone-50 hover:bg-stone-50">
-              <TableHead className="text-xs font-semibold text-stone-600">Approver</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Role</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Department</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600">Email</TableHead>
-              <TableHead className="text-xs font-semibold text-stone-600 text-right">Actions</TableHead>
+            <TableRow className="bg-muted hover:bg-muted">
+              <TableHead className="text-xs font-semibold text-muted-foreground">Approver</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Role</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Department</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground">Email</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredApprovers.map((emp) => (
-              <TableRow key={emp.id} className="hover:bg-stone-50">
+              <TableRow key={emp.id} className="hover:bg-muted">
                 <TableCell>
                   <div className="flex items-center gap-2.5">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={emp.avatar} />
                       <AvatarFallback className="text-xs">{emp.name[0]}</AvatarFallback>
                     </Avatar>
-                    <p className="text-xs font-medium text-stone-900">{emp.name}</p>
+                    <p className="text-xs font-medium text-foreground">{emp.name}</p>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs text-stone-700">{emp.role}</TableCell>
-                <TableCell className="text-xs text-stone-700">{emp.department}</TableCell>
-                <TableCell className="text-xs text-stone-600">{emp.email}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{emp.role}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{emp.department}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{emp.email}</TableCell>
                 <TableCell className="text-right">
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 px-2 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 gap-1"
+                    className="h-7 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
                     onClick={() => setRemoveCandidate(emp)}
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Remove
@@ -201,7 +201,7 @@ function ApprovalPanel() {
             ))}
             {filteredApprovers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-sm text-stone-500 py-10">
+                <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-10">
                   {approvers.length === 0
                     ? "No approvers yet. Add someone to manage appreciation approvals."
                     : "No approvers match your search."}
@@ -229,7 +229,7 @@ function ApprovalPanel() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => removeCandidate && handleRemove(removeCandidate)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive"
             >
               Remove
             </AlertDialogAction>
@@ -262,32 +262,32 @@ function AddApproverList({
   return (
     <div className="mt-6 space-y-3">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search employees…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 h-9 text-sm border-stone-200"
+          className="pl-9 h-9 text-sm border-border"
         />
       </div>
 
-      <div className="rounded-lg border border-stone-200 divide-y divide-stone-100 max-h-[60vh] overflow-y-auto">
+      <div className="rounded-lg border border-border divide-y divide-border max-h-[60vh] overflow-y-auto">
         {filtered.map((emp) => (
-          <div key={emp.id} className="flex items-center justify-between gap-3 p-3 hover:bg-stone-50">
+          <div key={emp.id} className="flex items-center justify-between gap-3 p-3 hover:bg-muted">
             <div className="flex items-center gap-2.5 min-w-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={emp.avatar} />
                 <AvatarFallback className="text-xs">{emp.name[0]}</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-stone-900 truncate">{emp.name}</p>
-                <p className="text-xs text-stone-500 truncate">{emp.role} · {emp.department}</p>
+                <p className="text-sm font-medium text-foreground truncate">{emp.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{emp.role} · {emp.department}</p>
               </div>
             </div>
             <Button
               size="sm"
               variant="outline"
-              className="h-7 px-2 text-xs gap-1 border-stone-200"
+              className="h-7 px-2 text-xs gap-1 border-border"
               onClick={() => onAdd(emp.id)}
             >
               <UserPlus className="w-3.5 h-3.5" /> Add
@@ -295,7 +295,7 @@ function AddApproverList({
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="p-6 text-center text-sm text-stone-500">
+          <div className="p-6 text-center text-sm text-muted-foreground">
             {candidates.length === 0
               ? "All employees are already approvers."
               : "No employees match your search."}
