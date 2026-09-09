@@ -386,7 +386,7 @@ export const PROGRAMS: Program[] = [
       { id: "p1", name: "Lin Wang", role: "VP Engineering", department: "Engineering", avatar: "/m/images/user04.png", lead: true, reviewed: 6, totalToReview: 9 },
       { id: "p2", name: "Priya Sharma", role: "Director of Product", department: "Product", avatar: "/m/images/user03.png", reviewed: 9, totalToReview: 9 },
       { id: "p3", name: "Daniel Park", role: "Principal Engineer", department: "Engineering", avatar: "/m/images/user07.png", reviewed: 4, totalToReview: 9 },
-      { id: "p4", name: "Maya Rodriguez", role: "Head of Design", department: "Design", avatar: "/m/images/user06.png", reviewed: 7, totalToReview: 9 },
+      { id: "p4", name: "Maya Rodriguez", role: "Head of Design", department: "Design", avatar: "/m/images/user10.png", reviewed: 7, totalToReview: 9 },
     ],
   },
   {
@@ -657,7 +657,7 @@ export const PROGRAMS: Program[] = [
     panel: [
       { id: "p1", name: "Sarah Chen", role: "VP People Operations", department: "People Ops", avatar: "/m/images/user02.png", lead: true, reviewed: 5, totalToReview: 11 },
       { id: "p2", name: "Marcus Johnson", role: "CHRO", department: "Executive", avatar: "/m/images/user05.png", reviewed: 8, totalToReview: 11 },
-      { id: "p3", name: "Maya Rodriguez", role: "Head of Design", department: "Design", avatar: "/m/images/user06.png", reviewed: 7, totalToReview: 11 },
+      { id: "p3", name: "Maya Rodriguez", role: "Head of Design", department: "Design", avatar: "/m/images/user10.png", reviewed: 7, totalToReview: 11 },
       { id: "p4", name: "David Kim", role: "Chief of Staff", department: "Executive", avatar: "/m/images/user01.png", reviewed: 4, totalToReview: 11 },
     ],
   },

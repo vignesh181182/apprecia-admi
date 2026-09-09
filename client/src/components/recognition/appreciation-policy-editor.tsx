@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Calendar, ShieldCheck, Eye } from "lucide-react";
+import { Sparkles, Calendar, ShieldCheck, Eye, Smile } from "lucide-react";
 import type { AppreciationPolicy, ApprovalLevel } from "@/lib/account";
+import { GENZ_REACTIONS } from "@/lib/reactions";
 import {
   isSendingWindowOpen,
   nextWindowReopenAt,
@@ -173,7 +174,35 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
         </CardContent>
       </Card>
 
-      {/* 2. Window */}
+      {/* 2. Gen-Z lingo */}
+      <Card className="border border-border">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Smile className="w-4 h-4 text-muted-foreground" /> Gen-Z lingo
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Controls whether employees can react to appreciations with playful emoji.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-muted border border-border">
+            <div>
+              <p className="text-sm font-medium text-foreground">Allow Gen-Z lingo</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                When on, appreciation cards show a Gen-Z emoji reaction bar
+                <span className="mx-1">{GENZ_REACTIONS.join(" ")}</span>
+                employees can tap to react.
+              </p>
+            </div>
+            <Switch
+              checked={policy.allowGenzLingo ?? false}
+              onCheckedChange={(v) => patch({ allowGenzLingo: !!v })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 3. Window */}
       <Card className="border border-border">
         <CardHeader className="pb-4">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -259,7 +288,7 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
         </CardContent>
       </Card>
 
-      {/* 3. Approval */}
+      {/* 4. Approval */}
       <Card className="border border-border">
         <CardHeader className="pb-4">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
@@ -335,7 +364,7 @@ export function AppreciationPolicyEditor({ policy, onChange, accountTimezone, ac
         </CardContent>
       </Card>
 
-      {/* 4. Status preview */}
+      {/* 5. Status preview */}
       <Card className="border border-border bg-muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">

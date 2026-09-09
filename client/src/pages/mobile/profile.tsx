@@ -6,7 +6,7 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { StatsGrid, ICONS } from "@/components/profile/stats-grid";
 import { ProfileTabs, type ProfileTab } from "@/components/profile/profile-tabs";
 import { BadgesGrid } from "@/components/profile/badges-grid";
-import { RecognitionCard } from "@/components/mobile/recognition-card";
+import { AppreciationCardExact } from "@/components/mobile/appreciation-card-exact";
 import { ProfileRightRail } from "@/components/profile/profile-right-rail";
 import { WalletCard } from "@/components/profile/wallet-card";
 import { getAccount, setAuthenticated } from "@/lib/account";
@@ -87,14 +87,14 @@ export default function MobileProfile() {
               received.length === 0 ? (
                 <EmptyState message="You haven't received any recognitions yet." />
               ) : (
-                received.map((f) => <RecognitionCard key={f.id} item={f} />)
+                received.map((f) => <AppreciationCardExact key={f.id} item={f} />)
               )
             )}
             {tab === "given" && (
               given.length === 0 ? (
                 <EmptyState message="You haven't sent any recognitions yet." />
               ) : (
-                given.map((f) => <RecognitionCard key={f.id} item={f} />)
+                given.map((f) => <AppreciationCardExact key={f.id} item={f} />)
               )
             )}
             {tab === "badges" && <BadgesGrid badges={MY_BADGES} />}

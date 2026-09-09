@@ -63,6 +63,7 @@ import { isAuthenticated, getAccount, setAuthenticated, isAdmin, isSuperAdminAut
 import { processAppreciationAutoApprovals } from "@/lib/badges";
 import { transitionScheduledPrograms } from "@/lib/programs-data";
 import { applyBrandColor } from "@/lib/theme";
+import { AssistantLauncher, AssistantPanel } from "@/components/assistant/assistant-panel";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated()) return <Navigate to="/auth/sign-in" replace />;
@@ -130,7 +131,15 @@ function Layout({ children, title, description }: { children: React.ReactNode; t
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem("engagex_sidebar_collapsed") === "1",
   );
+  const [assistantOpen, setAssistantOpen] = useState(
+    () => localStorage.getItem("engagex_assistant_open") === "1",
+  );
   const navigate = useNavigate();
+
+  function setAssistant(open: boolean) {
+    setAssistantOpen(open);
+    localStorage.setItem("engagex_assistant_open", open ? "1" : "0");
+  }
 
   function toggleCollapse() {
     setCollapsed((v) => {
@@ -199,6 +208,9 @@ function Layout({ children, title, description }: { children: React.ReactNode; t
         </Card>
         <Footer />
       </main>
+
+      <AssistantPanel open={assistantOpen} onClose={() => setAssistant(false)} />
+      {!assistantOpen && <AssistantLauncher onClick={() => setAssistant(true)} />}
     </div>
   );
 }

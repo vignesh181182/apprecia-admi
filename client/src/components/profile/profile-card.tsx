@@ -34,7 +34,7 @@ export function ProfileCard({
           asLink && "cursor-pointer",
         )}
       >
-        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary-soft flex items-center justify-center overflow-hidden shrink-0">
           {account.adminPhotoUrl ? (
             <img
               src={account.adminPhotoUrl}
@@ -88,7 +88,7 @@ export function ProfileCard({
         active ? "border-primary" : "border-border",
       )}
     >
-      <div className="rounded-full bg-primary/15 flex items-center justify-center overflow-hidden w-24 h-24">
+      <div className="rounded-full bg-primary-soft flex items-center justify-center overflow-hidden w-24 h-24">
         {account.adminPhotoUrl ? (
           <img
             src={account.adminPhotoUrl}

@@ -58,7 +58,7 @@ export const FEED: RecognitionFeedItem[] = [
     id: "f2",
     kind: "appreciation",
     senderName: "Ralph Edwards",
-    senderAvatar: "/m/images/user03.png",
+    senderAvatar: "/m/images/user01.png",
     senderEmail: "ralph@example.com",
     recipientName: "James Wilson",
     recipientAvatar: "/m/images/user07.png",
@@ -86,10 +86,10 @@ export const FEED: RecognitionFeedItem[] = [
     id: "f4",
     kind: "appreciation",
     senderName: "Ralph Edwards",
-    senderAvatar: "/m/images/user04.png",
+    senderAvatar: "/m/images/user01.png",
     senderEmail: "ralph@example.com",
     recipientName: "Dianne Russell",
-    recipientAvatar: "/m/images/user05.png",
+    recipientAvatar: "/m/images/user04.png",
     recipientEmail: "dianne@example.com",
     timeAgo: "1h ago",
     badge: "execution-ninja",
@@ -100,7 +100,7 @@ export const FEED: RecognitionFeedItem[] = [
     id: "f5",
     kind: "rnr",
     senderName: "Sarah Chen",
-    senderAvatar: "/m/images/user02.png",
+    senderAvatar: "/m/images/user08.png",
     senderEmail: "sarah@example.com",
     recipientName: "You",
     recipientAvatar: "/m/images/user06.png",
@@ -115,10 +115,10 @@ export const FEED: RecognitionFeedItem[] = [
     id: "f6",
     kind: "rnr",
     senderName: "Mike Patel",
-    senderAvatar: "/m/images/user04.png",
+    senderAvatar: "/m/images/user05.png",
     senderEmail: "mike@example.com",
     recipientName: "Robert Fox",
-    recipientAvatar: "/m/images/user03.png",
+    recipientAvatar: "/m/images/user11.png",
     recipientEmail: "robert@example.com",
     timeAgo: "5h ago",
     badge: "game-changer",
@@ -147,7 +147,7 @@ export const FEED: RecognitionFeedItem[] = [
     senderAvatar: "/m/images/user06.png",
     senderEmail: ME,
     recipientName: "Cristofer Botosh",
-    recipientAvatar: "/m/images/user06.png",
+    recipientAvatar: "/m/images/user07.png",
     recipientEmail: "cristofer@example.com",
     timeAgo: "3d ago",
     badge: "outcome-achiever",
@@ -161,7 +161,7 @@ export const FEED: RecognitionFeedItem[] = [
     senderAvatar: "/m/images/user06.png",
     senderEmail: ME,
     recipientName: "Dianne Russell",
-    recipientAvatar: "/m/images/user05.png",
+    recipientAvatar: "/m/images/user04.png",
     recipientEmail: "dianne@example.com",
     timeAgo: "5d ago",
     badge: "moment-impact",
@@ -189,12 +189,12 @@ export const LEADERBOARD: LeaderboardEntry[] = [
   { rank: 2, name: "Courtney Henry", role: "Delivery Head", points: 890, avatar: "/m/images/user02.png" },
   { rank: 3, name: "Albert Flores", role: "Sr Software Engineer", points: 835, avatar: "/m/images/user03.png" },
   { rank: 4, name: "Dianne Russell", role: "UI designer", points: 825, avatar: "/m/images/user04.png" },
-  { rank: 5, name: "Robert Fox", role: "Director", points: 790, avatar: "/m/images/user05.png" },
-  { rank: 6, name: "Cristofer Botosh", role: "Director", points: 782, avatar: "/m/images/user06.png" },
-  { rank: 7, name: "Talan Dias", role: "Director", points: 776, avatar: "/m/images/user07.png" },
+  { rank: 5, name: "Robert Fox", role: "Director", points: 790, avatar: "/m/images/user11.png" },
+  { rank: 6, name: "Cristofer Botosh", role: "Director", points: 782, avatar: "/m/images/user07.png" },
+  { rank: 7, name: "Talan Dias", role: "Director", points: 776, avatar: "/m/images/user05.png" },
   { rank: 8, name: "Gustavo Torff", role: "Director", points: 775, avatar: "/m/images/user01.png" },
-  { rank: 9, name: "Charlie Kenter", role: "Director", points: 764, avatar: "/m/images/user02.png" },
-  { rank: 10, name: "Miracle Bothman", role: "Director", points: 752, avatar: "/m/images/user03.png" },
+  { rank: 9, name: "Charlie Kenter", role: "Director", points: 764, avatar: "/m/images/user03.png" },
+  { rank: 10, name: "Miracle Bothman", role: "Director", points: 752, avatar: "/m/images/user09.png" },
 ];
 
 export const MY_RANK = {
@@ -202,10 +202,12 @@ export const MY_RANK = {
   points: 712,
 };
 
+// Themed badge art (transparent PNGs) lives in /images/badges. Each recognition
+// badge kind maps to the category badge whose artwork best fits it.
 export const BADGE_IMAGE: Record<BadgeKind, string> = {
-  "game-changer": "/m/images/game-changer.png",
-  "outcome-achiever": "/m/images/outcome-achiever.png",
-  "execution-ninja": "/m/images/execution-ninja.png",
-  "moment-impact": "/m/images/moment-impact.png",
-  "custom-badge-name": "/m/images/custom-badge-name.png",
+  "game-changer": "/images/badges/innovation.png", // lightbulb — game-changing idea
+  "outcome-achiever": "/images/badges/performance.png", // growth chart — results
+  "execution-ninja": "/images/badges/reliability_trust.png", // shield — dependable delivery
+  "moment-impact": "/images/badges/celebrations.png", // party popper — a moment to celebrate
+  "custom-badge-name": "/images/badges/collaboration.png", // people — helping others
 };

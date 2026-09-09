@@ -9,7 +9,7 @@
 // ──────────────────────────────────────────────────────────────────────
 
 /** Canonical fallback brand color (gold) — matches CLAUDE.md and the app default. */
-export const DEFAULT_BRAND_COLOR = "#a87a3a";
+export const DEFAULT_BRAND_COLOR = "#a87a3a"; // theme-allow — canonical brand seed, must be a literal
 
 interface HSL {
   h: number;

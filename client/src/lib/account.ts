@@ -78,6 +78,12 @@ export type AppreciationPolicy = {
     approverLevel: ApprovalLevel;
     autoApproveAfterHours?: number;
   };
+  /**
+   * When on, employees can react to appreciation cards with a set of Gen-Z
+   * emoji (🔥 💯 🐐 …). Off by default; optional so accounts saved before this
+   * setting existed read as disabled.
+   */
+  allowGenzLingo?: boolean;
 };
 
 export type Role = "admin" | "employee";
@@ -185,6 +191,7 @@ export const DEFAULT_APPRECIATION_POLICY: AppreciationPolicy = {
   pointValue: { points: 100, amount: 100 },
   window: { mode: "always" },
   approval: { required: false, approverLevel: "direct-manager" },
+  allowGenzLingo: false,
 };
 
 export const DEFAULT_POINTS_POLICY: PointsPolicy = {

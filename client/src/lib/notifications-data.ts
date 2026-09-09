@@ -71,7 +71,7 @@ export const NOTIFICATIONS: Notification[] = [
     title: "Charlie Kenter joined your team",
     body: "Director — say hello and send some kudos.",
     timeAgo: "3d ago",
-    avatar: "/m/images/user06.png",
+    avatar: "/m/images/user03.png",
     unread: false,
     href: "/m",
   },
